@@ -12,140 +12,67 @@
 
 <script>
 (function(){
-  var MP_URL = "https://script.google.com/macros/s/AKfycbye4J_WLSV0ALsgRuL9-KP_HVRn0s_X16fpgaPCsHaZaq_GpR98iX5cHHeKbd6dXhzR/exec";
+  var MP_URL = "https://script.google.com/macros/s/AKfycbxYJbj1u4bmO2X2X0c8-aRSsgh2PMyV4wGSVFAxPv56L-NAhMMhgIVtYrJmYjBgqaw5/exec";
   var ROLE = localStorage.getItem("letos_role") || "admin";
   var isContable = ROLE === "contable";
-  var mpVisible = false;
-
-  // Build the MP iframe panel
-  function buildMPPanel() {
-    var wrapper = document.createElement("div");
-    wrapper.id = "mp-iframe-panel";
-    wrapper.style.cssText = "display:none;width:100%;height:calc(100vh - 120px);padding:0;";
-    var iframe = document.createElement("iframe");
-    iframe.src = MP_URL;
-    iframe.style.cssText = "width:100%;height:100%;border:none;border-radius:0;";
-    iframe.setAttribute("frameborder", "0");
-    wrapper.appendChild(iframe);
-    return wrapper;
-  }
-
-  function showMP() {
-    mpVisible = true;
-    var panel = document.getElementById("mp-iframe-panel");
-    var siigo = document.getElementById("siigo-content");
-    if (panel) panel.style.display = "block";
-    if (siigo) siigo.style.display = "none";
-    // Update nav button style
-    updateNavStyles(true);
-  }
-
-  function hideMP() {
-    mpVisible = false;
-    var panel = document.getElementById("mp-iframe-panel");
-    var siigo = document.getElementById("siigo-content");
-    if (panel) panel.style.display = "none";
-    if (siigo) siigo.style.display = "";
-    updateNavStyles(false);
-  }
-
-  function updateNavStyles(mpActive) {
-    var btn = document.getElementById("mp-nav-btn");
-    if (!btn) return;
-    if (mpActive) {
-      btn.style.borderBottomColor = "#ec4899";
-      btn.style.color = "white";
-    } else {
-      btn.style.borderBottomColor = "transparent";
-      btn.style.color = "rgba(255,255,255,0.4)";
-    }
-  }
 
   function init() {
     var desktopNav = document.querySelector(".hidden.md\\:flex");
     var mobileSelect = document.querySelector(".flex.md\\:hidden select");
-    var root = document.getElementById("root");
+    if (!desktopNav) { setTimeout(init, 200); return; }
 
-    if (!desktopNav || !root) { setTimeout(init, 200); return; }
-
-    // Find the main content area (first big div after nav)
-    var mainContent = root.querySelector(".min-h-screen > div:last-child") ||
-                      root.querySelector("[class*='px-6']")?.parentElement;
-
-    // Wrap existing content so we can show/hide it
-    var siigoWrapper = document.createElement("div");
-    siigoWrapper.id = "siigo-content";
-
-    // Build and inject MP panel
-    var mpPanel = buildMPPanel();
-    root.querySelector(".min-h-screen").appendChild(mpPanel);
-
-    // Desktop nav button
-    if (desktopNav && !document.getElementById("mp-nav-btn")) {
-      var btn = document.createElement("button");
+    // Desktop: add link button
+    if (!document.getElementById("mp-nav-btn")) {
+      var btn = document.createElement("a");
       btn.id = "mp-nav-btn";
+      btn.href = MP_URL;
+      btn.target = "_blank";
+      btn.rel = "noopener noreferrer";
       btn.textContent = "💳 Mercado Pago";
-      btn.style.cssText = "background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:14px;padding:12px 0;white-space:nowrap;cursor:pointer;transition:color 0.2s;";
-      btn.addEventListener("click", function() {
-        if (mpVisible) return;
-        // Click first React tab to reset React state, then show MP
-        var firstBtn = desktopNav.querySelector("button:not(#mp-nav-btn)");
-        if (firstBtn) firstBtn.click();
-        setTimeout(showMP, 50);
-      });
+      btn.style.cssText = "display:flex;align-items:center;padding:12px 0;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:14px;white-space:nowrap;text-decoration:none;cursor:pointer;";
+      btn.onmouseover = function(){ btn.style.color="rgba(255,255,255,0.7)"; };
+      btn.onmouseout  = function(){ btn.style.color="rgba(255,255,255,0.4)"; };
       desktopNav.appendChild(btn);
-
-      // When other tabs clicked, hide MP
-      desktopNav.querySelectorAll("button:not(#mp-nav-btn)").forEach(function(b){
-        b.addEventListener("click", function(){ if(mpVisible) hideMP(); });
-      });
     }
 
-    // Mobile select option
+    // Mobile: add option
     if (mobileSelect && !document.getElementById("mp-mob-opt")) {
       var opt = document.createElement("option");
       opt.id = "mp-mob-opt";
-      opt.value = "mercadopago";
-      opt.textContent = "💳 Mercado Pago";
+      opt.value = "mp-ext";
+      opt.textContent = "💳 Mercado Pago ↗";
       mobileSelect.appendChild(opt);
       mobileSelect.addEventListener("change", function(){
-        if (mobileSelect.value === "mercadopago") {
-          setTimeout(showMP, 50);
-        } else {
-          if (mpVisible) hideMP();
+        if (mobileSelect.value === "mp-ext") {
+          window.open(MP_URL, "_blank");
+          setTimeout(function(){ mobileSelect.value = "resumen"; }, 100);
         }
       });
     }
 
-    // Contable: hide all Siigo tabs, auto-show MP
+    // Contable: hide Siigo tabs + Sincronizar, highlight MP button
     if (isContable) {
-      desktopNav.querySelectorAll("button:not(#mp-nav-btn)").forEach(function(b){
-        b.style.display = "none";
-      });
+      desktopNav.querySelectorAll("button").forEach(function(b){ b.style.display="none"; });
       document.querySelectorAll("button").forEach(function(b){
-        if (b.textContent.indexOf("Sincronizar") !== -1) b.style.display = "none";
+        if (b.textContent.indexOf("Sincronizar") !== -1) b.style.display="none";
       });
-      setTimeout(function(){
-        var firstBtn = desktopNav.querySelector("button:not(#mp-nav-btn)");
-        if (firstBtn) firstBtn.click();
-        setTimeout(showMP, 100);
-      }, 400);
+      var mpBtn = document.getElementById("mp-nav-btn");
+      if (mpBtn) {
+        mpBtn.style.color = "white";
+        mpBtn.style.borderBottomColor = "#00b1ea";
+      }
     }
 
     // Clear role on logout
     document.querySelectorAll("button").forEach(function(b){
-      if (b.textContent.trim() === "Salir" && !b.dataset.mpBound) {
+      if (b.textContent.trim()==="Salir" && !b.dataset.mpBound) {
         b.dataset.mpBound = "1";
         b.addEventListener("click", function(){ localStorage.removeItem("letos_role"); });
       }
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function(){ setTimeout(init, 400); });
-  } else {
-    setTimeout(init, 400);
-  }
+  setTimeout(init, 400);
 })();
 </script>
 </body>
