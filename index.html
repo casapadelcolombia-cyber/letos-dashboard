@@ -86,9 +86,11 @@
     });
 
     var rows = sellers.map(function(v,i){
-      var pct = maxV > 0 ? (v.ventas/maxV*100) : 0;
-      var c = COLORS[i%COLORS.length];
-      var ticket = v.facturas > 0 ? fmt(Math.round(v.ventas/v.facturas)) : "-";
+      var isNeg = v.ventas < 0;
+      var absMaxV = Math.max(Math.abs(sellers[0] ? sellers[0].ventas : 1), Math.abs(sellers[sellers.length-1] ? sellers[sellers.length-1].ventas : 1));
+      var pct = absMaxV > 0 ? (Math.abs(v.ventas)/absMaxV*100) : 0;
+      var c = isNeg ? '#ef4444' : COLORS[i%COLORS.length];
+      var ticket = v.facturas !== 0 ? fmt(Math.round(v.ventas/Math.abs(v.facturas))) : "-";
       var rowId = "lv-row-" + i;
       return '<div id="'+rowId+'" style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);">'+
                '<div style="font-size:11px;color:rgba(255,255,255,.25);">'+(i+1)+'</div>'+
@@ -118,12 +120,12 @@
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">'+
           kpiCard("Vendedores activos", sellers.length, "#60a5fa")+
           kpiCard("Ventas período", fmtK(totalV), "#4ade80")+
-          kpiCard("Facturas período", totalF, "#c084fc")+
+          kpiCard("Comprobantes período", totalF, "#c084fc")+
         '</div>'+
       '</div>'+
       '<div style="margin:0 24px 32px;background:#1c2030;border-radius:12px;border:1px solid rgba(255,255,255,.05);overflow:hidden;">'+
         '<div style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em;">'+
-          '<div>#</div><div>Vendedor</div><div style="text-align:right;">Facturas</div><div style="text-align:right;">Ticket Prom.</div><div style="text-align:right;">Ventas</div>'+
+          '<div>#</div><div>Vendedor</div><div style="text-align:right;">Comprobantes</div><div style="text-align:right;">Ticket Prom.</div><div style="text-align:right;">Ventas</div>'+
         '</div>'+
         (rows || '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.2);">Sin actividad en este período</div>')+
       '</div>';
