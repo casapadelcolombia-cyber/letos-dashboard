@@ -299,5 +299,298 @@
 })();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════
+     MÓDULO FILTRO FECHAS – Cuentas por Pagar
+     Inyecta un date-range picker encima de la tabla CxP
+     sin tocar el código React compilado.
+     ═══════════════════════════════════════════════════════ -->
+<script>
+(function(){
+
+  /* ── Estado global del filtro ── */
+  var _cxpFromDate = null;   // "YYYY-MM-DD" o null
+  var _cxpToDate   = null;
+
+  /* ── Utilidades ── */
+  function parseDate(str){ return str ? new Date(str + "T00:00:00") : null; }
+  function fmtDisplay(str){
+    if(!str) return "";
+    var d = new Date(str + "T00:00:00");
+    var months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+    return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  /* ── Mini-calendar HTML ── */
+  function buildCalendar(selectedDate, targetField){
+    var today = new Date();
+    var base  = selectedDate ? new Date(selectedDate + "T00:00:00") : new Date(today);
+    var year  = base.getFullYear();
+    var month = base.getMonth(); // 0-11
+
+    var months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    var firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    // Ajustar a Lunes como primer día
+    firstDay = (firstDay + 6) % 7;
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+
+    var todayStr = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
+
+    var header = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+      '<button onclick="__cxpCalNav(-1,\''+year+'\',\''+(month)+'\',\''+targetField+'\')" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:4px 8px;">‹</button>' +
+      '<span style="font-weight:600;font-size:14px;color:white;">' + months[month] + " " + year + '</span>' +
+      '<button onclick="__cxpCalNav(1,\''+year+'\',\''+(month)+'\',\''+targetField+'\')" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:4px 8px;">›</button>' +
+    '</div>';
+
+    var dayNames = ["Lu","Ma","Mi","Ju","Vi","Sa","Do"];
+    var grid = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">';
+    dayNames.forEach(function(d){
+      grid += '<div style="font-size:11px;color:rgba(255,255,255,.35);padding:4px 0;">' + d + '</div>';
+    });
+
+    for(var i=0;i<firstDay;i++) grid += '<div></div>';
+    for(var day=1;day<=daysInMonth;day++){
+      var dateStr = year + "-" + String(month+1).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+      var isSelected = dateStr === selectedDate;
+      var isToday    = dateStr === todayStr;
+      var bg  = isSelected ? "#3b82f6" : "transparent";
+      var clr = isSelected ? "#fff" : isToday ? "#3b82f6" : "rgba(255,255,255,.75)";
+      var fw  = isSelected || isToday ? "700" : "400";
+      grid += '<div onclick="__cxpPickDate(\''+dateStr+'\',\''+targetField+'\')" style="padding:5px 2px;border-radius:6px;cursor:pointer;background:'+bg+';color:'+clr+';font-weight:'+fw+';font-size:13px;transition:background .1s;" onmouseover="this.style.background=\''+(isSelected?'#3b82f6':'rgba(255,255,255,.1)')+'\'" onmouseout="this.style.background=\''+(isSelected?'#3b82f6':'transparent')+'\'">'+day+'</div>';
+    }
+    grid += '</div>';
+
+    var hint = '<div style="margin-top:10px;">' +
+      '<input placeholder="Mostrar para otra fecha" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 10px;color:rgba(255,255,255,.5);font-size:12px;outline:none;" onfocus="this.type=\'date\'" onchange="__cxpPickDate(this.value,\''+targetField+'\');this.type=\'text\';" />' +
+    '</div>';
+
+    return header + grid + hint;
+  }
+
+  /* ── Renderizar widget completo ── */
+  function renderFilterWidget(container){
+    var fromLabel = _cxpFromDate ? fmtDisplay(_cxpFromDate) : "Fecha inicio";
+    var toLabel   = _cxpToDate   ? fmtDisplay(_cxpToDate)   : "Fecha fin";
+
+    var hasFilter = _cxpFromDate || _cxpToDate;
+
+    container.innerHTML =
+      '<div id="cxp-filter-wrap" style="background:#1c2030;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;margin-bottom:16px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+          '<span style="font-size:12px;color:rgba(255,255,255,.45);font-weight:500;letter-spacing:.03em;">FILTRAR VENCIMIENTO</span>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+            /* Botón DESDE */
+            '<button id="cxp-btn-from" onclick="__cxpTogglePicker(\'from\')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:7px 12px;color:'+(_cxpFromDate?'#93c5fd':'rgba(255,255,255,.5)')+';font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;">' +
+              '<span style="font-size:14px;">📅</span>' +
+              '<span>'+ fromLabel +'</span>' +
+            '</button>' +
+            '<span style="color:rgba(255,255,255,.25);font-size:12px;">—</span>' +
+            /* Botón HASTA */
+            '<button id="cxp-btn-to" onclick="__cxpTogglePicker(\'to\')" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:7px 12px;color:'+(_cxpToDate?'#93c5fd':'rgba(255,255,255,.5)')+';font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;">' +
+              '<span style="font-size:14px;">📅</span>' +
+              '<span>'+ toLabel +'</span>' +
+            '</button>' +
+            /* Botón limpiar */
+            (hasFilter ? '<button onclick="__cxpClearFilter()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:7px 10px;color:#fca5a5;font-size:11px;cursor:pointer;white-space:nowrap;">✕ Limpiar</button>' : '') +
+          '</div>' +
+          /* Info de filtro activo */
+          (hasFilter ? '<span style="font-size:11px;color:#60a5fa;background:rgba(59,130,246,.12);border-radius:6px;padding:3px 8px;">Filtro activo</span>' : '') +
+        '</div>' +
+        /* Picker container */
+        '<div id="cxp-picker-panel" style="display:none;margin-top:14px;background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;max-width:280px;"></div>' +
+      '</div>';
+  }
+
+  /* ── Globals para callbacks inline ── */
+  window.__cxpTogglePicker = function(field){
+    var panel = document.getElementById("cxp-picker-panel");
+    if(!panel) return;
+    var currentField = panel.getAttribute("data-field");
+    if(panel.style.display !== "none" && currentField === field){
+      panel.style.display = "none";
+      return;
+    }
+    panel.setAttribute("data-field", field);
+    panel.style.display = "block";
+    var selDate = field === "from" ? _cxpFromDate : _cxpToDate;
+    panel.innerHTML = buildCalendar(selDate, field);
+  };
+
+  window.__cxpCalNav = function(dir, year, month, field){
+    var y = parseInt(year), m = parseInt(month) + dir;
+    if(m > 11){ m = 0; y++; }
+    if(m < 0){ m = 11; y--; }
+    var fakeDate = y + "-" + String(m+1).padStart(2,"0") + "-01";
+    var panel = document.getElementById("cxp-picker-panel");
+    if(panel) panel.innerHTML = buildCalendar(fakeDate, field);
+  };
+
+  window.__cxpPickDate = function(dateStr, field){
+    if(!dateStr) return;
+    if(field === "from") _cxpFromDate = dateStr;
+    else                 _cxpToDate   = dateStr;
+    var panel = document.getElementById("cxp-picker-panel");
+    if(panel){ panel.style.display = "none"; }
+    var wrap = document.getElementById("cxp-filter-inject");
+    if(wrap) renderFilterWidget(wrap);
+    applyCxpFilter();
+  };
+
+  window.__cxpClearFilter = function(){
+    _cxpFromDate = null;
+    _cxpToDate   = null;
+    var panel = document.getElementById("cxp-picker-panel");
+    if(panel){ panel.style.display = "none"; }
+    var wrap = document.getElementById("cxp-filter-inject");
+    if(wrap) renderFilterWidget(wrap);
+    applyCxpFilter();
+  };
+
+  /* ── Aplicar filtro a las filas de la tabla CxP ── */
+  function applyCxpFilter(){
+    var from = parseDate(_cxpFromDate);
+    var to   = parseDate(_cxpToDate);
+    if(to) to.setHours(23,59,59);
+
+    /* Buscar todas las filas de la tabla CxP.
+       Las filas tienen atributo data-vence o date en un span visible.
+       Alternativa: buscar el texto "venc" en las celdas y parsear la fecha. */
+    var rows = document.querySelectorAll("[data-cxp-row]");
+    var anyVisible = 0;
+    rows.forEach(function(row){
+      var venceStr = row.getAttribute("data-cxp-vence"); // "2026-03-28"
+      if(!venceStr){
+        row.style.display = "";
+        anyVisible++;
+        return;
+      }
+      var vence = new Date(venceStr + "T00:00:00");
+      var show = true;
+      if(from && vence < from) show = false;
+      if(to   && vence > to)   show = false;
+      row.style.display = show ? "" : "none";
+      if(show) anyVisible++;
+    });
+
+    /* Mostrar mensaje si no hay resultados */
+    var emptyMsg = document.getElementById("cxp-empty-filter");
+    if(emptyMsg) emptyMsg.style.display = anyVisible === 0 ? "block" : "none";
+
+    /* Actualizar badge de proveedores en el header */
+    updateCxpBadge(anyVisible);
+  }
+
+  function updateCxpBadge(count){
+    var badge = document.getElementById("cxp-count-badge");
+    if(badge) badge.textContent = count + " proveedores";
+  }
+
+  /* ── Observer: esperar a que React renderice la tabla CxP ── */
+  var _injected = false;
+  var _observer = null;
+
+  function tryInject(){
+    /* Detectar si estamos en el tab "cartera" buscando el título */
+    var allH2 = document.querySelectorAll("h2");
+    var cxpHeader = null;
+    for(var i=0;i<allH2.length;i++){
+      if(allH2[i].textContent && allH2[i].textContent.indexOf("Cuentas por Pagar") >= 0){
+        cxpHeader = allH2[i];
+        break;
+      }
+    }
+    if(!cxpHeader){ _injected = false; return; }
+
+    /* Buscar el contenedor padre de la tabla CxP */
+    var cxpCard = cxpHeader.closest("[class]");
+    if(!cxpCard) return;
+
+    /* Agregar data-cxp-row a cada fila de la tabla si no se ha hecho */
+    var divRows = cxpCard.querySelectorAll("div[class*='divide-y'] > div[class*='grid']");
+    if(!divRows.length) return;
+
+    var tagged = 0;
+    divRows.forEach(function(row){
+      if(row.getAttribute("data-cxp-row")) { tagged++; return; }
+      /* Encontrar la celda de fecha de vencimiento – es la 2da columna (text-white/40) */
+      var cells = row.querySelectorAll("div");
+      var venceCell = null;
+      cells.forEach(function(c){
+        if(c.style && c.textContent && /^\d{4}-\d{2}-\d{2}$/.test(c.textContent.trim())){
+          venceCell = c;
+        }
+      });
+      /* Alternativa: buscar el texto que parece fecha yyyy-mm-dd */
+      if(!venceCell){
+        cells.forEach(function(c){
+          var t = (c.textContent||"").trim();
+          if(/^\d{4}-\d{2}-\d{2}$/.test(t)) venceCell = c;
+        });
+      }
+      var venceStr = venceCell ? venceCell.textContent.trim() : null;
+      row.setAttribute("data-cxp-row", "1");
+      if(venceStr) row.setAttribute("data-cxp-vence", venceStr);
+      tagged++;
+    });
+
+    /* Inyectar widget solo una vez (o cuando el DOM fue recreado) */
+    var existing = document.getElementById("cxp-filter-inject");
+    if(!existing){
+      var inject = document.createElement("div");
+      inject.id = "cxp-filter-inject";
+      /* Insertar ANTES del header de la tarjeta CxP */
+      cxpCard.parentNode.insertBefore(inject, cxpCard);
+      renderFilterWidget(inject);
+
+      /* Mensaje vacío */
+      var emptyMsg = document.createElement("div");
+      emptyMsg.id = "cxp-empty-filter";
+      emptyMsg.style.cssText = "display:none;padding:24px;text-align:center;color:rgba(255,255,255,.3);font-size:13px;";
+      emptyMsg.textContent = "Sin proveedores en este rango de fechas.";
+      cxpCard.appendChild(emptyMsg);
+
+      /* Agregar badge con id en el header */
+      var badges = cxpCard.querySelectorAll("span");
+      badges.forEach(function(s){
+        if(s.textContent && s.textContent.indexOf("proveedores") >= 0 && !s.id){
+          s.id = "cxp-count-badge";
+        }
+      });
+
+      _injected = true;
+      applyCxpFilter();
+    }
+  }
+
+  /* ── Arrancar observer global ── */
+  function startObserver(){
+    if(_observer) return;
+    _observer = new MutationObserver(function(){
+      tryInject();
+      applyCxpFilter();
+    });
+    _observer.observe(document.body, { childList:true, subtree:true });
+    /* Polling de respaldo cada 800ms para cambios de tab */
+    setInterval(function(){
+      if(!document.getElementById("cxp-filter-inject")){
+        _injected = false;
+        tryInject();
+      }
+    }, 800);
+  }
+
+  /* Cerrar el picker al hacer click fuera */
+  document.addEventListener("click", function(e){
+    var panel = document.getElementById("cxp-picker-panel");
+    var wrap  = document.getElementById("cxp-filter-wrap");
+    if(panel && panel.style.display !== "none" && wrap && !wrap.contains(e.target)){
+      panel.style.display = "none";
+    }
+  });
+
+  setTimeout(startObserver, 1500);
+
+})();
+</script>
+
 </body>
 </html>
