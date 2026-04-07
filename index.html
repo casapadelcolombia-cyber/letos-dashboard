@@ -286,78 +286,52 @@
 <script>
 (function(){
   var MP_URL = "https://script.google.com/macros/s/AKfycbxYJbj1u4bmO2X2X0c8-aRSsgh2PMyV4wGSVFAxPv56L-NAhMMhgIVtYrJmYjBgqaw5/exec";
-  var ROLE = localStorage.getItem("letos_role") || "admin";
-  var isContable = ROLE === "contable";
 
-  function init() {
-    // Robust nav finder
+  function addMpButton(){
+    // Find nav by looking for buttons with "Resumen" text
     var desktopNav = null;
-    var candidates = document.querySelectorAll("div");
-    for(var di = 0; di < candidates.length; di++){
-      var d = candidates[di];
-      var directBtns = Array.from(d.children).filter(function(c){ return c.tagName === "BUTTON"; });
-      if(directBtns.length >= 3){
-        var txt = d.innerText || d.textContent || "";
-        if(txt.indexOf("Resumen") >= 0 && txt.indexOf("Producto") >= 0){
-          desktopNav = d; break;
-        }
+    var divs = document.querySelectorAll("div");
+    for(var i=0;i<divs.length;i++){
+      var kids = Array.from(divs[i].children).filter(function(c){return c.tagName==="BUTTON";});
+      if(kids.length>=3 && (divs[i].innerText||"").indexOf("Resumen")>=0){
+        desktopNav = divs[i]; break;
       }
     }
-    var mobileSelect = document.querySelector("select");
-    if (!desktopNav) { setTimeout(init, 200); return; }
+    if(!desktopNav){ setTimeout(addMpButton, 300); return; }
+    if(document.getElementById("mp-nav-btn")) return;
 
-    // Desktop: add link button
-    if (!document.getElementById("mp-nav-btn")) {
-      var btn = document.createElement("a");
-      btn.id = "mp-nav-btn";
-      btn.href = MP_URL;
-      btn.target = "_blank";
-      btn.rel = "noopener noreferrer";
-      btn.textContent = "💳 Mercado Pago";
-      btn.style.cssText = "display:flex;align-items:center;padding:12px 0;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:14px;white-space:nowrap;text-decoration:none;cursor:pointer;";
-      btn.onmouseover = function(){ btn.style.color="rgba(255,255,255,0.7)"; };
-      btn.onmouseout  = function(){ btn.style.color="rgba(255,255,255,0.4)"; };
-      desktopNav.appendChild(btn);
-    }
+    var btn = document.createElement("a");
+    btn.id = "mp-nav-btn";
+    btn.href = MP_URL;
+    btn.target = "_blank";
+    btn.rel = "noopener noreferrer";
+    btn.textContent = "💳 Mercado Pago";
+    btn.style.cssText = "display:flex;align-items:center;padding:12px 0;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:14px;white-space:nowrap;text-decoration:none;cursor:pointer;";
+    desktopNav.appendChild(btn);
 
-    // Mobile: add option
-    if (mobileSelect && !document.getElementById("mp-mob-opt")) {
+    // Mobile
+    var sel = document.querySelector("select");
+    if(sel && !document.getElementById("mp-mob-opt")){
       var opt = document.createElement("option");
       opt.id = "mp-mob-opt";
       opt.value = "mp-ext";
       opt.textContent = "💳 Mercado Pago ↗";
-      mobileSelect.appendChild(opt);
-      mobileSelect.addEventListener("change", function(){
-        if (mobileSelect.value === "mp-ext") {
-          window.open(MP_URL, "_blank");
-          setTimeout(function(){ mobileSelect.value = "resumen"; }, 100);
-        }
+      sel.appendChild(opt);
+      sel.addEventListener("change", function(){
+        if(sel.value==="mp-ext"){window.open(MP_URL,"_blank");setTimeout(function(){sel.value="resumen";},100);}
       });
-    }
-
-    // Contable: hide Siigo tabs + Sincronizar, highlight MP button
-    if (isContable) {
-      desktopNav.querySelectorAll("button").forEach(function(b){ b.style.display="none"; });
-      document.querySelectorAll("button").forEach(function(b){
-        if (b.textContent.indexOf("Sincronizar") !== -1) b.style.display="none";
-      });
-      var mpBtn = document.getElementById("mp-nav-btn");
-      if (mpBtn) {
-        mpBtn.style.color = "white";
-        mpBtn.style.borderBottomColor = "#00b1ea";
-      }
     }
 
     // Clear role on logout
     document.querySelectorAll("button").forEach(function(b){
-      if (b.textContent.trim()==="Salir" && !b.dataset.mpBound) {
-        b.dataset.mpBound = "1";
-        b.addEventListener("click", function(){ localStorage.removeItem("letos_role"); });
+      if(b.textContent.trim()==="Salir" && !b.dataset.mpBound){
+        b.dataset.mpBound="1";
+        b.addEventListener("click",function(){localStorage.removeItem("letos_role");});
       }
     });
   }
 
-  setTimeout(init, 400);
+  setTimeout(addMpButton, 800);
 })();
 </script>
 </body>
