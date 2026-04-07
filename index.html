@@ -141,9 +141,19 @@
 
   // ── Init ──
   function init(){
-    var desktopNav   = document.querySelector(".hidden.md\:flex");
-    var mobileSelect = document.querySelector(".flex.md\:hidden select");
-    if(!desktopNav){ setTimeout(init, 300); return; }
+    // Try multiple selectors to find the desktop nav
+    var desktopNav = document.querySelector(".hidden.md\:flex") ||
+                     document.querySelector("nav .hidden") ||
+                     (function(){
+                       // Fallback: find the nav element containing React tab buttons
+                       var btns = document.querySelectorAll("nav button");
+                       if(btns.length > 0) return btns[0].parentElement;
+                       return null;
+                     })();
+    var mobileSelect = document.querySelector(".flex.md\:hidden select") ||
+                       document.querySelector("select");
+    if(!desktopNav){ setTimeout(init, 500); return; }
+    console.log('[Vendedores] init - desktopNav found:', !!desktopNav);
     if(document.getElementById("letos-vend-tab")) return;
 
     // Crear panel como sibling del root
@@ -237,7 +247,7 @@
   // Exponer deactivate globalmente para que el nav de React pueda llamarla
   window.__letosVendDeactivate = deactivate;
 
-  setTimeout(init, 600);
+  setTimeout(init, 1200);
 })();
 </script>
 
