@@ -12,19 +12,17 @@
 
 <script>
 /* ═══════════════════════════════════════════════
-   MÓDULO VENDEDORES – Inyección sin tocar React
-   ═══════════════════════════════════════════════
-   Agrega:
-   1. Tab "Vendedores" en desktop y mobile
-   2. Panel completo con tabla por vendedor,
-      filtro por mes, y tarjetas KPI
-   Los datos vienen de mainObj.bySellerMonth
-   que el Apps Script guardará en columna F/G
+   MÓDULO VENDEDORES v2 – Integrado al nav React
    ═══════════════════════════════════════════════ */
 (function(){
 
-  // ── Colores para la barra de cada vendedor ──
   var COLORS = ["#ec4899","#f59e0b","#3b82f6","#10b981","#8b5cf6","#f97316","#06b6d4","#ef4444"];
+  var MES_NAMES = {"01":"Ene","02":"Feb","03":"Mar","04":"Abr","05":"May","06":"Jun",
+                   "07":"Jul","08":"Ago","09":"Sep","10":"Oct","11":"Nov","12":"Dic"};
+
+  var _sellerData = null;
+  var _currentMes = "__all__";
+  var _active = false;
 
   var fmt = function(n){
     return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
@@ -35,141 +33,105 @@
     return (n/1e3).toFixed(0)+"K";
   };
 
-  // Nombres de meses en español
-  var MES_NAMES = {"01":"Ene","02":"Feb","03":"Mar","04":"Abr","05":"May","06":"Jun",
-                   "07":"Jul","08":"Ago","09":"Sep","10":"Oct","11":"Nov","12":"Dic"};
-
-  // Caché local de los datos de vendedores
-  var _sellerData = null;          // bySellerMonth del cache JSON
-  var _currentMes = "__all__";     // mes seleccionado
-
-  // ── Helpers ──────────────────────────────────
-  function getAllMeses(bsm){
-    var keys = Object.keys(bsm||{}).sort();
-    return keys;
-  }
-
   function aggregateSellers(bsm, mesFilter){
-    // Retorna [{vendedor, facturas, ventas}] para el filtro dado
     var agg = {};
     Object.keys(bsm||{}).forEach(function(mes){
       if(mesFilter !== "__all__" && mes !== mesFilter) return;
       Object.keys(bsm[mes]).forEach(function(vid){
         var d = bsm[mes][vid];
-        if(!agg[vid]) agg[vid] = {id: vid, nombre: d.nombre||vid, facturas:0, ventas:0};
+        if(!agg[vid]) agg[vid] = {id:vid, nombre:d.nombre||vid, facturas:0, ventas:0};
         agg[vid].facturas += d.facturas||0;
         agg[vid].ventas   += d.ventas||0;
       });
     });
-    return Object.values(agg).sort(function(a,b){return b.ventas - a.ventas;});
+    return Object.values(agg).sort(function(a,b){return b.ventas-a.ventas;});
   }
 
-  // ── Render del panel de vendedores ───────────
+  function kpiCard(label, value, color){
+    return '<div style="background:#1c2030;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.05);">'+
+             '<p style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;">'+label+'</p>'+
+             '<p style="font-size:22px;font-weight:700;color:'+color+';margin:0;">'+value+'</p>'+
+           '</div>';
+  }
+
   function renderPanel(){
-    var panel = document.getElementById("letos-vendedores-panel");
-    if(!panel) return;
+    var panel = document.getElementById("letos-vend-panel");
+    if(!panel || !_active) return;
 
     if(!_sellerData || Object.keys(_sellerData).length === 0){
-      panel.innerHTML = '<div style="padding:40px;text-align:center;color:rgba(255,255,255,0.3);font-size:14px;">Sin datos de vendedores.<br><span style="font-size:12px;opacity:.7;">Ejecuta <b>actualizarCache</b> en Apps Script para capturar vendedores.</span></div>';
+      panel.innerHTML = '<div style="padding:60px;text-align:center;color:rgba(255,255,255,0.3);">Sin datos de vendedores.<br><small>Ejecuta actualizarCache en Apps Script.</small></div>';
       return;
     }
 
-    var meses = getAllMeses(_sellerData);
+    var meses = Object.keys(_sellerData).sort();
     var sellers = aggregateSellers(_sellerData, _currentMes);
-    var totalVentas = sellers.reduce(function(s,v){return s+v.ventas;},0);
-    var totalFact   = sellers.reduce(function(s,v){return s+v.facturas;},0);
-    var maxVentas   = sellers.length ? sellers[0].ventas : 1;
+    var totalV = sellers.reduce(function(s,v){return s+v.ventas;},0);
+    var totalF = sellers.reduce(function(s,v){return s+v.facturas;},0);
+    var maxV   = sellers.length ? sellers[0].ventas : 1;
 
-    // ── Selector de mes ──
-    var mesOptions = '<option value="__all__"'+ (_currentMes==="__all__"?" selected":"") +'>Todo el período</option>';
+    var mesOpts = '<option value="__all__"'+(_currentMes==="__all__"?" selected":"")+'>Todo el período</option>';
     meses.slice().reverse().forEach(function(m){
-      var label = (MES_NAMES[m.split("-")[1]]||m) + " " + m.split("-")[0];
-      mesOptions += '<option value="'+m+'"'+(m===_currentMes?" selected":"")+'>'+label+'</option>';
+      var label=(MES_NAMES[m.split("-")[1]]||m)+" "+m.split("-")[0];
+      mesOpts+='<option value="'+m+'"'+(m===_currentMes?" selected":"")+'>'+label+'</option>';
     });
 
-    // ── KPI cards ──
-    var kpiHtml =
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
-        kpiCard("Vendedores activos", sellers.length, "text-blue-400") +
-        kpiCard("Ventas período", fmtK(totalVentas), "text-green-400") +
-        kpiCard("Facturas período", totalFact, "text-purple-400") +
-      '</div>';
-
-    // ── Tabla ──
     var rows = sellers.map(function(v,i){
-      var pct = maxVentas > 0 ? (v.ventas/maxVentas*100) : 0;
-      var color = COLORS[i % COLORS.length];
-      var ticketProm = v.facturas > 0 ? fmt(Math.round(v.ventas/v.facturas)) : "—";
-      return '<div style="display:grid;grid-template-columns:24px 1fr 80px 80px 90px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.05);position:relative;transition:background .15s;" onmouseover="this.style.background=\'rgba(255,255,255,.04)\'" onmouseout="this.style.background=\'transparent\'">' +
-               '<div style="font-size:11px;color:rgba(255,255,255,.25);">'+(i+1)+'</div>' +
-               '<div>' +
-                 '<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.85);">'+escHtml(v.nombre)+'</div>' +
-                 '<div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px;overflow:hidden;">' +
-                   '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:2px;transition:width .4s;"></div>' +
-                 '</div>' +
-               '</div>' +
-               '<div style="text-align:right;font-size:12px;color:rgba(255,255,255,.5);">'+v.facturas+'</div>' +
-               '<div style="text-align:right;font-size:12px;color:rgba(255,255,255,.5);">'+ticketProm+'</div>' +
-               '<div style="text-align:right;font-size:13px;font-weight:600;color:'+color+';">'+fmt(v.ventas)+'</div>' +
+      var pct = maxV > 0 ? (v.ventas/maxV*100) : 0;
+      var c = COLORS[i%COLORS.length];
+      var ticket = v.facturas > 0 ? fmt(Math.round(v.ventas/v.facturas)) : "—";
+      return '<div style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);" onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''">'+
+               '<div style="font-size:11px;color:rgba(255,255,255,.25);">'+(i+1)+'</div>'+
+               '<div>'+
+                 '<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.85);">'+v.nombre+'</div>'+
+                 '<div style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px;overflow:hidden;">'+
+                   '<div style="height:100%;width:'+pct+'%;background:'+c+';border-radius:2px;"></div>'+
+                 '</div>'+
+               '</div>'+
+               '<div style="text-align:right;font-size:12px;color:rgba(255,255,255,.5);">'+v.facturas+'</div>'+
+               '<div style="text-align:right;font-size:12px;color:rgba(255,255,255,.5);">'+ticket+'</div>'+
+               '<div style="text-align:right;font-size:13px;font-weight:700;color:'+c+';">'+fmt(v.ventas)+'</div>'+
              '</div>';
     }).join("");
 
     panel.innerHTML =
-      // Header + selector mes
-      '<div style="padding:16px 24px 0;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">' +
-          '<div>' +
-            '<h1 style="font-size:20px;font-weight:600;margin:0;">👤 Ventas por Vendedor</h1>' +
-            '<p style="font-size:12px;color:rgba(255,255,255,.3);margin:4px 0 0;">Datos reales de Siigo · campo vendedor por factura</p>' +
-          '</div>' +
-          '<select id="letos-mes-filter" onchange="window.__letosMesChange(this.value)" style="background:#1c2030;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:white;padding:6px 12px;font-size:13px;cursor:pointer;">' +
-            mesOptions +
-          '</select>' +
-        '</div>' +
-        kpiHtml +
-      '</div>' +
-
-      // Tabla
-      '<div style="margin:0 24px 32px;background:#1c2030;border-radius:12px;border:1px solid rgba(255,255,255,.05);overflow:hidden;">' +
-        '<div style="display:grid;grid-template-columns:24px 1fr 80px 80px 90px;gap:8px;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em;">' +
-          '<div>#</div><div>Vendedor</div><div style="text-align:right;">Facturas</div><div style="text-align:right;">Ticket Prom.</div><div style="text-align:right;">Ventas</div>' +
-        '</div>' +
-        (rows || '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.2);font-size:13px;">Sin actividad en este mes</div>') +
+      '<div style="padding:16px 24px 0;">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">'+
+          '<div>'+
+            '<h1 style="font-size:20px;font-weight:600;margin:0;color:white;">👤 Ventas por Vendedor</h1>'+
+            '<p style="font-size:12px;color:rgba(255,255,255,.3);margin:4px 0 0;">Datos reales de Siigo</p>'+
+          '</div>'+
+          '<select onchange="window.__letosVendMes(this.value)" style="background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;padding:6px 10px;font-size:13px;cursor:pointer;">'+
+            mesOpts+
+          '</select>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">'+
+          kpiCard("Vendedores activos", sellers.length, "#60a5fa")+
+          kpiCard("Ventas período", fmtK(totalV), "#4ade80")+
+          kpiCard("Facturas período", totalF, "#c084fc")+
+        '</div>'+
+      '</div>'+
+      '<div style="margin:0 24px 32px;background:#1c2030;border-radius:12px;border:1px solid rgba(255,255,255,.05);overflow:hidden;">'+
+        '<div style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em;">'+
+          '<div>#</div><div>Vendedor</div><div style="text-align:right;">Facturas</div><div style="text-align:right;">Ticket Prom.</div><div style="text-align:right;">Ventas</div>'+
+        '</div>'+
+        (rows || '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.2);">Sin actividad en este período</div>')+
       '</div>';
   }
 
-  function kpiCard(label, value, colorClass){
-    var colorMap = {"text-blue-400":"#60a5fa","text-green-400":"#4ade80","text-purple-400":"#c084fc"};
-    var c = colorMap[colorClass]||"#fff";
-    return '<div style="background:#1c2030;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.05);">' +
-             '<p style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;">' + label + '</p>' +
-             '<p style="font-size:22px;font-weight:700;color:'+c+';margin:0;">' + value + '</p>' +
-           '</div>';
-  }
-
-  function escHtml(str){
-    return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
-
-  // ── Callback del selector de mes ─────────────
-  window.__letosMesChange = function(val){
+  window.__letosVendMes = function(val){
     _currentMes = val;
     renderPanel();
   };
 
-  // ── Intercept datos del fetch para capturar bySellerMonth ──
+  // ── Intercept fetch para capturar bySellerMonth ──
   var _origFetch = window.fetch;
   window.fetch = function(url, opts){
     return _origFetch.apply(this, arguments).then(function(resp){
       if(typeof url === "string" && url.indexOf("script.google.com") !== -1){
-        // Clonar la respuesta para leer sin consumirla
-        var resp2 = resp.clone();
-        resp2.json().then(function(data){
+        resp.clone().json().then(function(data){
           if(data && data.bySellerMonth){
             _sellerData = data.bySellerMonth;
-            // Si el panel está visible ahora, actualizar
-            var panel = document.getElementById("letos-vendedores-panel");
-            if(panel) renderPanel();
+            if(_active) renderPanel();
           }
         }).catch(function(){});
       }
@@ -177,119 +139,103 @@
     });
   };
 
-  // ── Inyección de UI ──────────────────────────
+  // ── Init ──
   function init(){
-    var desktopNav  = document.querySelector(".hidden.md\\:flex");
-    var mobileSelect = document.querySelector(".flex.md\\:hidden select");
-    var appRoot     = document.getElementById("root");
-    if(!desktopNav || !appRoot){
-      setTimeout(init, 300);
-      return;
-    }
+    var desktopNav   = document.querySelector(".hidden.md\:flex");
+    var mobileSelect = document.querySelector(".flex.md\:hidden select");
+    if(!desktopNav){ setTimeout(init, 300); return; }
+    if(document.getElementById("letos-vend-tab")) return;
 
-    // Evitar doble inyección
-    if(document.getElementById("letos-vendedores-tab")) return;
+    // Crear panel como sibling del root
+    var panel = document.createElement("div");
+    panel.id = "letos-vend-panel";
+    panel.style.cssText = "display:none;min-height:100vh;background:#0f1117;color:white;font-family:system-ui,sans-serif;";
+    document.body.appendChild(panel);
 
-    // ── Desktop tab ──
-    var tabBtn = document.createElement("button");
-    tabBtn.id = "letos-vendedores-tab";
-    tabBtn.textContent = "👤 Vendedores";
-    tabBtn.style.cssText = "padding:12px 0;border-bottom:2px solid transparent;color:rgba(255,255,255,.4);font-size:14px;white-space:nowrap;background:none;cursor:pointer;border-top:none;border-left:none;border-right:none;transition:color .15s;";
-    tabBtn.onmouseover = function(){ if(!tabBtn.dataset.active) tabBtn.style.color="rgba(255,255,255,.7)"; };
-    tabBtn.onmouseout  = function(){ if(!tabBtn.dataset.active) tabBtn.style.color="rgba(255,255,255,.4)"; };
-    tabBtn.onclick     = function(){ showVendedores(); };
-    desktopNav.appendChild(tabBtn);
+    // ── Tab desktop ──
+    var tab = document.createElement("button");
+    tab.id = "letos-vend-tab";
+    tab.textContent = "👤 Vendedores";
+    tab.style.cssText = "padding:12px 0;border:none;border-bottom:2px solid transparent;background:none;color:rgba(255,255,255,.4);font-size:14px;white-space:nowrap;cursor:pointer;transition:color .15s;";
+    tab.onclick = function(){ activate(); };
+    desktopNav.appendChild(tab);
 
-    // ── Mobile option ──
-    if(mobileSelect && !document.getElementById("letos-mob-vend")){
+    // ── Option mobile ──
+    if(mobileSelect){
       var opt = document.createElement("option");
-      opt.id    = "letos-mob-vend";
       opt.value = "vendedores";
       opt.textContent = "👤 Vendedores";
       mobileSelect.appendChild(opt);
       mobileSelect.addEventListener("change", function(){
-        if(mobileSelect.value === "vendedores") showVendedores();
+        if(mobileSelect.value === "vendedores") activate();
+        else deactivate();
       });
     }
 
-    // ── Panel container ──
-    var panel = document.createElement("div");
-    panel.id = "letos-vendedores-panel";
-    panel.style.cssText = "display:none;padding-top:16px;";
-    appRoot.appendChild(panel);
-
-    // ── Hook: ocultar panel cuando React cambia de tab ──
-    // Escuchamos clicks en los botones de React
+    // ── Detectar cuando React cambia de tab (clicks en sus botones) ──
     desktopNav.addEventListener("click", function(e){
       var btn = e.target.closest("button");
-      if(btn && btn !== tabBtn){
-        hideVendedores();
-      }
+      if(btn && btn.id !== "letos-vend-tab") deactivate();
     });
     if(mobileSelect){
       mobileSelect.addEventListener("change", function(){
-        if(mobileSelect.value !== "vendedores") hideVendedores();
+        if(mobileSelect.value !== "vendedores") deactivate();
       });
     }
+
+    // ── Detectar cambio de tab en React via MutationObserver ──
+    // Cuando el usuario navega dentro de React, el header/nav cambia border colors
+    var observer = new MutationObserver(function(){
+      if(!_active) return;
+      // Si algún botón de React tiene border-pink-400 activo, desactivar vendedores
+      var reactBtns = desktopNav.querySelectorAll("button:not(#letos-vend-tab)");
+      reactBtns.forEach(function(b){
+        if(b.style.borderBottomColor && b.style.borderBottomColor !== "transparent" &&
+           b.style.borderBottomColor !== "rgba(0, 0, 0, 0)"){
+          deactivate();
+        }
+      });
+    });
+    observer.observe(desktopNav, {attributes:true, subtree:true, attributeFilter:["style","class"]});
   }
 
-  function showVendedores(){
-    // Ocultar el contenido principal de React
+  function getReactContent(){
     var root = document.getElementById("root");
-    if(!root) return;
+    if(!root) return [];
+    var appDiv = root.firstElementChild;
+    if(!appDiv) return [];
+    return Array.from(appDiv.children).slice(2); // skip header + nav
+  }
 
-    // Guardar qué había visible
-    Array.from(root.children).forEach(function(el){
-      if(el.id !== "letos-vendedores-panel"){
-        el.dataset.letosHidden = "1";
-        el.style.display = "none";
-      }
-    });
-
-    var panel = document.getElementById("letos-vendedores-panel");
+  function activate(){
+    _active = true;
+    getReactContent().forEach(function(el){ el.style.display="none"; });
+    var panel = document.getElementById("letos-vend-panel");
     if(panel) panel.style.display = "block";
-
-    // Activar tab visual
-    var tabBtn = document.getElementById("letos-vendedores-tab");
-    if(tabBtn){
-      tabBtn.style.color = "white";
-      tabBtn.style.borderBottomColor = "#ec4899";
-      tabBtn.dataset.active = "1";
-    }
-
-    // Desactivar otros tabs de React visualmente
-    var desktopNav = document.querySelector(".hidden.md\\:flex");
+    var tab = document.getElementById("letos-vend-tab");
+    if(tab){ tab.style.color="white"; tab.style.borderBottomColor="#ec4899"; }
+    var desktopNav = document.querySelector(".hidden.md\:flex");
     if(desktopNav){
-      desktopNav.querySelectorAll("button:not(#letos-vendedores-tab)").forEach(function(b){
-        b.style.borderBottomColor = "transparent";
-        b.style.color = "rgba(255,255,255,.4)";
+      desktopNav.querySelectorAll("button:not(#letos-vend-tab)").forEach(function(b){
+        b.style.borderBottomColor="transparent";
+        b.style.color="rgba(255,255,255,.4)";
       });
     }
-
     renderPanel();
   }
 
-  function hideVendedores(){
-    // Restaurar el contenido principal
-    var root = document.getElementById("root");
-    if(!root) return;
-    Array.from(root.children).forEach(function(el){
-      if(el.id !== "letos-vendedores-panel" && el.dataset.letosHidden){
-        el.style.display = "";
-        delete el.dataset.letosHidden;
-      }
-    });
-    var panel = document.getElementById("letos-vendedores-panel");
+  function deactivate(){
+    if(!_active) return;
+    _active = false;
+    getReactContent().forEach(function(el){ el.style.display=""; });
+    var panel = document.getElementById("letos-vend-panel");
     if(panel) panel.style.display = "none";
-
-    // Restaurar estado visual del tab
-    var tabBtn = document.getElementById("letos-vendedores-tab");
-    if(tabBtn){
-      tabBtn.style.color = "rgba(255,255,255,.4)";
-      tabBtn.style.borderBottomColor = "transparent";
-      delete tabBtn.dataset.active;
-    }
+    var tab = document.getElementById("letos-vend-tab");
+    if(tab){ tab.style.color="rgba(255,255,255,.4)"; tab.style.borderBottomColor="transparent"; }
   }
+
+  // Exponer deactivate globalmente para que el nav de React pueda llamarla
+  window.__letosVendDeactivate = deactivate;
 
   setTimeout(init, 600);
 })();
