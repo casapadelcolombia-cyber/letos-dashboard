@@ -142,20 +142,24 @@
 
   // ── Init ──
   function init(){
-    // Try multiple selectors to find the desktop nav
-    var desktopNav = document.querySelector(".hidden.md\:flex") ||
-                     document.querySelector("nav .hidden") ||
-                     (function(){
-                       // Fallback: find the nav element containing React tab buttons
-                       var btns = document.querySelectorAll("nav button");
-                       if(btns.length > 0) return btns[0].parentElement;
-                       return null;
-                     })();
-    var mobileSelect = document.querySelector(".flex.md\:hidden select") ||
-                       document.querySelector("select");
+    // Robust nav finder - look for div containing React tab buttons
+    var desktopNav = null;
+    var candidates = document.querySelectorAll("div");
+    for(var di = 0; di < candidates.length; di++){
+      var d = candidates[di];
+      var directBtns = Array.from(d.children).filter(function(c){ return c.tagName === "BUTTON"; });
+      if(directBtns.length >= 3){
+        var txt = d.innerText || d.textContent || "";
+        if(txt.indexOf("Resumen") >= 0 && txt.indexOf("Producto") >= 0){
+          desktopNav = d;
+          break;
+        }
+      }
+    }
+    var mobileSelect = document.querySelector("select");
     if(!desktopNav){ setTimeout(init, 500); return; }
-    console.log('[Vendedores] init - desktopNav found:', !!desktopNav);
     if(document.getElementById("letos-vend-tab")) return;
+    console.log("[Vendedores] nav encontrado con", desktopNav.querySelectorAll("button").length, "botones");
 
     // Crear panel como sibling del root
     var panel = document.createElement("div");
@@ -183,10 +187,12 @@
       });
     }
 
-    // ── Detectar cuando React cambia de tab (clicks en sus botones) ──
-    desktopNav.addEventListener("click", function(e){
+    // ── Detectar cuando React cambia de tab ──
+    document.addEventListener("click", function(e){
       var btn = e.target.closest("button");
-      if(btn && btn.id !== "letos-vend-tab") deactivate();
+      if(btn && btn.id !== "letos-vend-tab" && desktopNav.contains(btn)){
+        deactivate();
+      }
     });
     if(mobileSelect){
       mobileSelect.addEventListener("change", function(){
@@ -215,7 +221,9 @@
     if(!root) return [];
     var appDiv = root.firstElementChild;
     if(!appDiv) return [];
-    return Array.from(appDiv.children).slice(2); // skip header + nav
+    // Skip header (index 0) and nav (index 1), hide everything else
+    var kids = Array.from(appDiv.children);
+    return kids.filter(function(el, idx){ return idx >= 2; });
   }
 
   function activate(){
