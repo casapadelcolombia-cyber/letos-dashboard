@@ -233,12 +233,35 @@
     if(panel) panel.style.display = "block";
     var tab = document.getElementById("letos-vend-tab");
     if(tab){ tab.style.color="white"; tab.style.borderBottomColor="#ec4899"; }
-    var desktopNav = document.querySelector(".hidden.md\:flex");
-    if(desktopNav){
-      desktopNav.querySelectorAll("button:not(#letos-vend-tab)").forEach(function(b){
+    // Deactivate React tabs visually
+    var btns = document.querySelectorAll("button");
+    btns.forEach(function(b){
+      if(b.id !== "letos-vend-tab" && b.style && b.style.borderBottomColor !== undefined){
         b.style.borderBottomColor="transparent";
         b.style.color="rgba(255,255,255,.4)";
-      });
+      }
+    });
+    // Try to load data from the cache URL directly if not yet loaded
+    if(!_sellerData){
+      var scripts = document.querySelectorAll("script");
+      // Find the GAS URL from the existing fetch calls
+      var gasUrl = null;
+      if(window.__letosGasUrl){
+        gasUrl = window.__letosGasUrl;
+      } else {
+        // Try to extract from page source
+        var html = document.documentElement.innerHTML;
+        var m = html.match(/https:\/\/script\.google\.com\/macros\/s\/[^"']+\/exec/);
+        if(m) gasUrl = m[0];
+      }
+      if(gasUrl){
+        fetch(gasUrl).then(function(r){ return r.json(); }).then(function(data){
+          if(data && data.bySellerMonth){
+            _sellerData = data.bySellerMonth;
+            renderPanel();
+          }
+        }).catch(function(e){ console.log("fetch error", e); });
+      }
     }
     renderPanel();
   }
@@ -267,8 +290,20 @@
   var isContable = ROLE === "contable";
 
   function init() {
-    var desktopNav = document.querySelector(".hidden.md\\:flex");
-    var mobileSelect = document.querySelector(".flex.md\\:hidden select");
+    // Robust nav finder
+    var desktopNav = null;
+    var candidates = document.querySelectorAll("div");
+    for(var di = 0; di < candidates.length; di++){
+      var d = candidates[di];
+      var directBtns = Array.from(d.children).filter(function(c){ return c.tagName === "BUTTON"; });
+      if(directBtns.length >= 3){
+        var txt = d.innerText || d.textContent || "";
+        if(txt.indexOf("Resumen") >= 0 && txt.indexOf("Producto") >= 0){
+          desktopNav = d; break;
+        }
+      }
+    }
+    var mobileSelect = document.querySelector("select");
     if (!desktopNav) { setTimeout(init, 200); return; }
 
     // Desktop: add link button
