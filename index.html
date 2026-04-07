@@ -78,8 +78,9 @@
     var rows = sellers.map(function(v,i){
       var pct = maxV > 0 ? (v.ventas/maxV*100) : 0;
       var c = COLORS[i%COLORS.length];
-      var ticket = v.facturas > 0 ? fmt(Math.round(v.ventas/v.facturas)) : "—";
-      return '<div style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);" onmouseover="this.style.background=\'rgba(255,255,255,.04)\'" onmouseout="this.style.background=\'\'">'+
+      var ticket = v.facturas > 0 ? fmt(Math.round(v.ventas/v.facturas)) : "-";
+      var rowId = "lv-row-" + i;
+      return '<div id="'+rowId+'" style="display:grid;grid-template-columns:28px 1fr 80px 100px 110px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);">'+
                '<div style="font-size:11px;color:rgba(255,255,255,.25);">'+(i+1)+'</div>'+
                '<div>'+
                  '<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.85);">'+v.nombre+'</div>'+
