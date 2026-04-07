@@ -21,7 +21,7 @@
                    "07":"Jul","08":"Ago","09":"Sep","10":"Oct","11":"Nov","12":"Dic"};
 
   var _sellerData = null;
-  var _currentMes = "__all__";
+  var _currentMes = "__all__"; // se actualiza al renderizar si hay datos del mes actual
   var _active = false;
 
   var fmt = function(n){
@@ -64,6 +64,16 @@
     }
 
     var meses = Object.keys(_sellerData).sort();
+    // Si _currentMes no existe en los datos, usar __all__
+    if(_currentMes !== "__all__" && meses.indexOf(_currentMes) === -1){
+      _currentMes = "__all__";
+    }
+    // Si es __all__ y hay mes actual en datos, seleccionarlo por default
+    if(_currentMes === "__all__"){
+      var now = new Date();
+      var mesActual = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+      if(meses.indexOf(mesActual) >= 0) _currentMes = mesActual;
+    }
     var sellers = aggregateSellers(_sellerData, _currentMes);
     var totalV = sellers.reduce(function(s,v){return s+v.ventas;},0);
     var totalF = sellers.reduce(function(s,v){return s+v.facturas;},0);
@@ -161,11 +171,15 @@
     if(document.getElementById("letos-vend-tab")) return;
     console.log("[Vendedores] nav encontrado con", desktopNav.querySelectorAll("button").length, "botones");
 
-    // Crear panel como sibling del root
+    // Crear panel dentro del mismo contenedor que el contenido de React
     var panel = document.createElement("div");
     panel.id = "letos-vend-panel";
-    panel.style.cssText = "display:none;min-height:100vh;background:#0f1117;color:white;font-family:system-ui,sans-serif;";
-    document.body.appendChild(panel);
+    panel.style.cssText = "display:none;background:#0f1117;color:white;font-family:system-ui,sans-serif;";
+    // Insertarlo justo después del nav, dentro del appDiv
+    var root = document.getElementById("root");
+    var appDiv = root ? root.firstElementChild : null;
+    if(appDiv) appDiv.appendChild(panel);
+    else document.body.appendChild(panel);
 
     // ── Tab desktop ──
     var tab = document.createElement("button");
@@ -283,56 +297,5 @@
 })();
 </script>
 
-<script>
-(function(){
-  var MP_URL = "https://script.google.com/macros/s/AKfycbxYJbj1u4bmO2X2X0c8-aRSsgh2PMyV4wGSVFAxPv56L-NAhMMhgIVtYrJmYjBgqaw5/exec";
-
-  function addMpButton(){
-    // Find nav by looking for buttons with "Resumen" text
-    var desktopNav = null;
-    var divs = document.querySelectorAll("div");
-    for(var i=0;i<divs.length;i++){
-      var kids = Array.from(divs[i].children).filter(function(c){return c.tagName==="BUTTON";});
-      if(kids.length>=3 && (divs[i].innerText||"").indexOf("Resumen")>=0){
-        desktopNav = divs[i]; break;
-      }
-    }
-    if(!desktopNav){ setTimeout(addMpButton, 300); return; }
-    if(document.getElementById("mp-nav-btn")) return;
-
-    var btn = document.createElement("a");
-    btn.id = "mp-nav-btn";
-    btn.href = MP_URL;
-    btn.target = "_blank";
-    btn.rel = "noopener noreferrer";
-    btn.textContent = "💳 Mercado Pago";
-    btn.style.cssText = "display:flex;align-items:center;padding:12px 0;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:14px;white-space:nowrap;text-decoration:none;cursor:pointer;";
-    desktopNav.appendChild(btn);
-
-    // Mobile
-    var sel = document.querySelector("select");
-    if(sel && !document.getElementById("mp-mob-opt")){
-      var opt = document.createElement("option");
-      opt.id = "mp-mob-opt";
-      opt.value = "mp-ext";
-      opt.textContent = "💳 Mercado Pago ↗";
-      sel.appendChild(opt);
-      sel.addEventListener("change", function(){
-        if(sel.value==="mp-ext"){window.open(MP_URL,"_blank");setTimeout(function(){sel.value="resumen";},100);}
-      });
-    }
-
-    // Clear role on logout
-    document.querySelectorAll("button").forEach(function(b){
-      if(b.textContent.trim()==="Salir" && !b.dataset.mpBound){
-        b.dataset.mpBound="1";
-        b.addEventListener("click",function(){localStorage.removeItem("letos_role");});
-      }
-    });
-  }
-
-  setTimeout(addMpButton, 800);
-})();
-</script>
 </body>
 </html>
