@@ -22,6 +22,7 @@
 
   var _sellerData = null;
   var _currentMes = "__all__"; // se actualiza al renderizar si hay datos del mes actual
+  var _vendFI = ""; var _vendFF = "";
   var _active = false;
 
   var fmt = function(n){
@@ -37,6 +38,8 @@
     var agg = {};
     Object.keys(bsm||{}).forEach(function(mes){
       if(mesFilter !== "__all__" && mes !== mesFilter) return;
+      if(_vendFI && mes < _vendFI.substring(0,7)) return;
+      if(_vendFF && mes > _vendFF.substring(0,7)) return;
       Object.keys(bsm[mes]).forEach(function(vid){
         var d = bsm[mes][vid];
         if(!agg[vid]) agg[vid] = {id:vid, nombre:d.nombre||vid, facturas:0, ventas:0};
@@ -113,9 +116,13 @@
             '<h1 style="font-size:20px;font-weight:600;margin:0;color:white;">👤 Ventas por Vendedor</h1>'+
             '<p style="font-size:12px;color:rgba(255,255,255,.3);margin:4px 0 0;">Datos reales de Siigo</p>'+
           '</div>'+
-          '<select onchange="window.__letosVendMes(this.value)" style="background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;padding:6px 10px;font-size:13px;cursor:pointer;">'+
-            mesOpts+
-          '</select>'+
+          '<div style="display:flex;align-items:center;gap:8px;">'+
+            '<span style="font-size:12px;color:rgba(255,255,255,.3);">Desde:</span>'+
+            '<input type="date" value="'+_vendFI+'" onchange="window.__letosVendFI(this.value)" style="background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;padding:5px 8px;font-size:12px;color-scheme:dark;">'+
+            '<span style="font-size:12px;color:rgba(255,255,255,.3);">\u2192</span>'+
+            '<input type="date" value="'+_vendFF+'" onchange="window.__letosVendFF(this.value)" style="background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;padding:5px 8px;font-size:12px;color-scheme:dark;">'+
+            (_vendFI||_vendFF ? '<button onclick="window.__letosVendClear()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:0 4px;">✕</button>' : '')+
+            '</div>'+
         '</div>'+
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">'+
           kpiCard("Vendedores activos", sellers.length, "#60a5fa")+
@@ -131,6 +138,9 @@
       '</div>';
   }
 
+  window.__letosVendFI = function(val){ _vendFI = val; _currentMes = "__all__"; render(); };
+  window.__letosVendFF = function(val){ _vendFF = val; _currentMes = "__all__"; render(); };
+  window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; render(); };
   window.__letosVendMes = function(val){
     _currentMes = val;
     renderPanel();
