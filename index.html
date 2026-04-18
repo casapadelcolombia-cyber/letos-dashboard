@@ -21,7 +21,6 @@
                    "07":"Jul","08":"Ago","09":"Sep","10":"Oct","11":"Nov","12":"Dic"};
 
   var _sellerData = null;
-  var _sellerDay = null;
   var _currentMes = "__all__"; // se actualiza al renderizar si hay datos del mes actual
   var _vendFI = ""; var _vendFF = "";
   var _active = false;
@@ -36,25 +35,11 @@
   };
 
   function aggregateSellers(bsm, mesFilter){
-    console.log("[VEND] aggregate called, FI:", _vendFI, "FF:", _vendFF, "mesFilter:", mesFilter);
     var agg = {};
-    // Si hay filtro de fecha específico y tenemos _sellerDay, usarlo con filtro diario
-    if((_vendFI || _vendFF) && _sellerDay){
-      Object.keys(_sellerDay).forEach(function(dia){
-        if(_vendFI && dia < _vendFI) return;
-        if(_vendFF && dia > _vendFF) return;
-        Object.keys(_sellerDay[dia]).forEach(function(vid){
-          var d = _sellerDay[dia][vid];
-          if(!agg[vid]) agg[vid] = {id:vid, nombre:d.nombre||vid, facturas:0, ventas:0};
-          agg[vid].facturas += d.facturas||0;
-          agg[vid].ventas   += d.ventas||0;
-        });
-      });
-      return Object.values(agg).sort(function(a,b){return b.ventas-a.ventas;});
-    }
-    // Sino usar bySellerMonth
     Object.keys(bsm||{}).forEach(function(mes){
       if(mesFilter !== "__all__" && mes !== mesFilter) return;
+      if(_vendFI && mes < _vendFI.substring(0,7)) return;
+      if(_vendFF && mes > _vendFF.substring(0,7)) return;
       Object.keys(bsm[mes]).forEach(function(vid){
         var d = bsm[mes][vid];
         if(!agg[vid]) agg[vid] = {id:vid, nombre:d.nombre||vid, facturas:0, ventas:0};
@@ -87,7 +72,7 @@
       _currentMes = "__all__";
     }
     // Si es __all__ y hay mes actual en datos, seleccionarlo por default
-    if(_currentMes === "__all__" && !_vendFI && !_vendFF){
+    if(_currentMes === "__all__"){
       var now = new Date();
       var mesActual = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
       if(meses.indexOf(mesActual) >= 0) _currentMes = mesActual;
@@ -153,9 +138,9 @@
       '</div>';
   }
 
-  window.__letosVendFI = function(val){ console.log("[VEND] FI changed to:", val); _vendFI = val; _currentMes = "__all__"; renderPanel(); };
-  window.__letosVendFF = function(val){ console.log("[VEND] FF changed to:", val); _vendFF = val; _currentMes = "__all__"; renderPanel(); };
-  window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; renderPanel(); };
+  window.__letosVendFI = function(val){ _vendFI = val; _currentMes = "__all__"; render(); };
+  window.__letosVendFF = function(val){ _vendFF = val; _currentMes = "__all__"; render(); };
+  window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; render(); };
   window.__letosVendMes = function(val){
     _currentMes = val;
     renderPanel();
@@ -169,7 +154,6 @@
         resp.clone().json().then(function(data){
           if(data && data.bySellerMonth){
             _sellerData = data.bySellerMonth;
-            if(data.bySellerDay) _sellerDay = data.bySellerDay;
             if(_active) renderPanel();
           }
         }).catch(function(){});
