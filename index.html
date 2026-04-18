@@ -138,9 +138,9 @@
       '</div>';
   }
 
-  window.__letosVendFI = function(val){ _vendFI = val; _currentMes = "__all__"; render(); };
-  window.__letosVendFF = function(val){ _vendFF = val; _currentMes = "__all__"; render(); };
-  window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; render(); };
+  window.__letosVendFI = function(val){ _vendFI = val; _currentMes = "__all__"; renderPanel(); };
+  window.__letosVendFF = function(val){ _vendFF = val; _currentMes = "__all__"; renderPanel(); };
+  window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; renderPanel(); };
   window.__letosVendMes = function(val){
     _currentMes = val;
     renderPanel();
