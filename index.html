@@ -72,7 +72,7 @@
       _currentMes = "__all__";
     }
     // Si es __all__ y hay mes actual en datos, seleccionarlo por default
-    if(_currentMes === "__all__"){
+    if(_currentMes === "__all__" && !_vendFI && !_vendFF){
       var now = new Date();
       var mesActual = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
       if(meses.indexOf(mesActual) >= 0) _currentMes = mesActual;
