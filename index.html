@@ -35,6 +35,7 @@
   };
 
   function aggregateSellers(bsm, mesFilter){
+    console.log("[VEND] aggregate called, FI:", _vendFI, "FF:", _vendFF, "mesFilter:", mesFilter);
     var agg = {};
     Object.keys(bsm||{}).forEach(function(mes){
       if(mesFilter !== "__all__" && mes !== mesFilter) return;
@@ -138,8 +139,8 @@
       '</div>';
   }
 
-  window.__letosVendFI = function(val){ _vendFI = val; _currentMes = "__all__"; renderPanel(); };
-  window.__letosVendFF = function(val){ _vendFF = val; _currentMes = "__all__"; renderPanel(); };
+  window.__letosVendFI = function(val){ console.log("[VEND] FI changed to:", val); _vendFI = val; _currentMes = "__all__"; renderPanel(); };
+  window.__letosVendFF = function(val){ console.log("[VEND] FF changed to:", val); _vendFF = val; _currentMes = "__all__"; renderPanel(); };
   window.__letosVendClear = function(){ _vendFI = ""; _vendFF = ""; _currentMes = "__all__"; renderPanel(); };
   window.__letosVendMes = function(val){
     _currentMes = val;
