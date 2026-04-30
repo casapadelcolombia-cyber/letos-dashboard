@@ -650,5 +650,63 @@
   setTimeout(init, 1500);
 })();
 </script>
+
+
+<script>
+/* ═══════════════════════════════════════════════
+   BOTÓN ARUMA – Abre el reporte en nueva pestaña
+   ═══════════════════════════════════════════════ */
+(function(){
+  var ARUMA_URL = "https://script.google.com/macros/s/AKfycbzfzU1DeP0ed-67R_9nwU-HIzW4C-xOs2aewC9wmqSeiLtBP4-3ULbiCNq0XWC3cHUXFQ/exec";
+
+  function init(){
+    var desktopNav = null;
+    var candidates = document.querySelectorAll("div");
+    for(var di = 0; di < candidates.length; di++) {
+      var c = candidates[di];
+      if(c.querySelectorAll("button").length >= 6 &&
+         c.textContent.indexOf("Resumen") !== -1 &&
+         c.textContent.indexOf("Cartera") !== -1 &&
+         c.classList.toString().indexOf("flex") !== -1) {
+        desktopNav = c;
+        break;
+      }
+    }
+    if(!desktopNav) { setTimeout(init, 500); return; }
+    if(document.getElementById("letos-ar-link")) return;
+
+    var link = document.createElement("a");
+    link.id = "letos-ar-link";
+    link.href = ARUMA_URL;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "💄 Aruma ↗";
+    link.style.cssText = "padding:12px 0;border:none;border-bottom:2px solid transparent;background:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;text-decoration:none;transition:all .2s;";
+    link.addEventListener("mouseenter", function(){ link.style.color = "white"; });
+    link.addEventListener("mouseleave", function(){ link.style.color = "rgba(255,255,255,.4)"; });
+    desktopNav.appendChild(link);
+
+    // Móvil: agregar option al select
+    var mobileSelect = document.querySelector('select[class*="bg-[#1c2030]"]');
+    if(mobileSelect && !document.getElementById("letos-ar-mobile-opt")){
+      var opt = document.createElement("option");
+      opt.id = "letos-ar-mobile-opt";
+      opt.value = "__aruma_link__";
+      opt.textContent = "💄 Aruma ↗";
+      mobileSelect.appendChild(opt);
+      mobileSelect.addEventListener("change", function(){
+        if(mobileSelect.value === "__aruma_link__"){
+          window.open(ARUMA_URL, "_blank", "noopener,noreferrer");
+          mobileSelect.value = "resumen";
+        }
+      });
+    }
+
+    console.log("[Aruma] link inyectado");
+  }
+
+  setTimeout(init, 1500);
+})();
+</script>
 </body>
 </html>
