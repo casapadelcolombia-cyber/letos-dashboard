@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rappi · LETOS</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:20px;min-height:100vh}
+a{color:inherit}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.title{font-size:24px;font-weight:600}
+.subtitle{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px}
+.back{font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;display:inline-block;margin-bottom:10px}
+.back:hover{color:#fff}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.controls label{font-size:12px;color:rgba(255,255,255,.4)}
+.controls input{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;color-scheme:dark}
+.btn{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);padding:6px 14px;font-size:12px;cursor:pointer}
+.btn:hover{background:#252b3d;color:#fff}
+.btn.active{background:#ff4a1c;border-color:#ff4a1c;color:#fff}
+.btn.primary{background:#4ade80;border-color:#4ade80;color:#0f1117;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#1c2030;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px}
+.kpi .lbl{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi .val{font-size:22px;font-weight:600}
+.card{background:#161922;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;margin-bottom:20px}
+.card h2{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.gran-btns{display:flex;gap:6px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}
+th{padding:8px;text-align:left;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;background:#161922}
+td{padding:10px 8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.right{text-align:right}
+.muted{color:rgba(255,255,255,.6);font-size:12px}
+.empty{padding:40px;text-align:center;color:rgba(255,255,255,.4)}
+.tbl-wrap{max-height:600px;overflow-y:auto;overflow-x:auto}
+.search{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;width:200px;color-scheme:dark}
+</style>
+</head>
+<body>
+<a class="back" href="/">← Volver al dashboard</a>
+<div class="header">
+  <div><div class="title">🛵 Rappi</div><div class="subtitle" id="sub">Cargando…</div></div>
+  <div class="controls">
+    <label>Desde:</label><input type="date" id="fi">
+    <span style="color:rgba(255,255,255,.3)">→</span>
+    <input type="date" id="ff">
+    <button class="btn" id="clr" style="display:none">✕</button>
+  </div>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="lbl">Ventas Período</div><div class="val" style="color:#4ade80" id="kV">—</div></div>
+  <div class="kpi"><div class="lbl">Unidades</div><div class="val" style="color:#3b82f6" id="kU">—</div></div>
+  <div class="kpi"><div class="lbl">Productos</div><div class="val" style="color:#a78bfa" id="kP">—</div></div>
+  <div class="kpi"><div class="lbl">Días con Datos</div><div class="val" style="color:#f59e0b" id="kD">—</div></div>
+</div>
+<div class="card">
+  <h2>Tendencia
+    <span class="gran-btns">
+      <button class="btn active" data-m="ventas">Ventas $</button>
+      <button class="btn" data-m="unidades">Unidades</button>
+      <span style="width:10px"></span>
+      <button class="btn active" data-g="dia">Día</button>
+      <button class="btn" data-g="semana">Semana</button>
+      <button class="btn" data-g="mes">Mes</button>
+    </span>
+  </h2>
+  <div id="chart" style="overflow-x:auto"></div>
+</div>
+<div class="card">
+  <h2><span>Productos del Período</span>
+    <span style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="search" class="search" placeholder="Buscar producto…">
+      <button class="btn primary" id="csv">📥 CSV</button>
+    </span>
+  </h2>
+  <div class="tbl-wrap">
+    <table><thead><tr>
+      <th style="width:40px">#</th><th>Producto</th><th>Categoría</th><th>EAN</th>
+      <th class="right" style="width:120px">Ventas</th><th class="right" style="width:90px">Uds</th>
+    </tr></thead><tbody id="prodBody"><tr><td colspan="6" class="empty">Cargando datos…</td></tr></tbody></table>
+  </div>
+  <div class="muted" style="margin-top:8px" id="prodCount"></div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycby3R8GGCKfweJWzBJ1QIa7n8u7wxm41WnXQLtLxWAP8OCX7ThEVRVYkYXUj99jSR1vgiA/exec?action=json";
+var DATA = {dias:[], productos_por_dia:[], updated:null};
+var _g="dia", _m="ventas", _fi="", _ff="", _search="";
+
+function ds(d){ return String(d||"").substring(0,10); }
+function fmt(n){ return Math.round(n).toLocaleString("es-CO"); }
+function cop(n){ return "$"+Math.round(n).toLocaleString("es-CO"); }
+function fmtK(n){ if(n>=1e6) return (n/1e6).toFixed(1)+"M"; if(n>=1e3) return (n/1e3).toFixed(0)+"K"; return String(Math.round(n)); }
+
+function filtDias(){
+  var a = DATA.dias||[];
+  if(!_fi && !_ff) return a;
+  return a.filter(function(d){ var f=ds(d.fecha); if(_fi&&f<_fi) return false; if(_ff&&f>_ff) return false; return true; });
+}
+
+function agg(rows,g){
+  if(g==="dia") return rows.slice().sort(function(a,b){ return ds(a.fecha).localeCompare(ds(b.fecha)); });
+  var o={};
+  rows.forEach(function(d){
+    var f=ds(d.fecha), k;
+    if(g==="mes") k=f.substring(0,7);
+    else { var dt=new Date(f); var mo=new Date(dt); mo.setDate(dt.getDate()-((dt.getDay()+6)%7)); k=mo.toISOString().substring(0,10); }
+    if(!o[k]) o[k]={fecha:k,ventas:0,unidades:0};
+    o[k].ventas += d.ventas||0; o[k].unidades += d.unidades||0;
+  });
+  return Object.values(o).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
+}
+
+function chart(rows){
+  if(!rows.length) return '<div class="empty">Sin datos</div>';
+  var val=function(r){ return _m==="ventas"? r.ventas : r.unidades; };
+  var max=Math.max.apply(null, rows.map(val))||1;
+  var w=Math.max(rows.length*46+60,600), h=280, p=40, iw=w-p*2, ih=h-p*2;
+  var pts=rows.map(function(r,i){
+    var x=p+(rows.length===1? iw/2 : (i*iw/(rows.length-1)));
+    var y=p+ih-(val(r)/max)*ih;
+    return [x,y,r];
+  });
+  var path=pts.map(function(pt,i){ return (i===0?"M":"L")+pt[0].toFixed(1)+","+pt[1].toFixed(1); }).join(" ");
+  var col=_m==="ventas"?"#4ade80":"#3b82f6";
+  var dots=pts.map(function(pt){ return '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="3" fill="'+col+'"/>'; }).join("");
+  var labels=pts.map(function(pt,i){
+    if(rows.length>20 && i%Math.ceil(rows.length/15)!==0) return "";
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(h-10)+'" fill="rgba(255,255,255,.4)" font-size="10" text-anchor="middle">'+String(pt[2].fecha).substring(5)+'</text>';
+  }).join("");
+  var vals=pts.map(function(pt){
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(pt[1]-8).toFixed(1)+'" fill="rgba(255,255,255,.6)" font-size="9" text-anchor="middle">'+fmtK(val(pt[2]))+'</text>';
+  }).join("");
+  return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block"><path d="'+path+'" fill="none" stroke="'+col+'" stroke-width="2"/>'+dots+vals+labels+'</svg>';
+}
+
+function prods(){
+  var ppd = DATA.productos_por_dia||[];
+  var f = ppd.filter(function(p){ var x=ds(p.fecha); if(_fi&&x<_fi) return false; if(_ff&&x>_ff) return false; return true; });
+  var o={};
+  f.forEach(function(p){
+    var k=p.sku||p.ean||p.nombre; if(!k) return;
+    if(!o[k]) o[k]={nombre:p.nombre,categoria:p.categoria,ean:p.ean,ventas:0,unidades:0};
+    o[k].ventas += p.ventas||0; o[k].unidades += p.unidades||0;
+  });
+  var arr=Object.values(o);
+  if(_search){
+    var q=_search.toLowerCase();
+    arr=arr.filter(function(p){
+      return (p.nombre||"").toLowerCase().indexOf(q)>=0 || (p.ean||"").indexOf(q)>=0 || (p.categoria||"").toLowerCase().indexOf(q)>=0;
+    });
+  }
+  arr.sort(function(a,b){ return b.ventas-a.ventas; });
+  return arr;
+}
+
+function csv(){
+  var pr=prods();
+  var rows=[["Producto","Categoria","EAN","Ventas","Unidades"]];
+  pr.forEach(function(p){ rows.push([p.nombre,p.categoria,p.ean,Math.round(p.ventas),Math.round(p.unidades)]); });
+  var c=rows.map(function(r){ return r.map(function(x){ var s=String(x); if(s.indexOf(",")>=0||s.indexOf('"')>=0){ s='"'+s.replace(/"/g,'""')+'"'; } return s; }).join(","); }).join("\n");
+  var b=new Blob(["﻿"+c],{type:"text/csv;charset=utf-8"});
+  var u=URL.createObjectURL(b);
+  var a=document.createElement("a");
+  a.href=u; a.download="rappi_"+(_fi||"todo")+"_"+(_ff||"todo")+".csv"; a.click();
+  URL.revokeObjectURL(u);
+}
+
+function render(){
+  var dd=filtDias(), rows=agg(dd,_g), pr=prods();
+  var tV=dd.reduce(function(s,d){ return s+(d.ventas||0); },0);
+  var tU=dd.reduce(function(s,d){ return s+(d.unidades||0); },0);
+  document.getElementById("kV").textContent=cop(tV);
+  document.getElementById("kU").textContent=fmt(tU);
+  document.getElementById("kP").textContent=pr.length;
+  document.getElementById("kD").textContent=dd.length;
+  document.getElementById("chart").innerHTML=chart(rows);
+  var tr=pr.map(function(p,i){
+    return '<tr><td class="muted">'+(i+1)+'</td><td>'+(p.nombre||"")+'</td><td class="muted">'+(p.categoria||"")+'</td><td class="muted">'+(p.ean||"")+'</td><td class="right" style="color:#4ade80">'+cop(p.ventas)+'</td><td class="right" style="color:#3b82f6">'+fmt(p.unidades)+'</td></tr>';
+  }).join("");
+  document.getElementById("prodBody").innerHTML = tr || '<tr><td colspan="6" class="empty">Sin productos en este rango</td></tr>';
+  document.getElementById("prodCount").textContent = pr.length+" productos · "+cop(tV)+" · "+fmt(tU)+" uds";
+  document.getElementById("clr").style.display = (_fi||_ff) ? "" : "none";
+}
+
+document.querySelectorAll("[data-g]").forEach(function(b){
+  b.addEventListener("click", function(){ _g=b.dataset.g; document.querySelectorAll("[data-g]").forEach(function(x){ x.classList.toggle("active", x===b); }); render(); });
+});
+document.querySelectorAll("[data-m]").forEach(function(b){
+  b.addEventListener("click", function(){ _m=b.dataset.m; document.querySelectorAll("[data-m]").forEach(function(x){ x.classList.toggle("active", x===b); }); render(); });
+});
+document.getElementById("fi").addEventListener("change", function(e){ _fi=e.target.value; render(); });
+document.getElementById("ff").addEventListener("change", function(e){ _ff=e.target.value; render(); });
+document.getElementById("clr").addEventListener("click", function(){ _fi=""; _ff=""; document.getElementById("fi").value=""; document.getElementById("ff").value=""; render(); });
+document.getElementById("search").addEventListener("input", function(e){ _search=e.target.value; render(); });
+document.getElementById("csv").addEventListener("click", csv);
+
+fetch(API)
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    DATA = j;
+    document.getElementById("sub").textContent = j.updated ? "Última actualización: "+new Date(j.updated).toLocaleString("es-CO") : "Sin datos";
+    render();
+  })
+  .catch(function(e){
+    document.getElementById("sub").textContent = "Error cargando datos";
+    document.getElementById("prodBody").innerHTML = '<tr><td colspan="6" class="empty">No se pudieron cargar los datos: '+e+'</td></tr>';
+  });
+</script>
+</body>
+</html>
