@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Farmatodo · LETOS</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:20px;min-height:100vh}
+.back{font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;display:inline-block;margin-bottom:10px}
+.back:hover{color:#fff}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.title{font-size:24px;font-weight:600}
+.subtitle{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.controls label{font-size:12px;color:rgba(255,255,255,.4)}
+.controls input{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;color-scheme:dark}
+.btn{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);padding:6px 14px;font-size:12px;cursor:pointer}
+.btn:hover{background:#252b3d;color:white}
+.btn.active{background:#ec4899;border-color:#ec4899;color:#fff}
+.btn.primary{background:#4ade80;border-color:#4ade80;color:#0f1117;font-weight:600}
+.btn.primary:hover{background:#3ec46e;color:#0f1117}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#1c2030;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px}
+.kpi .lbl{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi .val{font-size:24px;font-weight:600}
+.card{background:#161922;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;margin-bottom:20px}
+.card h2{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.gran-btns{display:flex;gap:6px}
+table{width:100%;border-collapse:collapse}
+th{padding:8px;text-align:left;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;background:#161922}
+td{padding:10px 8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.right{text-align:right}
+.muted{color:rgba(255,255,255,.6);font-size:12px}
+.empty{padding:40px;text-align:center;color:rgba(255,255,255,.4)}
+.tbl-wrap{max-height:600px;overflow-y:auto;overflow-x:auto}
+.search{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;width:200px;color-scheme:dark}
+</style>
+</head>
+<body>
+<a class="back" href="/">← Volver al dashboard</a>
+<div class="header">
+  <div><div class="title">🏬 Farmatodo</div><div class="subtitle" id="sub">Cargando…</div></div>
+  <div class="controls">
+    <label>Desde:</label><input type="date" id="fi">
+    <span style="color:rgba(255,255,255,.3)">→</span>
+    <input type="date" id="ff">
+    <button class="btn" id="clr" style="display:none">✕</button>
+  </div>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="lbl">Unidades Período</div><div class="val" style="color:#3b82f6" id="kU">—</div></div>
+  <div class="kpi"><div class="lbl">Productos Distintos</div><div class="val" style="color:#a78bfa" id="kP">—</div></div>
+  <div class="kpi"><div class="lbl">Días con Datos</div><div class="val" style="color:#f59e0b" id="kD">—</div></div>
+</div>
+<div class="card">
+  <h2>Tendencia de Unidades
+    <span class="gran-btns">
+      <button class="btn active" data-g="dia">Día</button>
+      <button class="btn" data-g="semana">Semana</button>
+      <button class="btn" data-g="mes">Mes</button>
+    </span>
+  </h2>
+  <div id="chart" style="overflow-x:auto"></div>
+</div>
+<div class="card">
+  <h2><span>Productos del Período</span>
+    <span style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="search" class="search" placeholder="Buscar producto…">
+      <button class="btn primary" id="csv">📥 Descargar CSV</button>
+    </span>
+  </h2>
+  <div class="tbl-wrap">
+    <table><thead><tr>
+      <th style="width:40px">#</th><th>Producto</th><th>EAN/UPC</th><th class="right" style="width:120px">Unidades</th>
+    </tr></thead><tbody id="prodBody"><tr><td colspan="4" class="empty">Cargando datos…</td></tr></tbody></table>
+  </div>
+  <div class="muted" style="margin-top:8px" id="prodCount"></div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycbw2Y-neHbgP23TvB15mbwmjy_AJwBQX9MZsDoCtPiVNhp9Sbi0KhqJmkMRvC4hAUrHFdA/exec?action=json";
+var DATA = {dias:[], productos_por_dia:[], updated:null};
+var SKU_DIVISORES = {"259000026":12};
+var _gran="dia", _fi="", _ff="", _search="";
+
+function dateStr(d){ return String(d||"").substring(0,10); }
+function fmt(n){ return n.toLocaleString("es-CO"); }
+function fmtK(n){ if(n>=1e6) return (n/1e6).toFixed(1)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return String(n); }
+
+function filterDias(){
+  var ds = DATA.dias||[];
+  if(!_fi && !_ff) return ds;
+  return ds.filter(function(d){ var f=dateStr(d.fecha); if(_fi&&f<_fi) return false; if(_ff&&f>_ff) return false; return true; });
+}
+
+function aggGran(ds,g){
+  if(g==="dia") return ds.slice().sort(function(a,b){ return dateStr(a.fecha).localeCompare(dateStr(b.fecha)); });
+  var agg={};
+  ds.forEach(function(d){
+    var f=dateStr(d.fecha), k;
+    if(g==="mes") k=f.substring(0,7);
+    else { var dt=new Date(f); var mon=new Date(dt); mon.setDate(dt.getDate()-((dt.getDay()+6)%7)); k=mon.toISOString().substring(0,10); }
+    if(!agg[k]) agg[k]={fecha:k,unidades:0};
+    agg[k].unidades += d.unidades||0;
+  });
+  return Object.values(agg).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
+}
+
+function chart(rows){
+  if(!rows.length) return '<div class="empty">Sin datos</div>';
+  var max=Math.max.apply(null, rows.map(function(r){ return r.unidades; }));
+  if(max===0) max=1;
+  var w=Math.max(rows.length*45+60,600), h=280, p=40, iw=w-p*2, ih=h-p*2;
+  var pts=rows.map(function(r,i){
+    var x=p+(rows.length===1? iw/2 : (i*iw/(rows.length-1)));
+    var y=p+ih-(r.unidades/max)*ih;
+    return [x,y,r];
+  });
+  var path=pts.map(function(pt,i){ return (i===0?"M":"L")+pt[0].toFixed(1)+","+pt[1].toFixed(1); }).join(" ");
+  var dots=pts.map(function(pt){ return '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="3" fill="#3b82f6"/>'; }).join("");
+  var labels=pts.map(function(pt,i){
+    if(rows.length>20 && i%Math.ceil(rows.length/15)!==0) return "";
+    var l=String(pt[2].fecha||"").substring(5);
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(h-10)+'" fill="rgba(255,255,255,.4)" font-size="10" text-anchor="middle">'+l+'</text>';
+  }).join("");
+  var vals=pts.map(function(pt){
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(pt[1]-8).toFixed(1)+'" fill="rgba(255,255,255,.6)" font-size="9" text-anchor="middle">'+fmtK(pt[2].unidades)+'</text>';
+  }).join("");
+  return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block"><path d="'+path+'" fill="none" stroke="#3b82f6" stroke-width="2"/>'+dots+vals+labels+'</svg>';
+}
+
+function getProductosFiltrados(){
+  var ppd = DATA.productos_por_dia||[];
+  var filtered = ppd.filter(function(p){
+    var f=dateStr(p.fecha);
+    if(_fi&&f<_fi) return false;
+    if(_ff&&f>_ff) return false;
+    return true;
+  });
+  var agg={};
+  filtered.forEach(function(p){
+    var key=p.sku||p.ean||p.nombre; if(!key) return;
+    if(!agg[key]) agg[key]={sku:p.sku,ean:p.ean,nombre:p.nombre,unidades:0};
+    agg[key].unidades += p.unidades||0;
+  });
+  var arr=Object.values(agg);
+  arr.forEach(function(p){
+    var div=SKU_DIVISORES[p.sku];
+    if(div&&div>1){ p.unidades=p.unidades/div; p.divisor=div; }
+  });
+  if(_search){
+    var q=_search.toLowerCase();
+    arr=arr.filter(function(p){
+      return (p.nombre||"").toLowerCase().indexOf(q)>=0 || (p.sku||"").indexOf(q)>=0 || (p.ean||"").indexOf(q)>=0;
+    });
+  }
+  arr.sort(function(a,b){ return b.unidades-a.unidades; });
+  return arr;
+}
+
+function downloadCSV(){
+  var prods=getProductosFiltrados();
+  var rows=[["SKU","EAN/UPC","Producto","Unidades","Divisor"]];
+  prods.forEach(function(p){ rows.push([p.sku||"",p.ean||"",p.nombre||"",Math.round(p.unidades||0),p.divisor||1]); });
+  var csv=rows.map(function(r){
+    return r.map(function(c){ var s=String(c); if(s.indexOf(",")>=0||s.indexOf('"')>=0||s.indexOf("\n")>=0){ s='"'+s.replace(/"/g,'""')+'"'; } return s; }).join(",");
+  }).join("\n");
+  var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="farmatodo_"+(_fi||"todo")+"_"+(_ff||"todo")+".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function render(){
+  var ds=filterDias();
+  var rows=aggGran(ds,_gran);
+  var prods=getProductosFiltrados();
+  var tU=prods.reduce(function(s,p){ return s+(p.unidades||0); },0);
+  document.getElementById("kU").textContent=fmt(Math.round(tU));
+  document.getElementById("kP").textContent=prods.length;
+  document.getElementById("kD").textContent=ds.length;
+  document.getElementById("chart").innerHTML=chart(rows);
+  var trs=prods.map(function(p,i){
+    var udsTxt=fmt(Math.round(p.unidades||0));
+    if(p.divisor) udsTxt+=' <span class="muted" style="font-size:10px">(÷'+p.divisor+')</span>';
+    return '<tr><td class="muted">'+(i+1)+'</td><td>'+(p.nombre||"")+'</td><td class="muted">'+(p.ean||"")+'</td><td class="right" style="color:#3b82f6">'+udsTxt+'</td></tr>';
+  }).join("");
+  document.getElementById("prodBody").innerHTML = trs || '<tr><td colspan="4" class="empty">Sin productos en este rango</td></tr>';
+  document.getElementById("prodCount").textContent = prods.length+" productos · "+fmt(Math.round(tU))+" unidades totales";
+  document.getElementById("clr").style.display = (_fi||_ff) ? "" : "none";
+}
+
+document.querySelectorAll("[data-g]").forEach(function(b){
+  b.addEventListener("click", function(){ _gran=b.dataset.g; document.querySelectorAll("[data-g]").forEach(function(x){ x.classList.toggle("active", x===b); }); render(); });
+});
+document.getElementById("fi").addEventListener("change", function(e){ _fi=e.target.value; render(); });
+document.getElementById("ff").addEventListener("change", function(e){ _ff=e.target.value; render(); });
+document.getElementById("clr").addEventListener("click", function(){ _fi=""; _ff=""; document.getElementById("fi").value=""; document.getElementById("ff").value=""; render(); });
+document.getElementById("search").addEventListener("input", function(e){ _search=e.target.value; render(); });
+document.getElementById("csv").addEventListener("click", downloadCSV);
+
+fetch(API)
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    DATA=j;
+    document.getElementById("sub").textContent = j.updated ? "Última actualización: "+new Date(j.updated).toLocaleString("es-CO") : "Sin datos";
+    render();
+  })
+  .catch(function(e){
+    document.getElementById("sub").textContent="Error cargando datos";
+    document.getElementById("prodBody").innerHTML='<tr><td colspan="4" class="empty">No se pudieron cargar los datos: '+e+'</td></tr>';
+  });
+</script>
+</body>
+</html>

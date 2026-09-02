@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aruma · LETOS</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e0e6f0;padding:20px;min-height:100vh}
+.back{font-size:12px;color:#7a8499;text-decoration:none;display:inline-block;margin-bottom:10px}
+.back:hover{color:#e0e6f0}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:12px}
+.title{display:flex;align-items:center;gap:12px;font-size:28px;font-weight:600}
+.title-emoji{font-size:32px}
+.muted{color:#7a8499;font-size:13px}
+.right{text-align:right}
+.filters{display:flex;align-items:center;gap:8px;color:#a8b2c8;font-size:14px;flex-wrap:wrap}
+input[type=date]{background:#1a1f2e;color:#e0e6f0;border:1px solid #2a3349;border-radius:6px;padding:6px 10px;font-size:13px;color-scheme:dark}
+.btn{background:#1a1f2e;color:#e0e6f0;border:1px solid #2a3349;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer}
+.btn:hover{background:#252b3d}
+.btn-clear{background:#2a3349;padding:6px 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
+.kpi{background:#0f1320;border:1px solid #1a1f2e;border-radius:12px;padding:18px}
+.kpi-label{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#7a8499;margin-bottom:8px}
+.kpi-value{font-size:32px;font-weight:600}
+.kpi-units{color:#3b82f6}.kpi-prods{color:#a855f7}.kpi-days{color:#f59e0b}.kpi-rev{color:#10b981}
+.card{background:#0f1320;border:1px solid #1a1f2e;border-radius:12px;padding:20px;margin:16px 0}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.card-title{font-size:15px;font-weight:500}
+.gran{display:flex;gap:4px}
+.gran button{background:#1a1f2e;border:none;color:#a8b2c8;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer}
+.gran button.active{background:#3b82f6;color:#fff}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a1f2e;padding-bottom:12px}
+.tabs button{background:#1a1f2e;border:none;color:#a8b2c8;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.tabs button.active{background:#3b82f6;color:#fff}
+.csv-btn{background:#10b981;border:none;color:#04231a;font-weight:600;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+.search{background:#1a1f2e;color:#e0e6f0;border:1px solid #2a3349;border-radius:6px;padding:6px 10px;font-size:13px;width:200px;color-scheme:dark}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 8px;text-align:left;font-size:11px;letter-spacing:.6px;color:#7a8499;text-transform:uppercase;border-bottom:1px solid #1a1f2e;position:sticky;top:0;background:#0f1320}
+td{padding:10px 8px;font-size:13px;border-bottom:1px solid #151a28}
+.tbl-wrap{max-height:600px;overflow-y:auto;overflow-x:auto}
+.empty{padding:40px;text-align:center;color:#7a8499}
+</style>
+</head>
+<body>
+<a class="back" href="/">← Volver al dashboard</a>
+<div class="header">
+  <div>
+    <div class="title"><span class="title-emoji">💄</span><span>Aruma</span></div>
+    <div class="muted" id="updated">Cargando…</div>
+  </div>
+  <div class="filters">
+    <span>Desde:</span><input type="date" id="fi">
+    <span>→</span><input type="date" id="ff">
+    <button class="btn-clear btn" id="clr" style="display:none">✕</button>
+  </div>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="kpi-label">Unidades Período</div><div class="kpi-value kpi-units" id="kU">0</div></div>
+  <div class="kpi"><div class="kpi-label">Ventas ($)</div><div class="kpi-value kpi-rev" id="kR">$0</div></div>
+  <div class="kpi"><div class="kpi-label">Productos Distintos</div><div class="kpi-value kpi-prods" id="kP">0</div></div>
+  <div class="kpi"><div class="kpi-label">Días con Datos</div><div class="kpi-value kpi-days" id="kD">0</div></div>
+</div>
+<div class="card">
+  <div class="card-h">
+    <div class="card-title">Tendencia de Unidades</div>
+    <div class="gran">
+      <button data-g="day" class="active">Día</button>
+      <button data-g="week">Semana</button>
+      <button data-g="month">Mes</button>
+    </div>
+  </div>
+  <div id="chart"></div>
+</div>
+<div class="card">
+  <div class="tabs">
+    <button data-tab="productos" class="active">📦 Productos</button>
+    <button data-tab="tiendas">🏪 Tiendas</button>
+    <button data-tab="meses">📅 Meses</button>
+  </div>
+  <div style="padding-top:16px;display:flex;justify-content:flex-end;gap:8px">
+    <button class="csv-btn" style="background:#7c3aed;color:#fff" id="btnExcel">📊 Descargar Excel Completo</button>
+  </div>
+
+  <div id="tab-productos" class="tab-content">
+    <div class="card-h">
+      <div class="card-title">Productos del Período</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="text" class="search" id="sr" placeholder="Buscar producto…">
+        <button class="csv-btn" data-csv="productos">📥 Descargar CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th style="width:40px">#</th><th>Producto</th><th>SKU</th>
+      <th class="right">Unidades</th><th class="right">Ventas ($)</th>
+    </tr></thead><tbody id="prodBody"><tr><td colspan="5" class="empty">Cargando datos…</td></tr></tbody></table></div>
+    <div class="muted" id="prodCount" style="margin-top:12px"></div>
+  </div>
+
+  <div id="tab-tiendas" class="tab-content" style="display:none">
+    <div class="card-h">
+      <div class="card-title">Ventas por Tienda</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="text" class="search" id="srTienda" placeholder="Buscar tienda…">
+        <button class="csv-btn" data-csv="tiendas">📥 Descargar CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th style="width:40px">#</th><th>Tienda</th><th class="right">Unidades</th><th class="right">Ventas ($)</th>
+    </tr></thead><tbody id="tiendaBody"></tbody></table></div>
+    <div class="muted" id="tiendaCount" style="margin-top:12px"></div>
+  </div>
+
+  <div id="tab-meses" class="tab-content" style="display:none">
+    <div class="card-h">
+      <div class="card-title">Ventas por Mes</div>
+      <button class="csv-btn" data-csv="meses">📥 Descargar CSV</button>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th style="width:40px">#</th><th>Mes</th><th class="right">Unidades</th><th class="right">Ventas ($)</th><th class="right">Facturas</th>
+    </tr></thead><tbody id="mesBody"></tbody></table></div>
+    <div class="muted" id="mesCount" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzfzU1DeP0ed-67R_9nwU-HIzW4C-xOs2aewC9wmqSeiLtBP4-3ULbiCNq0XWC3cHUXFQ/exec?action=json";
+var DATA = {dias:[], productos:[], ventas:[], updated:null};
+var _g="day", _fi="", _ff="", _srProd="", _srTienda="", _tab="productos";
+
+function ds(d){ return String(d||"").substring(0,10); }
+function fmt(n){ return Math.round(n).toLocaleString("es-CO"); }
+function cop(n){ return "$"+Math.round(n).toLocaleString("es-CO"); }
+function fmtK(n){ if(n>=1e6) return (n/1e6).toFixed(1)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return String(Math.round(n)); }
+function inRange(f){ if(_fi&&f<_fi) return false; if(_ff&&f>_ff) return false; return true; }
+
+function filtDias(){ return (DATA.dias||[]).filter(function(d){ return inRange(ds(d.fecha)); }); }
+function filtVentas(){ return (DATA.ventas||[]).filter(function(v){ return inRange(ds(v.fecha)); }); }
+
+function agg(rows,g){
+  if(g==="day") return rows.slice().sort(function(a,b){ return ds(a.fecha).localeCompare(ds(b.fecha)); })
+    .map(function(d){ return {fecha:ds(d.fecha), unidades:d.unidades||0}; });
+  var o={};
+  rows.forEach(function(d){
+    var f=ds(d.fecha), k;
+    if(g==="month") k=f.substring(0,7);
+    else { var dt=new Date(f); var mo=new Date(dt); mo.setDate(dt.getDate()-((dt.getDay()+6)%7)); k=mo.toISOString().substring(0,10); }
+    if(!o[k]) o[k]={fecha:k,unidades:0};
+    o[k].unidades += d.unidades||0;
+  });
+  return Object.values(o).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
+}
+
+function chart(rows){
+  if(!rows.length) return '<div class="empty">Sin datos</div>';
+  var max=Math.max.apply(null, rows.map(function(r){ return r.unidades; }))||1;
+  var w=Math.max(rows.length*46+60,600), h=280, p=40, iw=w-p*2, ih=h-p*2;
+  var pts=rows.map(function(r,i){
+    var x=p+(rows.length===1? iw/2 : (i*iw/(rows.length-1)));
+    return [x, p+ih-(r.unidades/max)*ih, r];
+  });
+  var path=pts.map(function(pt,i){ return (i===0?"M":"L")+pt[0].toFixed(1)+","+pt[1].toFixed(1); }).join(" ");
+  var dots=pts.map(function(pt){ return '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="3" fill="#3b82f6"/>'; }).join("");
+  var labels=pts.map(function(pt,i){
+    if(rows.length>20 && i%Math.ceil(rows.length/15)!==0) return "";
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(h-10)+'" fill="#7a8499" font-size="10" text-anchor="middle">'+String(pt[2].fecha).substring(5)+'</text>';
+  }).join("");
+  var vals=pts.map(function(pt){
+    return '<text x="'+pt[0].toFixed(1)+'" y="'+(pt[1]-8).toFixed(1)+'" fill="#a8b2c8" font-size="9" text-anchor="middle">'+fmtK(pt[2].unidades)+'</text>';
+  }).join("");
+  return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block"><path d="'+path+'" fill="none" stroke="#3b82f6" stroke-width="2"/>'+dots+vals+labels+'</svg>';
+}
+
+function getProductos(){
+  var o={};
+  filtVentas().forEach(function(v){
+    var k=v.sku||v.descripcion; if(!k) return;
+    if(!o[k]) o[k]={sku:v.sku, descripcion:v.descripcion, unidades:0, subtotal:0};
+    o[k].unidades += v.unidades||0; o[k].subtotal += v.subtotal||0;
+  });
+  var arr=Object.values(o);
+  if(_srProd){ var q=_srProd.toLowerCase();
+    arr=arr.filter(function(p){ return (p.descripcion||"").toLowerCase().indexOf(q)>=0 || String(p.sku||"").indexOf(q)>=0; }); }
+  return arr.sort(function(a,b){ return b.unidades-a.unidades; });
+}
+
+function getTiendas(){
+  var o={};
+  filtVentas().forEach(function(v){
+    var k=v.bodega||"(sin tienda)";
+    if(!o[k]) o[k]={bodega:k, unidades:0, subtotal:0};
+    o[k].unidades += v.unidades||0; o[k].subtotal += v.subtotal||0;
+  });
+  var arr=Object.values(o);
+  if(_srTienda){ var q=_srTienda.toLowerCase();
+    arr=arr.filter(function(t){ return (t.bodega||"").toLowerCase().indexOf(q)>=0; }); }
+  return arr.sort(function(a,b){ return b.subtotal-a.subtotal; });
+}
+
+function getMeses(){
+  var o={};
+  filtDias().forEach(function(d){
+    var k=ds(d.fecha).substring(0,7);
+    if(!o[k]) o[k]={mes:k, unidades:0, subtotal:0, facturas:0};
+    o[k].unidades += d.unidades||0; o[k].subtotal += d.subtotal||0; o[k].facturas += d.facturas||0;
+  });
+  return Object.values(o).sort(function(a,b){ return b.mes.localeCompare(a.mes); });
+}
+
+function toCSV(rows){
+  return rows.map(function(r){
+    return r.map(function(c){ var s=String(c); if(s.indexOf(",")>=0||s.indexOf('"')>=0||s.indexOf("\n")>=0){ s='"'+s.replace(/"/g,'""')+'"'; } return s; }).join(",");
+  }).join("\n");
+}
+function bajar(nombre, rows){
+  var blob=new Blob(["﻿"+toCSV(rows)],{type:"text/csv;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url; a.download=nombre+"_"+(_fi||"todo")+"_"+(_ff||"todo")+".csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+function downloadCSV(tipo){
+  if(tipo==="productos"){
+    var r=[["SKU","Producto","Unidades","Ventas"]];
+    getProductos().forEach(function(p){ r.push([p.sku||"",p.descripcion||"",Math.round(p.unidades),Math.round(p.subtotal)]); });
+    bajar("aruma_productos", r);
+  } else if(tipo==="tiendas"){
+    var r2=[["Tienda","Unidades","Ventas"]];
+    getTiendas().forEach(function(t){ r2.push([t.bodega,Math.round(t.unidades),Math.round(t.subtotal)]); });
+    bajar("aruma_tiendas", r2);
+  } else {
+    var r3=[["Mes","Unidades","Ventas","Facturas"]];
+    getMeses().forEach(function(m){ r3.push([m.mes,Math.round(m.unidades),Math.round(m.subtotal),Math.round(m.facturas)]); });
+    bajar("aruma_meses", r3);
+  }
+}
+function downloadExcelCompleto(){
+  var r=[["Fecha","SKU","Producto","Tienda","Unidades","Ventas"]];
+  filtVentas().slice().sort(function(a,b){ return ds(a.fecha).localeCompare(ds(b.fecha)); })
+    .forEach(function(v){ r.push([ds(v.fecha), v.sku||"", v.descripcion||"", v.bodega||"", Math.round(v.unidades||0), Math.round(v.subtotal||0)]); });
+  bajar("aruma_completo", r);
+}
+
+function render(){
+  var dd=filtDias();
+  var prods=getProductos(), tiendas=getTiendas(), meses=getMeses();
+  var tU=dd.reduce(function(s,d){ return s+(d.unidades||0); },0);
+  var tR=dd.reduce(function(s,d){ return s+(d.subtotal||0); },0);
+  document.getElementById("kU").textContent=fmt(tU);
+  document.getElementById("kR").textContent=cop(tR);
+  document.getElementById("kP").textContent=prods.length;
+  document.getElementById("kD").textContent=dd.length;
+  document.getElementById("chart").innerHTML=chart(agg(dd,_g));
+
+  document.getElementById("prodBody").innerHTML = prods.map(function(p,i){
+    return '<tr><td class="muted">'+(i+1)+'</td><td>'+(p.descripcion||"")+'</td><td class="muted">'+(p.sku||"")+'</td><td class="right" style="color:#3b82f6">'+fmt(p.unidades)+'</td><td class="right" style="color:#10b981">'+cop(p.subtotal)+'</td></tr>';
+  }).join("") || '<tr><td colspan="5" class="empty">Sin productos en este rango</td></tr>';
+  document.getElementById("prodCount").textContent = prods.length+" productos · "+fmt(tU)+" unidades · "+cop(tR);
+
+  document.getElementById("tiendaBody").innerHTML = tiendas.map(function(t,i){
+    return '<tr><td class="muted">'+(i+1)+'</td><td>'+t.bodega+'</td><td class="right" style="color:#3b82f6">'+fmt(t.unidades)+'</td><td class="right" style="color:#10b981">'+cop(t.subtotal)+'</td></tr>';
+  }).join("") || '<tr><td colspan="4" class="empty">Sin datos</td></tr>';
+  document.getElementById("tiendaCount").textContent = tiendas.length+" tiendas";
+
+  document.getElementById("mesBody").innerHTML = meses.map(function(m,i){
+    return '<tr><td class="muted">'+(i+1)+'</td><td>'+m.mes+'</td><td class="right" style="color:#3b82f6">'+fmt(m.unidades)+'</td><td class="right" style="color:#10b981">'+cop(m.subtotal)+'</td><td class="right muted">'+fmt(m.facturas)+'</td></tr>';
+  }).join("") || '<tr><td colspan="5" class="empty">Sin datos</td></tr>';
+  document.getElementById("mesCount").textContent = meses.length+" meses";
+
+  document.getElementById("clr").style.display = (_fi||_ff) ? "" : "none";
+}
+
+document.querySelectorAll("[data-g]").forEach(function(b){
+  b.addEventListener("click", function(){ _g=b.dataset.g; document.querySelectorAll("[data-g]").forEach(function(x){ x.classList.toggle("active", x===b); }); render(); });
+});
+document.querySelectorAll("[data-tab]").forEach(function(b){
+  b.addEventListener("click", function(){
+    _tab=b.dataset.tab;
+    document.querySelectorAll("[data-tab]").forEach(function(x){ x.classList.toggle("active", x===b); });
+    ["productos","tiendas","meses"].forEach(function(t){
+      document.getElementById("tab-"+t).style.display = (t===_tab) ? "" : "none";
+    });
+  });
+});
+document.querySelectorAll("[data-csv]").forEach(function(b){
+  b.addEventListener("click", function(){ downloadCSV(b.dataset.csv); });
+});
+document.getElementById("btnExcel").addEventListener("click", downloadExcelCompleto);
+document.getElementById("fi").addEventListener("change", function(e){ _fi=e.target.value; render(); });
+document.getElementById("ff").addEventListener("change", function(e){ _ff=e.target.value; render(); });
+document.getElementById("clr").addEventListener("click", function(){ _fi=""; _ff=""; document.getElementById("fi").value=""; document.getElementById("ff").value=""; render(); });
+document.getElementById("sr").addEventListener("input", function(e){ _srProd=e.target.value; render(); });
+document.getElementById("srTienda").addEventListener("input", function(e){ _srTienda=e.target.value; render(); });
+
+fetch(API)
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    DATA=j;
+    document.getElementById("updated").textContent = j.updated ? "Última actualización: "+new Date(j.updated).toLocaleString("es-CO") : "Sin datos";
+    render();
+  })
+  .catch(function(e){
+    document.getElementById("updated").textContent="Error cargando datos";
+    document.getElementById("prodBody").innerHTML='<tr><td colspan="5" class="empty">No se pudieron cargar los datos: '+e+'</td></tr>';
+  });
+</script>
+</body>
+</html>
