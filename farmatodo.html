@@ -90,6 +90,23 @@ function dateStr(d){ return String(d||"").substring(0,10); }
 function fmt(n){ return n.toLocaleString("es-CO"); }
 function fmtK(n){ if(n>=1e6) return (n/1e6).toFixed(1)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return String(n); }
 
+/* El scraper a veces guarda el total de un día en 0 aunque sí haya vendido
+   (el detalle por producto de ese día sí quedó bien). En esos casos usamos la
+   suma del detalle para que la gráfica no muestre un hueco falso. */
+function repararDias(){
+  var det={};
+  (DATA.productos_por_dia||[]).forEach(function(p){
+    var f=dateStr(p.fecha);
+    det[f]=(det[f]||0)+(p.unidades||0);
+  });
+  var arregladas=0;
+  (DATA.dias||[]).forEach(function(d){
+    var f=dateStr(d.fecha);
+    if(!(d.unidades>0) && det[f]>0){ d.unidades=det[f]; d.reparado=true; arregladas++; }
+  });
+  if(arregladas) console.log("[Farmatodo] "+arregladas+" días con total en 0 completados desde el detalle");
+}
+
 function filterDias(){
   var ds = DATA.dias||[];
   if(!_fi && !_ff) return ds;
@@ -209,6 +226,7 @@ fetch(API)
   .then(function(r){ return r.json(); })
   .then(function(j){
     DATA=j;
+    repararDias();
     document.getElementById("sub").textContent = j.updated ? "Última actualización: "+new Date(j.updated).toLocaleString("es-CO") : "Sin datos";
     render();
   })
