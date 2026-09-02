@@ -708,5 +708,63 @@
   setTimeout(init, 1500);
 })();
 </script>
+
+
+<script>
+/* ═══════════════════════════════════════════════
+   BOTÓN RAPPI – Abre el reporte en nueva pestaña
+   ═══════════════════════════════════════════════ */
+(function(){
+  var RAPPI_URL = "https://script.google.com/macros/s/AKfycby3R8GGCKfweJWzBJ1QIa7n8u7wxm41WnXQLtLxWAP8OCX7ThEVRVYkYXUj99jSR1vgiA/exec";
+
+  function init(){
+    var desktopNav = null;
+    var candidates = document.querySelectorAll("div");
+    for(var di = 0; di < candidates.length; di++) {
+      var c = candidates[di];
+      if(c.querySelectorAll("button").length >= 6 &&
+         c.textContent.indexOf("Resumen") !== -1 &&
+         c.textContent.indexOf("Cartera") !== -1 &&
+         c.classList.toString().indexOf("flex") !== -1) {
+        desktopNav = c;
+        break;
+      }
+    }
+    if(!desktopNav) { setTimeout(init, 500); return; }
+    if(document.getElementById("letos-rp-link")) return;
+
+    var link = document.createElement("a");
+    link.id = "letos-rp-link";
+    link.href = RAPPI_URL;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "🛵 Rappi ↗";
+    link.style.cssText = "padding:12px 0;border:none;border-bottom:2px solid transparent;background:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;text-decoration:none;transition:all .2s;";
+    link.addEventListener("mouseenter", function(){ link.style.color = "white"; });
+    link.addEventListener("mouseleave", function(){ link.style.color = "rgba(255,255,255,.4)"; });
+    desktopNav.appendChild(link);
+
+    // Móvil: agregar option al select
+    var mobileSelect = document.querySelector('select[class*="bg-[#1c2030]"]');
+    if(mobileSelect && !document.getElementById("letos-rp-mobile-opt")){
+      var opt = document.createElement("option");
+      opt.id = "letos-rp-mobile-opt";
+      opt.value = "__rappi_link__";
+      opt.textContent = "🛵 Rappi ↗";
+      mobileSelect.appendChild(opt);
+      mobileSelect.addEventListener("change", function(){
+        if(mobileSelect.value === "__rappi_link__"){
+          window.open(RAPPI_URL, "_blank", "noopener,noreferrer");
+          mobileSelect.value = "resumen";
+        }
+      });
+    }
+
+    console.log("[Rappi] link inyectado");
+  }
+
+  setTimeout(init, 1600);
+})();
+</script>
 </body>
 </html>
