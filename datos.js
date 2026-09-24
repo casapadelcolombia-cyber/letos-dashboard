@@ -57,9 +57,27 @@ function cargarDatos(opts) {
         try { localStorage.setItem(KEY, JSON.stringify(j)); } catch (e) {}
         opts.alListo(j, f.tipo);
         mostrado = true;
+        if (f.tipo === "estatico") buscarMasReciente(j);
       })
       .catch(function () { intentar(i + 1); });
   }
+
+  // La copia estática se refresca cada hora; para ver un sync recién hecho
+  // sin esperar, preguntamos al Apps Script en segundo plano. Si trae un
+  // 'updated' más nuevo, se re-dibuja solo. Si falla, no pasa nada.
+  function buscarMasReciente(estatico) {
+    var tEst = Date.parse(estatico.updated || "") || 0;
+    conTiempoLimite(opts.api, 60000)
+      .then(function (j) {
+        var tNuevo = Date.parse(j.updated || "") || 0;
+        if (tNuevo > tEst) {
+          try { localStorage.setItem(KEY, JSON.stringify(j)); } catch (e) {}
+          opts.alListo(j, "apps_script");
+        }
+      })
+      .catch(function () {});
+  }
+
   intentar(0);
 }
 
