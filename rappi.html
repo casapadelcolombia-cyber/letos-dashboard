@@ -85,6 +85,7 @@ td{padding:10px 8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)
   <div class="muted" style="margin-top:8px" id="prodCount"></div>
 </div>
 
+<script src="datos.js"></script>
 <script>
 var API = "https://script.google.com/macros/s/AKfycby3R8GGCKfweJWzBJ1QIa7n8u7wxm41WnXQLtLxWAP8OCX7ThEVRVYkYXUj99jSR1vgiA/exec?action=json";
 var DATA = {dias:[], productos_por_dia:[], updated:null};
@@ -198,17 +199,22 @@ document.getElementById("clr").addEventListener("click", function(){ _fi=""; _ff
 document.getElementById("search").addEventListener("input", function(e){ _search=e.target.value; render(); });
 document.getElementById("csv").addEventListener("click", csv);
 
-fetch(API)
-  .then(function(r){ return r.json(); })
-  .then(function(j){
+var _subBase = "";
+cargarDatos({
+  nombre: "rappi",
+  api: API,
+  alListo: function(j, fuente){
     DATA = j;
-    document.getElementById("sub").textContent = j.updated ? "Última actualización: "+new Date(j.updated).toLocaleString("es-CO") : "Sin datos";
+    _subBase = textoActualizacion(j, fuente);
+    document.getElementById("sub").textContent = _subBase;
     render();
-  })
-  .catch(function(e){
+  },
+  alEstado: function(txt){ document.getElementById("sub").textContent = _subBase.split(" · ")[0] + " · " + txt; },
+  alError: function(msg){
     document.getElementById("sub").textContent = "Error cargando datos";
-    document.getElementById("prodBody").innerHTML = '<tr><td colspan="6" class="empty">No se pudieron cargar los datos: '+e+'</td></tr>';
-  });
+    document.getElementById("prodBody").innerHTML = '<tr><td colspan="6" class="empty">'+msg+' <button class="btn" onclick="location.reload()">Reintentar</button></td></tr>';
+  }
+});
 </script>
 </body>
 </html>

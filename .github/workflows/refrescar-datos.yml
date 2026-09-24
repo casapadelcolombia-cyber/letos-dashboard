@@ -1,0 +1,66 @@
+name: Refrescar datos del dashboard
+
+# Baja los JSON de los Apps Script (lentos y a veces con 404) con calma y
+# reintentos, y los publica como archivos estáticos en /data/ de este mismo
+# sitio. Las páginas farmatodo/aruma/rappi.html leen primero esos archivos:
+# carga instantánea sin depender de Google al abrir.
+on:
+  schedule:
+    - cron: '47 * * * *'   # cada hora (solo hace commit si los datos cambiaron)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: refrescar-datos
+  cancel-in-progress: false
+
+jobs:
+  refrescar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Descargar JSON de los Apps Script
+        run: |
+          mkdir -p data
+          bajar () {  # $1 = nombre, $2 = URL /exec
+            for i in 1 2 3 4 5 6; do
+              if curl -sfL --max-time 150 -o "/tmp/$1.json" "$2?action=json" \
+                 && python3 - "$1" <<'PY'
+          import json, sys
+          nombre = sys.argv[1]
+          d = json.load(open(f"/tmp/{nombre}.json", encoding="utf-8"))
+          assert isinstance(d, dict) and d.get("dias"), "respuesta sin dias"
+          json.dump(d, open(f"data/{nombre}.json", "w", encoding="utf-8"),
+                    ensure_ascii=False, separators=(",", ":"))
+          print(f"{nombre}: {len(d['dias'])} dias, updated={d.get('updated')}")
+          PY
+              then return 0; fi
+              echo "$1: intento $i falló, reintento en $((i*20))s"; sleep $((i*20))
+            done
+            echo "::warning::$1 no se pudo descargar; se conserva la copia anterior"
+          }
+          bajar farmatodo https://script.google.com/macros/s/AKfycbw2Y-neHbgP23TvB15mbwmjy_AJwBQX9MZsDoCtPiVNhp9Sbi0KhqJmkMRvC4hAUrHFdA/exec
+          bajar aruma     https://script.google.com/macros/s/AKfycbzfzU1DeP0ed-67R_9nwU-HIzW4C-xOs2aewC9wmqSeiLtBP4-3ULbiCNq0XWC3cHUXFQ/exec
+          bajar rappi     https://script.google.com/macros/s/AKfycby3R8GGCKfweJWzBJ1QIa7n8u7wxm41WnXQLtLxWAP8OCX7ThEVRVYkYXUj99jSR1vgiA/exec
+          ls -la data/
+
+      - name: Publicar si cambió
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name  "letos-datos-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then echo "Sin cambios en los datos"; exit 0; fi
+          git commit -q -m "Datos actualizados $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push -q
+          # Por si el push con GITHUB_TOKEN no dispara el build de Pages por sí solo
+          curl -s -o /dev/null -w "pages build: %{http_code}\n" -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages/builds" || true
