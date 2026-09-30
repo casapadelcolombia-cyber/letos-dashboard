@@ -1605,7 +1605,7 @@ function abrirMenu() {
   if (S.dev) h += '<div class="quien"><b>Vista previa</b>Datos locales de ejemplo</div>';
   else if (S.usuario) h += '<div class="quien"><b>' + esc(S.usuario) + "</b>" + esc(S.rol === "contable" ? "Contabilidad" : S.rol === "admin" ? "Administrador" : (S.rol || "")) + "</div>";
   EXTERNOS.forEach(function (e) { h += '<a role="menuitem" href="' + e[1] + '">' + e[0] + " <small>↗</small></a>"; });
-  h += '<a role="menuitem" href="https://dashboard.letos.co/">Dashboard anterior <small>↗</small></a><hr>';
+  h += '<a role="menuitem" href="/anterior.html">Dashboard anterior <small>↗</small></a><hr>';
   if (!S.dev && S.rol === "admin") h += '<button role="menuitem" data-m="sync"' + (S.syncEnCurso ? " disabled aria-disabled=\"true\">Sincronizando…" : ">Sincronizar con Siigo ahora") + "</button>";
   if (!S.dev) h += '<button role="menuitem" class="rojo" data-m="salir">Cerrar sesión</button>';
   m.innerHTML = h; m.classList.remove("oculto"); $("b-menu").setAttribute("aria-expanded", "true");
@@ -1753,6 +1753,27 @@ document.addEventListener("visibilitychange", function () {
   }
   if (!okCache) $("view").innerHTML = cargandoHTML();
   revalidar();
+})();
+
+/* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
+   en vez de cortarla con "…". */
+(function(){
+  var pend=false;
+  function ajustarCifras(){
+    pend=false;
+    var els=document.querySelectorAll(".v");
+    for(var i=0;i<els.length;i++){
+      var e=els[i];
+      if(getComputedStyle(e).textOverflow!=="ellipsis") continue;
+      e.style.fontSize="";
+      var fs=parseFloat(getComputedStyle(e).fontSize);
+      while(e.scrollWidth>e.clientWidth+1 && fs>14){ fs-=1; e.style.fontSize=fs+"px"; }
+    }
+  }
+  function programar(){ if(!pend){ pend=true; setTimeout(ajustarCifras, 30); } }
+  new MutationObserver(programar).observe(document.body,{childList:true,subtree:true,characterData:true});
+  window.addEventListener("resize",programar);
+  programar();
 })();
 </script>
 </body>

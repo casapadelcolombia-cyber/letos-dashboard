@@ -2,95 +2,346 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
 <title>Farmatodo · LETOS</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
+/* ═══════════ Tokens (claro) — mismos del dashboard principal ═══════════ */
+:root{
+  --bg:#f5f5f7; --card:#fff; --fill:#f2f2f7; --fill2:#e8e8ed; --text:#1d1d1f; --text2:#6e6e73; --text3:#6e6e73;
+  --sep:rgba(0,0,0,.09); --bar:rgba(245,245,247,.78); --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05);
+  --blue:#0071e3; --green:#34c759; --red:#ff3b30; --orange:#ff9500; --yellow:#ffcc00; --purple:#af52de; --pink:#ff2d55; --teal:#30b0c7; --indigo:#5856d6; --gray:#8e8e93;
+  --serieY:#d9a400;
+  --pos:#1e7a34; --neg:#d70015; --warn:#b25000; --blueT:#0066cc;
+  --grid:rgba(0,0,0,.07); --axis:#6e6e73; --focus:#0071e3;
+  --r:20px; --r2:12px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+/* ═══════════ Tokens (oscuro) ═══════════ */
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#000; --card:#1c1c1e; --fill:#2c2c2e; --fill2:#3a3a3c; --text:#f5f5f7; --text2:#aeaeb2; --text3:#98989d;
+    --sep:rgba(255,255,255,.12); --bar:rgba(22,22,23,.76); --shadow:none;
+    --blue:#0a84ff; --green:#30d158; --red:#ff453a; --orange:#ff9f0a; --yellow:#ffd60a; --purple:#bf5af2; --pink:#ff375f; --teal:#40c8e0; --indigo:#5e5ce6; --gray:#98989d;
+    --serieY:#ffd60a;
+    --pos:#30d158; --neg:#ff6961; --warn:#ffb340; --blueT:#409cff;
+    --grid:rgba(255,255,255,.09); --axis:#8e8e93; --focus:#0a84ff;
+  }
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0f1117;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:20px;min-height:100vh}
-.back{font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;display:inline-block;margin-bottom:10px}
-.back:hover{color:#fff}
-.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.title{font-size:24px;font-weight:600}
-.subtitle{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.controls label{font-size:12px;color:rgba(255,255,255,.4)}
-.controls input{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;color-scheme:dark}
-.btn{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);padding:6px 14px;font-size:12px;cursor:pointer}
-.btn:hover{background:#252b3d;color:white}
-.btn.active{background:#ec4899;border-color:#ec4899;color:#fff}
-.btn.primary{background:#4ade80;border-color:#4ade80;color:#0f1117;font-weight:600}
-.btn.primary:hover{background:#3ec46e;color:#0f1117}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:#1c2030;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px}
-.kpi .lbl{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.kpi .val{font-size:24px;font-weight:600}
-.card{background:#161922;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;margin-bottom:20px}
-.card h2{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.gran-btns{display:flex;gap:6px}
-table{width:100%;border-collapse:collapse}
-th{padding:8px;text-align:left;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;background:#161922}
-td{padding:10px 8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
-.right{text-align:right}
-.muted{color:rgba(255,255,255,.6);font-size:12px}
-.empty{padding:40px;text-align:center;color:rgba(255,255,255,.4)}
-.tbl-wrap{max-height:600px;overflow-y:auto;overflow-x:auto}
-.search{background:#1c2030;border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:6px 10px;font-size:12px;width:200px;color-scheme:dark}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+a{color:var(--blueT)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+.num,.tn{font-variant-numeric:tabular-nums}
+.oculto{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ═══════════ Barra superior ═══════════ */
+.top{position:sticky;top:0;z-index:30;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
+.top-in{max-width:1240px;margin:0 auto;padding:0 16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.fila1{display:flex;align-items:center;gap:10px;height:52px}
+.marca{display:flex;align-items:center;gap:9px;min-width:0;flex:1;text-decoration:none;color:var(--text)}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d1d1f,#48484a);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:.5px;flex:none}
+@media (prefers-color-scheme:dark){.logo{background:linear-gradient(135deg,#f5f5f7,#c7c7cc);color:#000}}
+.marca b{font-size:17px;font-weight:600;letter-spacing:-.2px;white-space:nowrap}
+.marca .canal{font-size:17px;font-weight:400;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estado{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.estado span:last-child{overflow:hidden;text-overflow:ellipsis}
+.punto{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.punto.viejo{background:var(--orange)}.punto.off{background:var(--gray)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-padding:16px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;height:34px;padding:0 14px;border-radius:17px;font-size:14px;font-weight:500;color:var(--text2);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.tab:hover{color:var(--text);background:var(--fill)}
+.tab[aria-current="page"]{background:var(--text);color:var(--bg)}
+.tab.home{color:var(--blueT)}
+.tab.home svg{width:14px;height:14px}
+.tabs .div{flex:none;width:1px;background:var(--sep);margin:6px 6px}
+@media (max-width:420px){.tab{padding:0 11px}.tabs .div{margin:6px 3px}}
+
+/* ═══════════ Contenido ═══════════ */
+main{max-width:1240px;margin:0 auto;padding:16px 16px 56px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 16px}
+.cab h1{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.cab p{font-size:13px;color:var(--text2);margin-top:4px;overflow-wrap:anywhere}
+.seg{display:inline-flex;background:var(--fill2);border-radius:9px;padding:2px;gap:0;position:relative;flex:none}
+.seg button{min-width:52px;height:30px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04);font-weight:600}
+@media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:#636366}}
+.aviso{border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;background:var(--card);box-shadow:var(--shadow)}
+.aviso .ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:var(--orange)}
+.aviso.error .ic{background:var(--red)}.aviso.info .ic{background:var(--blue)}
+.aviso p{color:var(--text2);font-size:13px;margin-top:2px}
+.aviso .btn{margin-top:10px}
+
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpis .kpi:first-child{grid-column:1/-1}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.kpis .kpi:first-child{grid-column:auto}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;min-width:0;margin-top:12px}
+.card h2{font-size:17px;font-weight:600;letter-spacing:-.2px}
+.card .sub{font-size:13px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
+.card-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpi{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;min-width:0}
+.kpi .l{font-size:13px;color:var(--text2);font-weight:500}
+.kpi .v{font-size:24px;font-weight:700;letter-spacing:-.4px;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .s{font-size:12px;color:var(--text3);margin-top:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+@media (min-width:760px){.kpi .v{font-size:28px}}
+.azul{color:var(--blueT)}
+
+/* Filtros */
+.filtros{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end}
+.pills{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 100%;min-width:0}
+.pill{height:32px;padding:0 12px;border-radius:16px;background:var(--fill);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.pill:hover{background:var(--fill2)}
+.pill[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+.rango{display:flex;gap:10px 12px;align-items:flex-end;flex:1 1 320px;min-width:0;flex-wrap:wrap}
+@media (min-width:1000px){.pills{flex:1 1 auto;align-self:center}.rango{flex:0 1 auto;justify-content:flex-end}}
+.flecha{color:var(--text3);padding-bottom:8px}
+.fld{display:flex;flex-direction:column;gap:3px;flex:1 1 140px;max-width:200px;font-size:12px;color:var(--text2);min-width:0}
+.fecha{height:36px;border-radius:10px;border:0;background:var(--fill);padding:0 10px;font-size:14px;min-width:0;width:100%}
+@media (max-width:600px){.fld{max-width:none}.rango{flex-basis:100%}.flecha{display:none}}
+.btn{height:36px;padding:0 14px;border-radius:10px;background:var(--fill);font-size:14px;font-weight:500;color:var(--blueT);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--fill2)}
+.btn.prim{background:var(--blue);color:#fff}
+.btn.ic{width:36px;padding:0;flex:none}
+@media (pointer:coarse){.btn.ic{width:44px}}
+.btn svg{width:15px;height:15px}
+.buscar{flex:1 1 200px;min-width:0;height:36px;border-radius:10px;border:0;background:var(--fill);padding:0 12px 0 34px;font-size:15px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px 50%}
+.buscar::placeholder{color:var(--text3)}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+@media (max-width:600px),(pointer:coarse){.buscar,.fecha{font-size:16px}}
+@media (pointer:coarse){
+  .seg button{height:40px}
+  .tab,.pill,.btn,.buscar,.fecha{min-height:44px}
+  details.datos-graf summary{min-height:44px}
+}
+
+/* Chips de resumen */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:500;padding:5px 10px;border-radius:999px;background:var(--fill);font-variant-numeric:tabular-nums;color:var(--text)}
+.chip span{color:var(--text2);font-weight:400}
+.chips-nota{flex:1 1 100%;font-size:12px;color:var(--text3);margin-top:1px}
+
+/* Gráficos */
+.graf{position:relative;width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none;min-height:220px}
+.graf svg{display:block;width:100%;overflow:visible}
+.graf text{font-size:11px;fill:var(--axis);font-family:var(--font);font-variant-numeric:tabular-nums}
+.graf text.val{font-size:10px;font-weight:600;fill:var(--text2)}
+.graf .gl{stroke:var(--grid);stroke-width:1}
+.graf .b{transition:opacity .12s;fill:var(--blue)}
+.graf.activo .col .b{opacity:.45}
+.graf.activo .col.on .b{opacity:1}
+.graf .parcial .b{opacity:.55}
+.graf.activo .col.parcial.on .b{opacity:.8}
+.graf .regla{stroke:var(--text3);stroke-width:1;stroke-dasharray:3 3}
+.graf .rep{fill:var(--orange)}
+#tip{position:fixed;z-index:60;pointer-events:none;background:var(--card);color:var(--text);border-radius:12px;padding:9px 11px;font-size:13px;box-shadow:0 8px 28px rgba(0,0,0,.2);border:.5px solid var(--sep);max-width:260px;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .1s;left:0;top:0}
+#tip.ver{opacity:1}
+#tip b{display:block;font-size:13px;margin-bottom:3px}
+#tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--text2)}
+#tip .r span:last-child{color:var(--text);font-weight:600}
+#tip .nota{color:var(--warn);font-size:12px;margin-top:4px}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-top:8px}
+.leyenda i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+details.datos-graf{margin-top:12px;border-top:.5px solid var(--sep);padding-top:6px}
+details.datos-graf summary{cursor:pointer;font-size:14px;font-weight:500;color:var(--blueT);display:flex;align-items:center;gap:6px;min-height:36px;list-style:none;border-radius:8px}
+details.datos-graf summary::-webkit-details-marker{display:none}
+details.datos-graf summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px}
+details.datos-graf[open] summary::before{transform:rotate(45deg)}
+.datos-graf .tw{max-height:320px;overflow-y:auto}
+
+/* Tablas. Las sombras laterales avisan que la tabla se puede deslizar de lado. */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px;
+  background:linear-gradient(to right,var(--card) 30%,transparent) left/24px 100% no-repeat local,
+    linear-gradient(to left,var(--card) 30%,transparent) right/24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll;
+  background-color:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;font-weight:600;color:var(--text2);text-align:left;padding:8px 8px;border-bottom:.5px solid var(--sep);white-space:nowrap;position:sticky;top:0;background:var(--card);z-index:1}
+th.d,td.d{text-align:right}
+td{padding:10px 8px;border-bottom:.5px solid var(--sep);vertical-align:middle;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+td.d{white-space:nowrap}
+td .n1{font-weight:500;overflow-wrap:break-word;min-width:130px}
+td .n2{font-size:12px;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
+td.idx{color:var(--text3);font-size:12px;width:28px}
+td.cod{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;color:var(--text2);white-space:nowrap}
+td.uds{font-weight:600;color:var(--blueT)}
+.solo-m{display:none}
+@media (max-width:600px){.m-no{display:none}span.solo-m{display:inline}td .n1{min-width:96px}}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;color:var(--warn);background:color-mix(in srgb,var(--yellow) 20%,transparent);vertical-align:1px;margin-left:4px;white-space:nowrap}
+.minibar{height:4px;border-radius:2px;background:var(--fill2);margin-top:5px;overflow:hidden;min-width:44px;margin-left:auto}
+.minibar span{display:block;height:100%;background:var(--blue);border-radius:2px}
+.mas{display:flex;justify-content:center;margin-top:12px}
+.vacio{padding:28px 8px;text-align:center;color:var(--text2);font-size:14px}
+.pie{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.5;font-variant-numeric:tabular-nums}
+.nota-pie{font-size:12px;color:var(--text3);line-height:1.5;margin:14px 4px 0}
+
+/* Esqueleto de carga */
+.skel{height:14px;border-radius:7px;background:var(--fill);margin:8px 0;animation:pulso 1.4s ease-in-out infinite}
+@keyframes pulso{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<a class="back" href="/">← Volver al dashboard</a>
-<div class="header">
-  <div><div class="title">🏬 Farmatodo</div><div class="subtitle" id="sub">Cargando…</div></div>
-  <div class="controls">
-    <label>Desde:</label><input type="date" id="fi">
-    <span style="color:rgba(255,255,255,.3)">→</span>
-    <input type="date" id="ff">
-    <button class="btn" id="clr" style="display:none">✕</button>
+
+<header class="top">
+  <div class="top-in">
+    <div class="fila1">
+      <a class="marca" href="/" aria-label="LETOS · ir al dashboard"><span class="logo" aria-hidden="true">L</span><b>LETOS</b><span class="canal">Farmatodo</span></a>
+      <div class="estado" id="estado"><span class="punto off"></span><span>Cargando…</span></div>
+      <div class="sr" id="estadoVivo" aria-live="polite"></div>
+    </div>
+    <nav class="tabs" aria-label="Canales">
+      <a class="tab home" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Dashboard</a>
+      <span class="div" aria-hidden="true"></span>
+      <a class="tab" href="farmatodo.html" aria-current="page">Farmatodo</a>
+      <a class="tab" href="aruma.html">Aruma</a>
+      <a class="tab" href="rappi.html">Rappi</a>
+    </nav>
   </div>
-</div>
-<div class="kpis">
-  <div class="kpi"><div class="lbl">Unidades Período</div><div class="val" style="color:#3b82f6" id="kU">—</div></div>
-  <div class="kpi"><div class="lbl">Productos Distintos</div><div class="val" style="color:#a78bfa" id="kP">—</div></div>
-  <div class="kpi"><div class="lbl">Días con Datos</div><div class="val" style="color:#f59e0b" id="kD">—</div></div>
-</div>
-<div class="card">
-  <h2>Tendencia de Unidades
-    <span class="gran-btns">
-      <button class="btn active" data-g="dia">Día</button>
-      <button class="btn" data-g="semana">Semana</button>
-      <button class="btn" data-g="mes">Mes</button>
-    </span>
-  </h2>
-  <div id="chart" style="overflow-x:auto"></div>
-</div>
-<div class="card">
-  <h2><span>Productos del Período</span>
-    <span style="display:flex;gap:8px;align-items:center;">
-      <input type="text" id="search" class="search" placeholder="Buscar producto…">
-      <button class="btn primary" id="csv">📥 Descargar CSV</button>
-    </span>
-  </h2>
-  <div class="tbl-wrap">
-    <table><thead><tr>
-      <th style="width:40px">#</th><th>Producto</th><th>EAN/UPC</th><th class="right" style="width:120px">Unidades</th>
-    </tr></thead><tbody id="prodBody"><tr><td colspan="4" class="empty">Cargando datos…</td></tr></tbody></table>
+</header>
+
+<main id="main">
+  <div class="cab">
+    <div>
+      <h1>Farmatodo</h1>
+      <p id="sub">Cargando…</p>
+    </div>
   </div>
-  <div class="muted" style="margin-top:8px" id="prodCount"></div>
-</div>
+
+  <div id="avisos"></div>
+
+  <!-- Estado de carga (esqueleto) -->
+  <div id="cargando" aria-hidden="true">
+    <div class="grid kpis">
+      <div class="kpi"><div class="skel" style="width:40%"></div><div class="skel" style="height:30px;width:55%"></div></div>
+      <div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:40%"></div></div>
+      <div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:40%"></div></div>
+    </div>
+    <section class="card"><div class="skel" style="width:35%;height:18px"></div><div class="skel" style="height:190px;border-radius:14px;margin-top:16px"></div></section>
+    <section class="card"><div class="skel" style="width:40%;height:18px"></div>
+      <div class="skel" style="margin-top:18px"></div><div class="skel"></div><div class="skel"></div><div class="skel" style="width:70%"></div></section>
+  </div>
+
+  <!-- Error sin copia guardada -->
+  <div id="error" class="oculto" role="alert">
+    <div class="aviso error"><span class="ic" aria-hidden="true">!</span><div><b>Error cargando datos</b><p id="errorMsg"></p>
+      <button class="btn prim" id="reintentar" type="button">Reintentar</button></div></div>
+  </div>
+
+  <!-- Contenido -->
+  <div id="contenido" class="oculto">
+    <section class="card" aria-label="Filtros" style="margin-top:0">
+      <div class="filtros">
+        <div class="pills" role="group" aria-label="Rango rápido" id="rapidos">
+          <button class="pill" type="button" data-r="7" aria-pressed="false">7 días</button>
+          <button class="pill" type="button" data-r="30" aria-pressed="false">30 días</button>
+          <button class="pill" type="button" data-r="90" aria-pressed="false">90 días</button>
+          <button class="pill" type="button" data-r="todo" aria-pressed="true">Todo</button>
+        </div>
+        <div class="rango">
+          <label class="fld">Desde<input class="fecha" type="date" id="fi"></label>
+          <span class="flecha" aria-hidden="true">→</span>
+          <label class="fld">Hasta<input class="fecha" type="date" id="ff"></label>
+          <button class="btn ic" type="button" id="clr" style="display:none" aria-label="Limpiar fechas" title="Limpiar fechas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid kpis" style="margin-top:12px">
+      <div class="kpi"><div class="l">Unidades del período</div><div class="v azul" id="kU">—</div><div class="s" id="kUs"></div></div>
+      <div class="kpi"><div class="l">Productos distintos</div><div class="v" id="kP">—</div><div class="s" id="kPs"></div></div>
+      <div class="kpi"><div class="l">Días con datos</div><div class="v" id="kD">—</div><div class="s" id="kDs"></div></div>
+    </div>
+
+    <section class="card" aria-labelledby="t-tend">
+      <div class="card-cab">
+        <div><h2 id="t-tend">Tendencia de unidades</h2><div class="sub" id="tendSub"></div></div>
+        <div class="seg" role="group" aria-label="Agrupar por">
+          <button type="button" data-g="dia" aria-pressed="true">Día</button>
+          <button type="button" data-g="semana" aria-pressed="false">Semana</button>
+          <button type="button" data-g="mes" aria-pressed="false">Mes</button>
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="graf" id="chart"></div>
+      <div class="leyenda oculto" id="leyRep"><span><i style="background:var(--orange)"></i>Total del día completado desde el detalle por producto</span></div>
+      <div class="leyenda oculto" id="leyPar"><span><i style="background:var(--blue);opacity:.55;border-radius:2px"></i><span id="leyParTxt"></span></span></div>
+      <details class="datos-graf" id="datosGraf"><summary>Ver datos del gráfico</summary><div id="tablaGraf"></div></details>
+    </section>
+
+    <section class="card" aria-labelledby="t-prod">
+      <div class="card-cab">
+        <div><h2 id="t-prod">Productos del período</h2><div class="sub" id="prodSub"></div></div>
+      </div>
+      <div class="ctrls">
+        <input type="search" id="search" class="buscar" placeholder="Buscar producto…" aria-label="Buscar producto por nombre, SKU o EAN" autocomplete="off" spellcheck="false">
+        <button class="btn" type="button" id="csv" aria-label="Descargar CSV de productos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>CSV</button>
+      </div>
+      <div id="prodTabla"></div>
+      <div class="pie" id="prodCount"></div>
+    </section>
+
+    <p class="nota-pie" id="notaDiv"></p>
+  </div>
+</main>
+<div id="tip" role="tooltip" aria-hidden="true"></div>
 
 <script src="datos.js?v=2"></script>
 <script>
+"use strict";
 var API = "https://script.google.com/macros/s/AKfycbw2Y-neHbgP23TvB15mbwmjy_AJwBQX9MZsDoCtPiVNhp9Sbi0KhqJmkMRvC4hAUrHFdA/exec?action=json";
 var DATA = {dias:[], productos_por_dia:[], updated:null};
 var SKU_DIVISORES = {"259000026":12};
-var _gran="dia", _fi="", _ff="", _search="";
+var _gran="dia", _fi="", _ff="", _search="", _n=50;
+var _fuente = "", _estadoTxt = "", _hayDatos = false;
 
+var MES_L = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+var MES_C = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+var DIA_C = ["dom","lun","mar","mié","jue","vie","sáb"];
+var NF0 = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
+var NF1 = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+var NF1f = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+var $ = function (id) { return document.getElementById(id); };
+
+/* ─────────── Formato es-CO y escape ─────────── */
 function dateStr(d){ return String(d||"").substring(0,10); }
 function fmt(n){ return n.toLocaleString("es-CO"); }
-function fmtK(n){ if(n>=1e6) return (n/1e6).toFixed(1)+"M"; if(n>=1e3) return (n/1e3).toFixed(1)+"K"; return String(n); }
+function num(n){ n = Number(n); return isFinite(n) ? n : 0; }
+function fmtN(n){ n = Math.round(num(n)); return (n < 0 ? "−" : "") + NF0.format(Math.abs(n)); }
+function pct(x){ return isFinite(x) ? NF1f.format(x * 100) + " %" : "—"; }
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"'`=\/]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;", "=": "&#61;", "/": "&#47;" }[c];
+  });
+}
+function partes(f){ var p = dateStr(f).split("-"); return { y: +p[0], m: +p[1], d: +p[2] }; }
+function fechaC(f){ if(!f) return "—"; var p = partes(f); return p.d + " " + (MES_C[p.m-1] || "") + " " + p.y; }
+function fechaCorta(f){ var p = partes(f); return p.d + " " + (MES_C[p.m-1] || ""); }
+function diaSemana(f){ var p = partes(f); var d = new Date(p.y, p.m-1, p.d, 12); return DIA_C[d.getDay()] || ""; }
+function mesL(k){ var p = String(k).split("-"); return (MES_L[+p[1]-1] || k) + " " + p[0]; }
+function sumarDias(f, n){ var p = partes(f); var d = new Date(Date.UTC(p.y, p.m-1, p.d + n)); return d.toISOString().substring(0,10); }
+function diasEnMes(k){ var p = k.split("-"); return new Date(Date.UTC(+p[0], +p[1], 0)).getUTCDate(); }
+function hace(ms){
+  var s = (Date.now() - ms) / 1000;
+  if (s < 60) return "hace un momento";
+  var m = Math.round(s / 60); if (m < 60) return "hace " + m + " min";
+  var h = Math.round(m / 60); if (h < 36) return "hace " + h + " h";
+  var d = Math.round(h / 24); return "hace " + d + (d === 1 ? " día" : " días");
+}
+function ejeCorto(v){ if (v === 0) return "0"; return Math.abs(v) >= 1000 ? NF1.format(v / 1000) + " mil" : NF0.format(v); }
 
+/* ═══════════ Lógica de datos (idéntica a la versión anterior) ═══════════ */
 /* El scraper a veces guarda el total de un día en 0 aunque sí haya vendido
    (el detalle por producto de ese día sí quedó bien). En esos casos usamos la
    suma del detalle para que la gráfica no muestre un hueco falso. */
@@ -114,40 +365,24 @@ function filterDias(){
   return ds.filter(function(d){ var f=dateStr(d.fecha); if(_fi&&f<_fi) return false; if(_ff&&f>_ff) return false; return true; });
 }
 
+/* Semana: de lunes a domingo, calculada en UTC (igual que Aruma y Rappi; la versión anterior
+   usaba la zona horaria del navegador y en Colombia agrupaba de martes a lunes).
+   Además de las unidades, se cuentan los días de cada grupo para el tooltip. */
 function aggGran(ds,g){
   if(g==="dia") return ds.slice().sort(function(a,b){ return dateStr(a.fecha).localeCompare(dateStr(b.fecha)); });
   var agg={};
   ds.forEach(function(d){
     var f=dateStr(d.fecha), k;
     if(g==="mes") k=f.substring(0,7);
-    else { var dt=new Date(f); var mon=new Date(dt); mon.setDate(dt.getDate()-((dt.getDay()+6)%7)); k=mon.toISOString().substring(0,10); }
-    if(!agg[k]) agg[k]={fecha:k,unidades:0};
+    else { var t=Date.parse(f.substring(0,10)+"T00:00:00Z"); k=new Date(t-((new Date(t).getUTCDay()+6)%7)*864e5).toISOString().substring(0,10); }
+    if(!agg[k]) agg[k]={fecha:k,unidades:0,nDias:0,reparados:0,desde:f,hasta:f};
     agg[k].unidades += d.unidades||0;
+    agg[k].nDias++;
+    if(d.reparado) agg[k].reparados++;
+    if(f<agg[k].desde) agg[k].desde=f;
+    if(f>agg[k].hasta) agg[k].hasta=f;
   });
   return Object.values(agg).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
-}
-
-function chart(rows){
-  if(!rows.length) return '<div class="empty">Sin datos</div>';
-  var max=Math.max.apply(null, rows.map(function(r){ return r.unidades; }));
-  if(max===0) max=1;
-  var w=Math.max(rows.length*45+60,600), h=280, p=40, iw=w-p*2, ih=h-p*2;
-  var pts=rows.map(function(r,i){
-    var x=p+(rows.length===1? iw/2 : (i*iw/(rows.length-1)));
-    var y=p+ih-(r.unidades/max)*ih;
-    return [x,y,r];
-  });
-  var path=pts.map(function(pt,i){ return (i===0?"M":"L")+pt[0].toFixed(1)+","+pt[1].toFixed(1); }).join(" ");
-  var dots=pts.map(function(pt){ return '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="3" fill="#3b82f6"/>'; }).join("");
-  var labels=pts.map(function(pt,i){
-    if(rows.length>20 && i%Math.ceil(rows.length/15)!==0) return "";
-    var l=String(pt[2].fecha||"").substring(5);
-    return '<text x="'+pt[0].toFixed(1)+'" y="'+(h-10)+'" fill="rgba(255,255,255,.4)" font-size="10" text-anchor="middle">'+l+'</text>';
-  }).join("");
-  var vals=pts.map(function(pt){
-    return '<text x="'+pt[0].toFixed(1)+'" y="'+(pt[1]-8).toFixed(1)+'" fill="rgba(255,255,255,.6)" font-size="9" text-anchor="middle">'+fmtK(pt[2].unidades)+'</text>';
-  }).join("");
-  return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block"><path d="'+path+'" fill="none" stroke="#3b82f6" stroke-width="2"/>'+dots+vals+labels+'</svg>';
 }
 
 function getProductosFiltrados(){
@@ -191,38 +426,361 @@ function downloadCSV(){
   var a=document.createElement("a");
   a.href=url;
   a.download="farmatodo_"+(_fi||"todo")+"_"+(_ff||"todo")+".csv";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+/* ═══════════ Tooltip e interacción de gráficos ═══════════ */
+var tip = $("tip");
+function verTip(html, x, y){
+  tip.innerHTML = html; tip.classList.add("ver");
+  var w = tip.offsetWidth, h = tip.offsetHeight, vw = window.innerWidth;
+  var left = Math.min(Math.max(8, x - w / 2), vw - w - 8);
+  var top = y - h - 14; if (top < 8) top = y + 18;
+  tip.style.left = left + "px"; tip.style.top = top + "px";
+}
+function ocultarTip(){ tip.classList.remove("ver"); }
+function filaTip(nombre, valor){ return '<div class="r"><span>' + esc(nombre) + "</span><span>" + esc(valor) + "</span></div>"; }
+function escala(min, max, n){
+  if (max === min) { max = min + 1; }
+  var rango = max - min, paso = Math.pow(10, Math.floor(Math.log10(rango / n)));
+  var err = rango / n / paso;
+  if (err >= 7.5) paso *= 10; else if (err >= 3.5) paso *= 5; else if (err >= 1.5) paso *= 2;
+  var lo = Math.floor(min / paso) * paso, hi = Math.ceil(max / paso) * paso, t = [];
+  for (var v = lo; v <= hi + paso / 2; v += paso) t.push(Math.round(v * 1e6) / 1e6);
+  return { lo: lo, hi: hi, ticks: t };
+}
+function anchoDe(el){ return Math.max(260, Math.floor(el.clientWidth || el.getBoundingClientRect().width || 320)); }
+function interactivo(el, n, xDe, alActivar, tipDe){
+  var svg = el.querySelector("svg"), activo = -1, fijo = false;
+  function en(ev){
+    var r = svg.getBoundingClientRect();
+    var x = (ev.clientX - r.left) * (svg.viewBox.baseVal.width / r.width);
+    var i = xDe(x); if (i < 0 || i >= n) { salir(); return; }
+    if (i !== activo) { activo = i; el.classList.add("activo"); alActivar(i); }
+    verTip(tipDe(i), ev.clientX, ev.clientY);
+  }
+  function salir(){ activo = -1; el.classList.remove("activo"); alActivar(-1); ocultarTip(); }
+  svg.addEventListener("pointermove", function (ev) { if (ev.pointerType === "mouse" || fijo) en(ev); });
+  svg.addEventListener("pointerdown", function (ev) { fijo = ev.pointerType !== "mouse"; en(ev); });
+  svg.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") salir(); });
+  svg.addEventListener("pointercancel", function () { fijo = false; });
+  svg.addEventListener("pointerup", function () { fijo = false; });
+  el._salir = salir;
+}
+document.addEventListener("pointerdown", function (ev) {
+  if (!ev.target.closest || !ev.target.closest(".graf")) { ocultarTip(); document.querySelectorAll(".graf.activo").forEach(function (g) { if (g._salir) g._salir(); }); }
+}, true);
+window.addEventListener("scroll", ocultarTip, { passive: true });
+document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") ocultarTip(); });
+
+/* Etiqueta y tooltip de cada punto según la agrupación */
+function etiquetaX(r, g, variosAnios){
+  if (g === "mes") { var m = +r.fecha.substring(5,7); return (MES_C[m-1] || r.fecha) + (variosAnios ? " " + r.fecha.substring(2,4) : ""); }
+  return fechaCorta(r.fecha);
+}
+function tituloTip(r, g){
+  if (g === "mes") return mesL(r.fecha);
+  if (g === "semana") return "Semana desde el " + fechaC(r.fecha);
+  return diaSemana(r.fecha) + " " + fechaC(r.fecha);
+}
+function htmlTip(r, g){
+  var h = "<b>" + esc(tituloTip(r, g)) + "</b>" + filaTip("Unidades", fmtN(r.unidades));
+  if (g !== "dia") {
+    h += filaTip("Días con datos", fmtN(r.nDias));
+    if (r.nDias) h += filaTip("Promedio por día", fmtN(r.unidades / r.nDias));
+    if (r.reparados) h += '<div class="nota">' + esc(r.reparados === 1 ? "1 día completado desde el detalle" : r.reparados + " días completados desde el detalle") + "</div>";
+  } else if (r.reparado) h += '<div class="nota">Total completado desde el detalle por producto</div>';
+  return h;
+}
+function esParcial(r, g){
+  // Mes o semana que no tiene todos sus días en el rango visible
+  if (g === "mes") return r.nDias < diasEnMes(r.fecha);
+  if (g === "semana") return r.nDias < 7;
+  return false;
+}
+
+/* Líneas con área (vista por día) */
+function graficoLineas(el, rows, g){
+  var W = anchoDe(el), H = 230, L = 46, R = 8, T = 12, B = 24, n = rows.length;
+  var max = 0; rows.forEach(function (r) { max = Math.max(max, num(r.unidades)); });
+  var e = escala(0, max || 1, 4), lo = e.lo, hi = e.hi;
+  var x = function (i) { return L + (n === 1 ? (W - L - R) / 2 : (W - L - R) * i / (n - 1)); };
+  var y = function (v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Unidades por día; el detalle está en «Ver datos del gráfico»">';
+  s += '<defs><linearGradient id="gArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--blue)" stop-opacity=".28"/><stop offset="1" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>';
+  e.ticks.forEach(function (t) {
+    var yy = y(t).toFixed(1);
+    s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (+yy + 4) + '" text-anchor="end">' + esc(ejeCorto(t)) + "</text>";
+  });
+  var d = "";
+  rows.forEach(function (r, i) { d += (i ? "L" : "M") + x(i).toFixed(1) + " " + y(num(r.unidades)).toFixed(1); });
+  s += '<path d="' + d + "L" + x(n - 1).toFixed(1) + " " + y(0).toFixed(1) + "L" + x(0).toFixed(1) + " " + y(0).toFixed(1) + 'Z" fill="url(#gArea)"/>';
+  s += '<path d="' + d + '" fill="none" stroke="var(--blue)" stroke-width="' + (n > 120 ? 1.5 : 2) + '" stroke-linejoin="round" stroke-linecap="round"/>';
+  // Puntos: días completados desde el detalle (naranja); si hay pocos puntos, todos
+  rows.forEach(function (r, i) {
+    if (r.reparado) s += '<circle class="rep" cx="' + x(i).toFixed(1) + '" cy="' + y(num(r.unidades)).toFixed(1) + '" r="3.5" stroke="var(--card)" stroke-width="1.5"/>';
+    else if (n <= 45) s += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(num(r.unidades)).toFixed(1) + '" r="2.5" fill="var(--blue)"/>';
+  });
+  if (n <= 16) rows.forEach(function (r, i) {
+    s += '<text class="val" x="' + x(i).toFixed(1) + '" y="' + (y(num(r.unidades)) - 9).toFixed(1) + '" text-anchor="middle">' + esc(ejeCorto(num(r.unidades))) + "</text>";
+  });
+  // Eje X: con muchos días se marca el inicio de cada mes
+  var cada = Math.max(1, Math.ceil(n / Math.max(1, Math.floor((W - L) / 54))));
+  var varios = rows.length && rows[0].fecha.substring(0,4) !== rows[n-1].fecha.substring(0,4);
+  var ultX = -1e9;
+  rows.forEach(function (r, i) {
+    var lab = null;
+    if (n > 45) { if (r.fecha.substring(8,10) === "01") { var m = +r.fecha.substring(5,7); lab = MES_C[m-1] + (varios && m === 1 ? " " + r.fecha.substring(2,4) : ""); } }
+    else if (i % cada === 0) lab = fechaCorta(r.fecha);
+    if (lab == null) return;
+    var xx = Math.min(Math.max(x(i), L + 12), W - R - 12);
+    if (xx - ultX < 34) return;
+    ultX = xx;
+    s += '<text x="' + xx.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(lab) + "</text>";
+  });
+  s += '<line class="regla oculto rg" y1="' + T + '" y2="' + (H - B) + '"/>';
+  s += '<circle class="oculto pto" r="4.5" fill="var(--blue)" stroke="var(--card)" stroke-width="2"/>';
+  s += '<rect x="' + L + '" y="0" width="' + (W - L - R) + '" height="' + H + '" fill="transparent"/></svg>';
+  el.innerHTML = s;
+  var regla = el.querySelector(".rg"), pto = el.querySelector(".pto");
+  var pasoX = n > 1 ? (W - L - R) / (n - 1) : W;
+  interactivo(el, n, function (px) { return n === 1 ? 0 : Math.round((px - L) / pasoX); }, function (i) {
+    if (i < 0) { regla.classList.add("oculto"); pto.classList.add("oculto"); return; }
+    regla.setAttribute("x1", x(i)); regla.setAttribute("x2", x(i)); regla.classList.remove("oculto");
+    pto.setAttribute("cx", x(i)); pto.setAttribute("cy", y(num(rows[i].unidades))); pto.classList.remove("oculto");
+  }, function (i) { return htmlTip(rows[i], g); });
+}
+
+/* Barras (vista por semana y por mes) */
+function graficoBarras(el, rows, g){
+  var W = anchoDe(el), n = rows.length, conValor = n <= 14 && (W - 52) / Math.max(1, n) >= 36;
+  var H = 230, L = 46, R = 6, T = conValor ? 22 : 12, B = 24;
+  var max = 0; rows.forEach(function (r) { max = Math.max(max, num(r.unidades)); });
+  var e = escala(0, max || 1, 4), lo = e.lo, hi = e.hi;
+  var y = function (v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+  var paso = (W - L - R) / n, bw = Math.max(1, Math.min(40, paso * (n > 40 ? 0.8 : 0.64)));
+  var varios = n && rows[0].fecha.substring(0,4) !== rows[n-1].fecha.substring(0,4);
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Unidades por ' + (g === "mes" ? "mes" : "semana") + '; el detalle está en «Ver datos del gráfico»">';
+  e.ticks.forEach(function (t) {
+    var yy = y(t).toFixed(1);
+    s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (+yy + 4) + '" text-anchor="end">' + esc(ejeCorto(t)) + "</text>";
+  });
+  var rx = Math.min(5, bw / 3);
+  rows.forEach(function (r, i) {
+    var v = num(r.unidades), cx = L + paso * i + paso / 2, y1 = y(Math.max(0, v)), y2 = y(0);
+    s += '<g class="col' + (esParcial(r, g) ? " parcial" : "") + '">';
+    s += '<rect class="b" x="' + (cx - bw / 2).toFixed(1) + '" y="' + y1.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(v ? 1 : 0, y2 - y1).toFixed(1) + '" rx="' + rx.toFixed(1) + '"/>';
+    if (conValor) s += '<text class="val" x="' + cx.toFixed(1) + '" y="' + (y1 - 6).toFixed(1) + '" text-anchor="middle">' + esc(ejeCorto(v)) + "</text>";
+    s += "</g>";
+  });
+  var cada = Math.max(1, Math.ceil(n / Math.max(1, Math.floor((W - L) / (g === "mes" ? 40 : 50)))));
+  rows.forEach(function (r, i) {
+    if (i % cada !== 0) return;
+    s += '<text x="' + (L + paso * i + paso / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(etiquetaX(r, g, varios)) + "</text>";
+  });
+  s += '<rect x="' + L + '" y="0" width="' + (W - L - R) + '" height="' + H + '" fill="transparent"/></svg>';
+  el.innerHTML = s;
+  var cols = el.querySelectorAll(".col");
+  interactivo(el, n, function (x) { return Math.floor((x - L) / paso); },
+    function (i) { cols.forEach(function (c, j) { c.classList.toggle("on", j === i); }); },
+    function (i) { return htmlTip(rows[i], g); });
+}
+
+/* ═══════════ Pintar ═══════════ */
+function rangoTexto(ds){
+  if (!ds.length) return "Sin días en el rango";
+  var fs = ds.map(function (d) { return dateStr(d.fecha); }).sort();
+  return fechaC(fs[0]) + " – " + fechaC(fs[fs.length - 1]);
+}
+function ultimaFecha(){
+  var u = ""; (DATA.dias || []).forEach(function (d) { var f = dateStr(d.fecha); if (f > u) u = f; }); return u;
+}
+function pintarRapidos(){
+  var u = ultimaFecha(), activo = "";
+  if (!_fi && !_ff) activo = "todo";
+  else if (u && _ff === u) ["7", "30", "90"].forEach(function (k) { if (_fi === sumarDias(u, -(+k - 1))) activo = k; });
+  document.querySelectorAll("#rapidos [data-r]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-r") === activo)); });
+  $("clr").style.display = (_fi || _ff) ? "" : "none";
+}
+
+function renderGrafico(){
+  var ds = filterDias();
+  var rows = aggGran(ds, _gran);
+  var el = $("chart");
+  ocultarTip();
+  el.classList.remove("activo");
+  $("tendSub").textContent = ds.length ? rangoTexto(ds) + " · " + (_gran === "dia" ? "por día" : _gran === "semana" ? "por semana (lun–dom)" : "por mes") : "";
+  // Resumen del rango (sobre los mismos días de la gráfica): usa el total diario de
+  // Farmatodo, sin el ajuste ÷ por empaque; por eso se rotula distinto de «Unidades del período».
+  var sinAj = "Total diario que reporta Farmatodo, sin el ajuste por empaque (" +
+    Object.keys(SKU_DIVISORES).map(function (k) { return "SKU " + k + " ÷" + SKU_DIVISORES[k]; }).join(", ") + ")";
+  var tot = 0, pico = null;
+  ds.forEach(function (d) { tot += d.unidades || 0; if (!pico || (d.unidades || 0) > (pico.unidades || 0)) pico = d; });
+  $("chips").innerHTML = ds.length
+    ? '<span class="chip"><span>Promedio</span>' + esc(fmtN(tot / ds.length)) + " u./día</span>" +
+      (pico ? '<span class="chip"><span>Mejor día</span>' + esc(fechaCorta(dateStr(pico.fecha))) + " · " + esc(fmtN(pico.unidades)) + " u.</span>" : "") +
+      '<span class="chips-nota">' + esc(sinAj) + "</span>"
+    : "";
+  if (!rows.length) {
+    el.innerHTML = '<div class="vacio">Sin datos en este rango</div>';
+    $("tablaGraf").innerHTML = ""; $("datosGraf").classList.add("oculto"); $("leyRep").classList.add("oculto"); $("leyPar").classList.add("oculto");
+    return;
+  }
+  if (_gran === "dia") graficoLineas(el, rows, _gran); else graficoBarras(el, rows, _gran);
+  var hayRep = _gran === "dia" && rows.some(function (r) { return r.reparado; });
+  $("leyRep").classList.toggle("oculto", !hayRep);
+  var hayPar = _gran !== "dia" && rows.some(function (r) { return esParcial(r, _gran); });
+  $("leyPar").classList.toggle("oculto", !hayPar);
+  $("leyParTxt").textContent = _gran === "mes" ? "Barra clara: mes con días fuera del rango o sin reporte" : "Barra clara: semana con menos de 7 días en el rango";
+  // Tabla con los valores exactos de cada punto
+  var varios = rows[0].fecha.substring(0,4) !== rows[rows.length-1].fecha.substring(0,4);
+  var h = '<div class="tw"><table><thead><tr><th scope="col">' + (_gran === "dia" ? "Día" : _gran === "semana" ? "Semana desde" : "Mes") + '</th>' +
+    (_gran === "dia" ? "" : '<th class="d" scope="col">Días</th>') + '<th class="d" scope="col">Unidades</th></tr></thead><tbody>';
+  rows.forEach(function (r) {
+    var et = _gran === "mes" ? mesL(r.fecha) : _gran === "semana" ? fechaC(r.fecha) : diaSemana(r.fecha) + " " + fechaC(r.fecha);
+    h += '<tr data-k="' + esc(r.fecha) + '"><td>' + esc(et) + (r.reparado ? ' <span class="tag" title="Total completado desde el detalle por producto">completado</span>' : "") + "</td>" +
+      (_gran === "dia" ? "" : '<td class="d">' + esc(fmtN(r.nDias)) + "</td>") +
+      '<td class="d" data-v="' + esc(r.unidades) + '">' + esc(fmtN(r.unidades)) + "</td></tr>";
+  });
+  $("tablaGraf").innerHTML = h + "</tbody></table></div>";
+  $("datosGraf").classList.remove("oculto");
+}
+
+function renderProductos(){
+  var ds = filterDias();
+  var prods = getProductosFiltrados();
+  var tU = prods.reduce(function(s,p){ return s+(p.unidades||0); },0);
+  $("kU").textContent = fmt(Math.round(tU));
+  $("kP").textContent = fmt(prods.length);
+  $("kD").textContent = fmt(ds.length);
+  var filtroTxt = _search ? "Según la búsqueda «" + _search + "»" : "";
+  var hayDiv = prods.some(function (p) { return p.divisor; });
+  $("kUs").textContent = filtroTxt || (hayDiv ? "Con ajuste ÷ por empaque" : "Suma de los productos");
+  $("kPs").textContent = filtroTxt || "Con ventas en el rango";
+  $("kDs").textContent = rangoTexto(ds);
+  $("prodSub").textContent = ds.length ? rangoTexto(ds) : "";
+
+  var body = "";
+  if (!prods.length) {
+    body = '<div class="vacio">' + esc(_search ? "Ningún producto coincide con «" + _search + "»" : "Sin productos en este rango") + "</div>";
+  } else {
+    var n = Math.min(prods.length, _n);
+    body = '<div class="tw"><table><thead><tr><th scope="col">#</th><th scope="col">Producto</th><th class="m-no" scope="col">EAN/UPC</th>' +
+      '<th class="d" scope="col">Unidades</th><th class="d" scope="col">Part.</th></tr></thead><tbody id="prodBody">';
+    for (var i = 0; i < n; i++) {
+      var p = prods[i], part = tU > 0 ? (p.unidades || 0) / tU : NaN;
+      var sub = [];
+      if (p.sku) sub.push("SKU " + p.sku);
+      var n2 = '<div class="n2">' + esc(sub.join("")) + (p.ean ? '<span class="solo-m">' + esc((p.sku ? " · " : "") + "EAN " + p.ean) + "</span>" : "") + "</div>";
+      body += "<tr>" +
+        '<td class="idx">' + (i + 1) + "</td>" +
+        '<td><div class="n1">' + esc(p.nombre || "") + "</div>" + (p.sku || p.ean ? n2 : "") + "</td>" +
+        '<td class="cod m-no">' + esc(p.ean || "") + "</td>" +
+        '<td class="d uds">' + esc(fmt(Math.round(p.unidades || 0))) +
+          (p.divisor ? '<span class="tag" title="Unidades divididas entre ' + esc(p.divisor) + '">÷' + esc(p.divisor) + "</span>" : "") + "</td>" +
+        '<td class="d">' + esc(pct(part)) + '<div class="minibar" aria-hidden="true"><span style="width:' + (isFinite(part) ? Math.max(0, Math.min(100, part * 100)).toFixed(1) : 0) + '%"></span></div></td>' +
+        "</tr>";
+    }
+    body += "</tbody></table></div>";
+    if (prods.length > n) {
+      body += '<div class="mas"><button class="btn" type="button" id="verMas">Ver ' + fmtN(Math.min(prods.length - n, 50)) +
+        ' más <span style="color:var(--text2)">(' + fmtN(prods.length - n) + " restantes)</span></button></div>";
+    }
+  }
+  $("prodTabla").innerHTML = body;
+  $("prodCount").textContent = prods.length+" productos · "+fmt(Math.round(tU))+" unidades totales";
+}
+
+function renderNota(){
+  var divs = Object.keys(SKU_DIVISORES).map(function (k) { return "SKU " + k + " ÷" + SKU_DIVISORES[k]; });
+  $("notaDiv").textContent = "«Unidades del período» y la tabla de productos suman el detalle por producto y aplican el ajuste por empaque (" + divs.join(", ") +
+    "). La tendencia muestra el total diario que reporta Farmatodo, por eso sus cifras pueden ser mayores. «Días con datos» cuenta los días con reporte dentro del rango.";
 }
 
 function render(){
-  var ds=filterDias();
-  var rows=aggGran(ds,_gran);
-  var prods=getProductosFiltrados();
-  var tU=prods.reduce(function(s,p){ return s+(p.unidades||0); },0);
-  document.getElementById("kU").textContent=fmt(Math.round(tU));
-  document.getElementById("kP").textContent=prods.length;
-  document.getElementById("kD").textContent=ds.length;
-  document.getElementById("chart").innerHTML=chart(rows);
-  var trs=prods.map(function(p,i){
-    var udsTxt=fmt(Math.round(p.unidades||0));
-    if(p.divisor) udsTxt+=' <span class="muted" style="font-size:10px">(÷'+p.divisor+')</span>';
-    return '<tr><td class="muted">'+(i+1)+'</td><td>'+(p.nombre||"")+'</td><td class="muted">'+(p.ean||"")+'</td><td class="right" style="color:#3b82f6">'+udsTxt+'</td></tr>';
-  }).join("");
-  document.getElementById("prodBody").innerHTML = trs || '<tr><td colspan="4" class="empty">Sin productos en este rango</td></tr>';
-  document.getElementById("prodCount").textContent = prods.length+" productos · "+fmt(Math.round(tU))+" unidades totales";
-  document.getElementById("clr").style.display = (_fi||_ff) ? "" : "none";
+  pintarRapidos();
+  renderProductos();
+  renderGrafico();
 }
 
-document.querySelectorAll("[data-g]").forEach(function(b){
-  b.addEventListener("click", function(){ _gran=b.dataset.g; document.querySelectorAll("[data-g]").forEach(function(x){ x.classList.toggle("active", x===b); }); render(); });
-});
-document.getElementById("fi").addEventListener("change", function(e){ _fi=e.target.value; render(); });
-document.getElementById("ff").addEventListener("change", function(e){ _ff=e.target.value; render(); });
-document.getElementById("clr").addEventListener("click", function(){ _fi=""; _ff=""; document.getElementById("fi").value=""; document.getElementById("ff").value=""; render(); });
-document.getElementById("search").addEventListener("input", function(e){ _search=e.target.value; render(); });
-document.getElementById("csv").addEventListener("click", downloadCSV);
+/* ─────────── Indicador de actualización ─────────── */
+/* El texto visible se refresca cada 30 s («hace X min»); solo se reescribe si cambió.
+   Los lectores de pantalla oyen únicamente los cambios de estado (región #estadoVivo). */
+var _estadoHtml = "", _estadoVivo = "";
+function ponerEstado(html, vivo){
+  var el = $("estado");
+  if (html !== _estadoHtml) { _estadoHtml = html; el.innerHTML = html; }
+  if (vivo !== _estadoVivo) { _estadoVivo = vivo; $("estadoVivo").textContent = vivo; }
+}
+function pintarEstado(){
+  if (!_hayDatos) {
+    var t0 = _estadoTxt ? "Sin conexión" : "Cargando…";
+    ponerEstado('<span class="punto off"></span><span>' + esc(t0) + "</span>", _estadoTxt ? "Sin conexión con la fuente de Farmatodo" : "");
+    return;
+  }
+  var t = Date.parse(DATA.updated || "") || 0;
+  var viejo = t && Date.now() - t > 30 * 3600000;
+  var cuando = t ? hace(t) : "";
+  var txt, vivo;
+  if (_estadoTxt) { txt = "Sin conexión · " + (t ? "actualizado " + cuando : "sin fecha"); vivo = "Sin conexión. Mostrando la última copia guardada"; }
+  else {
+    txt = t ? "Actualizado " + cuando : "Sin fecha de actualización";
+    if (_fuente === "cache") { txt += " · buscando datos nuevos…"; vivo = "Mostrando copia guardada, buscando datos nuevos"; }
+    else vivo = "Datos cargados";
+  }
+  ponerEstado('<span class="punto' + (_estadoTxt ? " off" : (viejo || !t) ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>", vivo);
+  $("estado").title = textoActualizacion(DATA, _fuente);
+}
+function pintarAvisos(){
+  var h = "";
+  if (_estadoTxt) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Mostrando la última copia guardada</b><p>No hubo conexión con la fuente de Farmatodo. Las cifras pueden no incluir la última sincronización.</p></div></div>';
+  if (_hayDatos && !(DATA.dias || []).length) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Sin datos todavía</b><p>La fuente respondió sin días de venta. Vuelve a intentar más tarde.</p></div></div>';
+  $("avisos").innerHTML = h;
+}
 
+/* ─────────── Eventos ─────────── */
+document.querySelectorAll("[data-g]").forEach(function(b){
+  b.addEventListener("click", function(){
+    _gran=b.getAttribute("data-g");
+    document.querySelectorAll("[data-g]").forEach(function(x){ x.setAttribute("aria-pressed", String(x===b)); });
+    renderGrafico();
+  });
+});
+function aplicarRango(fi, ff){
+  _fi = fi; _ff = ff; _n = 50;
+  $("fi").value = fi; $("ff").value = ff;
+  render();
+}
+$("fi").addEventListener("change", function(e){ _fi=e.target.value; _n=50; render(); });
+$("ff").addEventListener("change", function(e){ _ff=e.target.value; _n=50; render(); });
+$("clr").addEventListener("click", function(){ aplicarRango("", ""); $("fi").focus(); });
+$("rapidos").addEventListener("click", function(ev){
+  var b = ev.target.closest("[data-r]"); if (!b) return;
+  var r = b.getAttribute("data-r"), u = ultimaFecha();
+  if (r === "todo" || !u) aplicarRango("", "");
+  else aplicarRango(sumarDias(u, -(+r - 1)), u);
+});
+$("search").addEventListener("input", function(e){ _search=e.target.value; _n=50; renderProductos(); });
+$("csv").addEventListener("click", downloadCSV);
+$("prodTabla").addEventListener("click", function(ev){
+  if (!ev.target.closest("#verMas")) return;
+  _n += 50; renderProductos();
+  var b = $("verMas"); if (b) b.focus({ preventScroll: true });
+});
+$("reintentar").addEventListener("click", function(){ location.reload(); });
+
+var anchoPrevio = window.innerWidth, tRes = null;
+window.addEventListener("resize", function () {
+  clearTimeout(tRes);
+  tRes = setTimeout(function () { if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (_hayDatos) renderGrafico(); } }, 180);
+});
+setInterval(pintarEstado, 30000);
+
+/* ─────────── Carga (contrato de datos.js) ─────────── */
 var _subBase = "";
 cargarDatos({
   nombre: "farmatodo",
@@ -230,16 +788,50 @@ cargarDatos({
   alListo: function(j, fuente){
     DATA=j;
     repararDias();
+    _fuente = fuente; _estadoTxt = ""; _hayDatos = true;
     _subBase = textoActualizacion(j, fuente);
-    document.getElementById("sub").textContent = _subBase;
+    $("sub").textContent = _subBase;
+    $("cargando").classList.add("oculto");
+    $("error").classList.add("oculto");
+    $("contenido").classList.remove("oculto");
+    renderNota();
     render();
+    pintarEstado(); pintarAvisos();
   },
-  alEstado: function(txt){ document.getElementById("sub").textContent = _subBase.split(" · ")[0] + " · " + txt; },
+  alEstado: function(txt){
+    $("sub").textContent = _subBase.split(" · ")[0] + " · " + txt;
+    _estadoTxt = txt; pintarEstado(); pintarAvisos();
+  },
   alError: function(msg){
-    document.getElementById("sub").textContent="Error cargando datos";
-    document.getElementById("prodBody").innerHTML='<tr><td colspan="4" class="empty">'+msg+' <button class="btn" onclick="location.reload()">Reintentar</button></td></tr>';
+    $("sub").textContent="Error cargando datos";
+    _estadoTxt = msg;
+    $("errorMsg").textContent = msg;
+    $("cargando").classList.add("oculto");
+    $("error").classList.remove("oculto");
+    pintarEstado();
   }
 });
+
+/* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
+   en vez de cortarla con "…". */
+(function(){
+  var pend=false;
+  function ajustarCifras(){
+    pend=false;
+    var els=document.querySelectorAll(".v");
+    for(var i=0;i<els.length;i++){
+      var e=els[i];
+      if(getComputedStyle(e).textOverflow!=="ellipsis") continue;
+      e.style.fontSize="";
+      var fs=parseFloat(getComputedStyle(e).fontSize);
+      while(e.scrollWidth>e.clientWidth+1 && fs>14){ fs-=1; e.style.fontSize=fs+"px"; }
+    }
+  }
+  function programar(){ if(!pend){ pend=true; setTimeout(ajustarCifras, 30); } }
+  new MutationObserver(programar).observe(document.body,{childList:true,subtree:true,characterData:true});
+  window.addEventListener("resize",programar);
+  programar();
+})();
 </script>
 </body>
 </html>
