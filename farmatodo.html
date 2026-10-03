@@ -357,7 +357,18 @@ function repararDias(){
     if(!(d.unidades>0) && det[f]>0){ d.unidades=det[f]; d.reparado=true; arregladas++; }
   });
   if(arregladas) console.log("[Farmatodo] "+arregladas+" días con total en 0 completados desde el detalle");
+  /* Día en 0 y sin ningún detalle por producto = Farmatodo aún no lo publicó (o el portal no
+     cargó). No es una venta real de 0: se saca de la gráfica y de los KPI y se muestra como
+     "pendiente". Cuando el scraper lo traiga, aparece solo. */
+  PENDIENTES = [];
+  DATA.dias = (DATA.dias||[]).filter(function(d){
+    var f=dateStr(d.fecha);
+    if(!(d.unidades>0) && !(det[f]>0)){ PENDIENTES.push(f); return false; }
+    return true;
+  });
+  PENDIENTES.sort();
 }
+var PENDIENTES = [];
 
 function filterDias(){
   var ds = DATA.dias||[];
@@ -613,7 +624,9 @@ function renderGrafico(){
   var el = $("chart");
   ocultarTip();
   el.classList.remove("activo");
-  $("tendSub").textContent = ds.length ? rangoTexto(ds) + " · " + (_gran === "dia" ? "por día" : _gran === "semana" ? "por semana (lun–dom)" : "por mes") : "";
+  var pend = PENDIENTES.filter(function (f) { return (!_fi || f >= _fi) && (!_ff || f <= _ff); });
+  var txtPend = pend.length ? " · " + (pend.length === 1 ? "pendiente: " : "pendientes: ") + pend.map(fechaC).join(", ") + " (Farmatodo aún no lo publica)" : "";
+  $("tendSub").textContent = (ds.length ? rangoTexto(ds) + " · " + (_gran === "dia" ? "por día" : _gran === "semana" ? "por semana (lun–dom)" : "por mes") : "") + txtPend;
   // Resumen del rango (sobre los mismos días de la gráfica): usa el total diario de
   // Farmatodo, sin el ajuste ÷ por empaque; por eso se rotula distinto de «Unidades del período».
   var sinAj = "Total diario que reporta Farmatodo, sin el ajuste por empaque (" +
