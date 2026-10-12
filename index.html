@@ -258,6 +258,48 @@ tr.det td{background:var(--fill);padding:4px 8px 14px}
 .err{color:var(--neg);font-size:14px;min-height:20px;margin-top:12px}
 .cargando{min-height:60vh;display:grid;place-items:center;color:var(--text2);font-size:15px}
 .skel{height:14px;border-radius:7px;background:var(--fill);margin:8px 0}
+
+/* Casa Padel */
+/* Escala azul de ocupación. El texto de cada celda cambia de color según el alfa (ver estiloOcup):
+   --oc1 si alfa < .85, --oc2 entre .85 y .9, --oc3 desde .9; así todo queda ≥ 4,5:1 en claro y oscuro. */
+:root{--blueRGB:0,102,204;--oc1:#000;--oc2:#000;--oc3:#fff}
+@media (prefers-color-scheme:dark){:root{--blueRGB:10,132,255;--oc1:#fff;--oc2:#000;--oc3:#000}}
+.p-lect{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ocup{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 6px;border-radius:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ocup.nada{background:none;color:var(--text3);font-weight:400}
+table.turnos th,table.turnos td{text-align:center;padding:6px 3px}
+/* Columna "Día" fija al deslizar. Se pega 18 px adentro (relleno de .tw): el ::before tapa ese hueco con el mismo fondo
+   de la celda, para que no se vean pasar las celdas de debajo (box-shadow no se pinta en tablas border-collapse) */
+table.turnos th:first-child,table.turnos td:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--card);padding-left:0;padding-right:8px}
+table.turnos th:first-child::before,table.turnos td:first-child::before{content:"";position:absolute;top:0;bottom:0;left:-18px;width:18px;background:inherit}
+table.turnos th.noche{color:var(--text)}
+table.turnos.todas th.noche,table.turnos.todas td.noche{background:rgba(var(--blueRGB),.06)}
+table.turnos tr.hoy td{background:var(--fill)}
+table.turnos tr.hoy .tag{background:var(--card)}
+table.turnos th.tot,table.turnos td.tot{text-align:right;padding-left:10px}
+.p-dia{font-weight:600;white-space:nowrap}
+.p-dia+.n2{white-space:nowrap}
+.p-dia .tag{margin-left:0}
+.niveles{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text2);margin-top:10px}
+.niveles .ocup{min-width:36px;height:22px;font-size:12px}
+table.hm{border-collapse:separate;border-spacing:3px;width:100%;table-layout:fixed;min-width:300px}
+table.hm th{border:0;padding:2px 2px;font-size:11px;text-align:center;color:var(--text2)}
+table.hm th[scope="row"]{text-align:right;padding-right:6px;width:46px;font-variant-numeric:tabular-nums}
+table.hm th.noche{color:var(--text);font-weight:700}
+table.hm td{border:0;padding:0;height:24px;text-align:center;font-size:11px;font-weight:600;border-radius:5px}
+table.hm td.nada{background:none;color:var(--text3);font-weight:400}
+table.hm td button{display:block;width:100%;height:24px;border-radius:5px;font-weight:inherit}
+.escala{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-top:10px}
+.escala span.g{flex:0 1 160px;height:8px;border-radius:4px;background:linear-gradient(to right,rgba(var(--blueRGB),.1),rgba(var(--blueRGB),1))}
+.evs{list-style:none}
+.evs li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px 10px;padding:10px 0;border-bottom:.5px solid var(--sep);align-items:baseline}
+.evs li:last-child{border-bottom:0}
+.evs .pt{width:8px;height:8px;border-radius:50%;align-self:center}
+.evs .q{font-weight:600;overflow-wrap:anywhere}
+.evs .cu{font-size:12px;color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.evs .d2{grid-column:2/4;font-size:13px;color:var(--text2)}
+.metodo ul{margin:8px 0 0 18px;color:var(--text2);font-size:13px;line-height:1.55}
+.metodo li+li{margin-top:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -317,10 +359,11 @@ tr.det td{background:var(--fill);padding:4px 8px 14px}
    ═══════════════════════════════════════════════════════════════════ */
 var API = "https://letos-mcp.casapadelcolombia.workers.dev/api/dashboard";
 var K_TOKEN = "letos_dash_token", K_CACHE = "letos_dash_cache", K_USER = "letos_dash_usuario", K_PREF = "letos_dash_pref";
+var K_PADEL = "letos_padel_cache"; // copia local de /api/dashboard/padel (independiente de la del dashboard)
 var EXTERNOS = [["Farmatodo", "https://dashboard.letos.co/farmatodo.html"], ["Aruma", "https://dashboard.letos.co/aruma.html"], ["Rappi", "https://dashboard.letos.co/rappi.html"]];
 var TABS = [
   ["resumen", "Resumen"], ["productos", "Productos"], ["clientes", "Clientes"], ["vendedores", "Vendedores"],
-  ["inventario", "Inventario"], ["cartera", "Cartera"], ["movimiento", "Movimiento"]
+  ["inventario", "Inventario"], ["cartera", "Cartera"], ["movimiento", "Movimiento"], ["padel", "Casa Padel"]
 ];
 var PERIODOS = [["3", "3M"], ["6", "6M"], ["12", "12M"], ["todo", "Todo"]];
 var MES_L = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -392,14 +435,19 @@ function uiInicial() {
     // nit/nitN: filtro exacto por tercero (al tocar un cliente); q es la búsqueda libre
     car: { lado: "cxc", vista: "terceros", rapido: "todas", desde: "", hasta: "", q: "", nit: "", nitN: "", sort: { k: "s", dir: -1 }, n: 50 },
     mov: { mes: "", q: "", sort: { k: "t", dir: -1 }, n: 50, abierto: "" },
-    mensual: { n: 12 }
+    mensual: { n: 12 },
+    // Casa Padel: club elegido (índice), rango del gráfico, horas plegables, filas de turnos, filtro de eventos
+    padel: { club: 0, rango: "30", todas: false, n: 14, ev: "todos", evN: 15 }
   };
 }
+/* Casa Padel tiene su propia carga, copia local y errores: si falla no toca las otras pestañas */
+function padelInicial() { return { data: null, etag: null, cargando: false, desde: 0, error: null, vacio: null, revisado: 0, ctl: null }; }
 var S = {
   data: null, etag: null, dev: false, token: null, usuario: null, rol: null,
   tab: "resumen", periodo: "12", revisado: 0, errorRed: null, cargando: false, sinDatos: null, estadoSync: null,
   gen: 0, ctl: null, syncEnCurso: false, // gen cambia en cada login/logout: invalida respuestas viejas
-  memo: {}, charts: [],
+  memo: {}, charts: [], msgSinDatos: null,
+  padel: padelInicial(),
   ui: uiInicial()
 };
 var $ = function (id) { return document.getElementById(id); };
@@ -1303,12 +1351,363 @@ function zMov() {
   });
 }
 
+/* ═══════════ Casa Padel: ocupación de la competencia (easycancha) ═══════════
+   Lee /api/dashboard/padel (contrato padel:data:v1, ver PADEL_SPEC.md). Todo lo que viene del API
+   se valida (fechas, horas, canchas) y se escapa antes de insertarlo. */
+var NOCHE = ["17:00", "18:30", "20:00", "21:30"];
+var DOW_C = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+var DOW_L = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+var ORDEN_DOW = [1, 2, 3, 4, 5, 6, 0];
+var COLOR_CANCHA = ["blue", "orange", "green", "purple", "pink", "teal", "indigo", "gray"];
+function datosPadelValidos(j) { return !!(j && typeof j === "object" && Array.isArray(j.clubes)); }
+function esFecha(f) { return typeof f === "string" && /^\d{4}-\d{2}-\d{2}$/.test(f) && isFinite(Date.parse(f + "T12:00:00Z")); }
+function esHora(h) { return typeof h === "string" && /^\d{2}:\d{2}$/.test(h); }
+function sumarDias(f, n) { return new Date(Date.parse(f + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
+function dowDe(f) { return new Date(f + "T12:00:00Z").getUTCDay(); }
+function fechaCorta(f) { var p = f.split("-"); return +p[2] + " " + (MES_C[+p[1] - 1] || ""); }
+function diaC(f) { return DOW_C[dowDe(f)] + " " + fechaCorta(f); }
+function horas(n) { return NF1.format(num(n)) + " h"; }
+function clubesPadel() { return arr((S.padel.data || {}).clubes).filter(function (c) { return c && typeof c === "object"; }); }
+function clubPadel() { var cs = clubesPadel(); return cs[S.ui.padel.club] || cs[0] || null; }
+function hoyPadel() { var h = (S.padel.data || {}).hoy; return esFecha(h) ? h : new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10); }
+/* Canchas del club como texto ("1".."N"), más cualquier otra que aparezca en los datos */
+function canchasDe(c) {
+  var n = Math.floor(num(c.canchas)), m = {};
+  for (var i = 1; i <= Math.min(n, 30); i++) m[i] = 1;
+  arr(c.dias).forEach(function (d) { if (d && d.porCancha && typeof d.porCancha === "object") Object.keys(d.porCancha).forEach(function (k) { if (/^\d{1,3}$/.test(k)) m[+k] = 1; }); });
+  return Object.keys(m).map(Number).sort(function (a, b) { return a - b; }).map(String);
+}
+/* Días válidos, sin repetir, en orden ascendente */
+function diasPadel(c) {
+  var vistos = {}, out = [];
+  arr(c.dias).forEach(function (d) { if (d && esFecha(d.f) && !vistos[d.f]) { vistos[d.f] = 1; out.push(d); } });
+  return out.sort(function (a, b) { return a.f < b.f ? -1 : a.f > b.f ? 1 : 0; });
+}
+function sumaDias(lista) {
+  var r = { h: 0, ab: 0, ing: 0, n: lista.length };
+  lista.forEach(function (d) { r.h += num(d.horasArrendadas); r.ab += num(d.horasAbiertas); r.ing += num(d.ingresoEst); });
+  r.oc = r.ab > 0 ? r.h / r.ab : null;
+  return r;
+}
+/* Color de ocupación (0..1) sobre la escala azul; el color del texto por tramo de alfa lo fija el tema (--oc1..3) */
+function estiloOcup(v) {
+  v = Math.max(0, Math.min(1, num(v)));
+  if (v <= 0) return "background:var(--fill);color:var(--text2)";
+  var a = 0.1 + 0.9 * v;
+  return "background:rgba(var(--blueRGB)," + a.toFixed(3) + ");color:var(" + (a < 0.85 ? "--oc1" : a < 0.9 ? "--oc2" : "--oc3") + ")";
+}
+/* La lectura publicada se reconstruye cada 60 min si no hay cambios y el cron corre cada 30: puede llegar
+   con ~90 min (+ 5 de revalidación del navegador) sin que nada esté mal. Recién pasado esto se marca vieja. */
+var LECTURA_VIEJA_MS = 120 * 60000;
+function lecturaPadel(c) {
+  var t = c ? Date.parse(c.ultimaLectura || "") || 0 : 0;
+  return { t: t, viejo: !t || Date.now() - t > LECTURA_VIEJA_MS };
+}
+function textoLecturaPadel(c) {
+  var l = lecturaPadel(c);
+  return '<span class="punto' + (l.viejo ? " viejo" : "") + '"></span><span>' + esc((l.t ? "Última lectura " + hace(l.t) : "Sin lecturas todavía") + (esFecha(c.desde) ? " · historial desde " + fechaC(c.desde) : "")) + "</span>";
+}
+/* Parte del día sin ninguna lectura previa (p. ej. el día en que empezó a leerse o una caída de easycancha) */
+function sinDatoPadel(d) { return num(d && d.horasSinDato) > 0; }
+function anticipacion(h) {
+  h = num(h);
+  if (h < 0) return "después de empezar el turno";
+  if (h < 1) return "menos de 1 h antes";
+  if (h < 48) return NF0.format(Math.round(h)) + " h antes";
+  return NF1.format(h / 24) + " días antes";
+}
+function cabeceraPadel(c) {
+  var h = '<div class="cab"><div><h1>Casa Padel</h1>';
+  if (c) {
+    h += "<p>" + esc("Ocupación de la competencia en easycancha · " + (c.nombre || "Club") + (c.ciudad ? " (" + c.ciudad + ")" : "") + " · " + fmtN(canchasDe(c).length) + " canchas") + "</p>" +
+      '<p class="p-lect" id="p-lect">' + textoLecturaPadel(c) + "</p>";
+  } else h += "<p>Ocupación de la competencia en easycancha</p>";
+  h += "</div>";
+  var cs = clubesPadel();
+  if (cs.length > 1) {
+    h += '<div class="pills" role="group" aria-label="Club">';
+    cs.forEach(function (x, i) { h += '<button class="pill" data-act="padel-club" data-v="' + i + '" aria-pressed="' + (clubPadel() === x) + '">' + esc(x.nombre || "Club " + (i + 1)) + "</button>"; });
+    h += "</div>";
+  }
+  return h + "</div>";
+}
+function estadoPadelHTML(titulo, msg) {
+  return '<section class="card"><div class="vacio"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">' + esc(titulo) + "</div><div>" + esc(msg) +
+    '</div><div style="margin-top:14px"><button class="btn prim" data-act="padel-reintentar">Reintentar</button></div></div></section>';
+}
+function vPadel() {
+  var P = S.padel;
+  if (!P.data) {
+    // Mientras busca (también al tocar Reintentar) se ve el esqueleto, no el mensaje anterior
+    if (P.vacio && !P.cargando) return cabeceraPadel(null) + estadoPadelHTML("Todavía no hay datos de Casa Padel", P.vacio);
+    if (P.error && !P.cargando) return cabeceraPadel(null) + estadoPadelHTML("No se pudieron cargar los datos de Casa Padel", P.error + " Las demás pestañas siguen funcionando.");
+    return cabeceraPadel(null) + '<div class="grid kpis k3">' + [1, 2, 3].map(function () { return '<div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:80%"></div></div>'; }).join("") + "</div>";
+  }
+  var c = clubPadel(), u = S.ui.padel;
+  var h = cabeceraPadel(c);
+  if (P.error) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Mostrando la última copia guardada de Casa Padel</b><p>' + esc(P.error) +
+    '</p></div><button class="btn" data-act="padel-reintentar" style="margin-left:auto">Reintentar</button></div>';
+  if (P.data.version !== 1) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Versión de datos de Casa Padel no reconocida</b><p>Recarga la página; si sigue igual, avisa a soporte.</p></div></div>';
+  if (!c) return h + '<section class="card"><div class="vacio">Todavía no hay clubes configurados para seguir.</div></section>';
+
+  var hoy = hoyPadel(), ayer = sumarDias(hoy, -1), dias = diasPadel(c), canchas = canchasDe(c), N = canchas.length || 4;
+  var porF = {}; dias.forEach(function (d) { porF[d.f] = d; });
+  var cerrados = dias.filter(function (d) { return d.f < hoy; });
+  function ventana(n, fin) { var ini = sumarDias(fin, -n); return cerrados.filter(function (d) { return d.f >= ini && d.f < fin; }); }
+  var dHoy = porF[hoy], dAyer = porF[ayer];
+  var s7 = sumaDias(ventana(7, hoy)), s30 = sumaDias(ventana(30, hoy)), s30p = sumaDias(ventana(30, sumarDias(hoy, -30)));
+  function ocTxt(d) {
+    var ab = num(d.horasAbiertas);
+    return (ab > 0 ? pct(num(d.horasArrendadas) / ab) + " de " + horas(ab) + " abiertas" : sinDatoPadel(d) ? "sin lecturas" : "club cerrado") +
+      (sinDatoPadel(d) && ab > 0 ? " · sin lectura en parte del día" : "");
+  }
+
+  h += '<div class="grid kpis k3">' +
+    kpi("Hoy (en curso)", dHoy ? horas(dHoy.horasArrendadas) : "—", dHoy ? esc(ocTxt(dHoy) + (dHoy.festivo ? " · festivo" : "")) : "sin lectura de hoy", "azul") +
+    kpi("Ayer", dAyer ? horas(dAyer.horasArrendadas) : "—", dAyer ? esc(ocTxt(dAyer)) : "sin datos", "") +
+    kpi("Últimos 7 días", s7.n ? horas(s7.h) : "—", s7.n ? esc("prom. " + horas(s7.h / s7.n) + "/día · hasta ayer") : "sin días cerrados", "") +
+    kpi("Últimos 30 días", s30.n ? horas(s30.h) : "—", s30.n ? esc("prom. " + horas(s30.h / s30.n) + "/día" + (s30.n < 30 ? " · " + s30.n + " días con datos" : "")) : "sin días cerrados", "") +
+    kpi("Ocupación 30 días", s30.oc != null ? pct(s30.oc) : "—", s30p.n >= 7 && s30p.oc != null ? esc("vs " + pct(s30p.oc) + " los 30 días anteriores") : "de las horas abiertas", "naranja") +
+    kpi("Ingreso estimado 30 días", s30.n ? moneyA(s30.ing) : "—", s30.n ? esc("≈ " + moneyA(s30.ing / s30.n) + "/día · precio publicado") : "", "verde") + "</div>";
+
+  // Gráfico diario apilado por cancha
+  var rango = { "7": 7, "30": 30, "90": 90 }[u.rango] || 30;
+  var enRango = dias.filter(function (d) { return d.f <= hoy && d.f > sumarDias(hoy, -rango); });
+  var seg = '<div class="seg" role="group" aria-label="Días del gráfico">' + [["7", "7 d"], ["30", "30 d"], ["90", "90 d"]].map(function (p) {
+    return '<button data-act="padel-rango" data-v="' + p[0] + '" aria-pressed="' + (String(rango) === p[0]) + '">' + p[1] + "</button>";
+  }).join("") + "</div>";
+  h += '<section class="card"><div class="card-cab"><div><h2>Horas arrendadas por día</h2><div class="sub">' +
+    esc("Apiladas por cancha · " + (enRango.length < rango ? enRango.length + " días con datos" : "últimos " + rango + " días") + " · barra clara = hoy (en curso) · línea = promedio") + "</div></div>" + seg +
+    '</div><div class="graf" id="g-padel" style="min-height:230px"></div><div class="leyenda">' +
+    canchas.map(function (k, i) { return '<span><i class="bg-' + COLOR_CANCHA[i % COLOR_CANCHA.length] + '"></i>Cancha ' + esc(k) + "</span>"; }).join("") + "</div></section>";
+
+  h += zTurnos(c, dias, hoy, canchas, N);
+  h += '<div class="grid g2">' + zHeatmap(c) + zEventos(c) + "</div>";
+  h += '<section class="card metodo"><h2>Cómo se calcula</h2><ul>' +
+    "<li>Es una <b>estimación</b> hecha con la disponibilidad pública de easycancha, leída cada 30 minutos para hoy y los próximos 4 días.</li>" +
+    "<li>Una cancha que deja de aparecer libre cuenta como arrendada: si a una hora salen 3 canchas libres, hay 1 arrendada. Las reservas hechas por fuera de la app (en el club, por WhatsApp) también salen como ocupadas porque bloquean la cancha.</li>" +
+    "<li>Los huecos libres de menos de 90 minutos no se ven en easycancha, así que cuentan como ocupados.</li>" +
+    "<li>Días pasados: estado final con la última lectura antes de que empiece cada media hora. Hoy y los próximos días: la última lectura (lo reservado hasta ahora).</li>" +
+    "<li>Ingreso estimado = horas arrendadas × precio publicado de esa franja (precio de 90 min ÷ 1,5). No descuenta promociones ni membresías.</li></ul></section>";
+
+  S.charts.push(function () {
+    var fs = enRango.map(function (d) { return d.f; });
+    var series = canchas.map(function (k, i) { return { nombre: "Cancha " + k, color: COLOR_CANCHA[i % COLOR_CANCHA.length], v: enRango.map(function (d) { return num(d.porCancha && d.porCancha[k]); }) }; });
+    var cer = enRango.filter(function (d) { return d.f < hoy; }), prom = cer.length > 1 ? sumaDias(cer).h / cer.length : 0;
+    graficoBarras($("g-padel"), {
+      labels: fs, h: 230, modo: "apilado", tipo: "n", series: series, promedio: prom, aria: "Horas arrendadas por día y cancha",
+      parcial: function (i) { return fs[i] === hoy; },
+      xLab: function (i, cada) {
+        var f = fs[i], dd = +f.slice(8), mes = MES_C[+f.slice(5, 7) - 1];
+        if (fs.length <= 10) return cada === 1 ? DOW_C[dowDe(f)] + " " + dd : String(dd);
+        if (fs.length <= 31) {
+          if (i % cada !== 0) return null;
+          // El mes se escribe en la primera etiqueta y cada vez que cambia (así "3" no se confunde de mes)
+          var antes = i >= cada ? fs[i - cada].slice(0, 7) : null;
+          return dd === 1 ? mes : antes === f.slice(0, 7) ? String(dd) : dd + " " + mes;
+        }
+        return dd === 1 ? mes : (dd === 15 && cada < 12 ? "15" : null);
+      },
+      tip: function (i) {
+        var d = enRango[i];
+        return "<b>" + esc(diaC(d.f) + (d.f === hoy ? " (en curso)" : "") + (d.festivo ? " · festivo" : "")) + "</b>" +
+          series.map(function (s) { return s.v[i] ? filaTip(s.color, s.nombre, horas(s.v[i])) : ""; }).join("") +
+          filaTip(null, "Total", horas(d.horasArrendadas)) + filaTip(null, "Ocupación", num(d.horasAbiertas) > 0 ? pct(num(d.horasArrendadas) / num(d.horasAbiertas)) : "—") +
+          filaTip(null, "Ingreso est.", moneyA(d.ingresoEst)) + (prom ? filaTip(null, "Promedio", horas(prom)) : "") +
+          (sinDatoPadel(d) ? filaTip(null, "Sin lectura", horas(d.horasSinDato) + " de cancha") : "");
+      }
+    });
+  });
+  return h;
+}
+/* Tabla de turnos fecha × hora de inicio: arrendadas / canchas, como lo cuenta Mau */
+/* Detalle de una celda: botón con data-tip (se abre al tocar, con teclado o al pasar el mouse) y aria-label con el mismo texto */
+function botonTip(cls, estilo, etiqueta, filas, contenido) {
+  var html = "<b>" + esc(etiqueta) + "</b>" + filas.map(function (f) { return filaTip(null, f[0], f[1]); }).join("");
+  var txt = etiqueta + ": " + filas.map(function (f) { return f[0] + " " + f[1]; }).join(" · ");
+  return '<button type="button"' + (cls ? ' class="' + cls + '"' : "") + (estilo ? ' style="' + estilo + '"' : "") + ' data-act="padel-tip" data-tip="' + esc(html) + '" aria-label="' + esc(txt) + '">' + contenido + "</button>";
+}
+function celdaTurno(x, canchas, N, cls, etiqueta) {
+  var td = "<td" + (cls ? ' class="' + cls + '"' : "") + ">";
+  if (!x || typeof x !== "object") return td + botonTip("ocup nada", "", etiqueta, [["Sin turno", "todas ocupadas desde antes, club cerrado o sin lectura"]], '<span aria-hidden="true">—</span>') + "</td>";
+  var a = Math.max(0, Math.min(N, Math.round(num(x.arrendadas))));
+  var libres = arr(x.libres).map(function (v) { return String(Math.round(num(v))); });
+  var arrend = canchas.filter(function (k) { return libres.indexOf(k) < 0; });
+  var filas = [["Arrendadas", a ? (arrend.length === a ? arrend.join(", ") : String(a)) : "ninguna"], ["Libres", libres.length ? libres.join(", ") : "ninguna"]];
+  if (num(x.precio) > 0) filas.push(["Precio", money(x.precio) + " / 90 min"]);
+  return td + botonTip("ocup", estiloOcup(a / N), etiqueta, filas, a + "/" + N) + "</td>";
+}
+function zTurnos(c, dias, hoy, canchas, N) {
+  var u = S.ui.padel;
+  var filas = dias.slice().reverse();
+  var vis = filas.slice(0, u.n);
+  var hs;
+  if (u.todas) {
+    var m = {};
+    vis.forEach(function (d) { if (d.porHora && typeof d.porHora === "object") Object.keys(d.porHora).forEach(function (k) { if (esHora(k)) m[k] = 1; }); });
+    NOCHE.forEach(function (k) { m[k] = 1; });
+    hs = Object.keys(m).sort();
+  } else hs = NOCHE;
+  var h = '<section class="card"><div class="card-cab"><div><h2>' + (u.todas ? "Turnos del día" : "Turnos de la noche") + '</h2><div class="sub">' +
+    esc("Canchas arrendadas de " + N + " en cada hora de inicio · lo más reciente arriba (incluye lo ya reservado para los próximos días)") + "</div></div>" +
+    '<button class="btn" data-act="padel-horas" aria-pressed="' + u.todas + '">' + (u.todas ? "Solo la noche" : "Ver todas las horas") + "</button></div>";
+  if (!vis.length) return h + '<div class="vacio">Todavía no hay días con lecturas.</div></section>';
+  h += '<div class="tw"><table class="turnos' + (u.todas ? " todas" : "") + '"><thead><tr><th scope="col">Día</th>';
+  hs.forEach(function (k) { h += '<th scope="col"' + (NOCHE.indexOf(k) >= 0 ? ' class="noche"' : "") + ">" + esc(k) + "</th>"; });
+  h += '<th scope="col" class="tot m-no">' + (u.todas ? "Día" : "Noche") + "</th></tr></thead><tbody>";
+  vis.forEach(function (d) {
+    var ph = d.porHora && typeof d.porHora === "object" ? d.porHora : {};
+    var sa = 0, sn = 0;
+    hs.forEach(function (k) { var x = ph[k]; if (x && typeof x === "object") { sa += Math.max(0, Math.min(N, Math.round(num(x.arrendadas)))); sn += N; } });
+    var tags = d.f === hoy ? '<span class="tag">hoy</span> ' : d.f > hoy ? '<span class="tag">próximo</span> ' : "";
+    if (d.festivo) tags += '<span class="tag">festivo</span> ';
+    if (sinDatoPadel(d)) tags += '<span class="tag">datos parciales</span> ';
+    h += "<tr" + (d.f === hoy ? ' class="hoy"' : "") + '><td><div class="p-dia">' + esc(diaC(d.f)) + '</div><div class="n2">' + tags +
+      '<span class="solo-m">' + (sn ? esc(fmtN(sa) + " de " + fmtN(sn)) : "") + "</span></div></td>";
+    hs.forEach(function (k) { h += celdaTurno(ph[k], canchas, N, u.todas && NOCHE.indexOf(k) >= 0 ? "noche" : "", diaC(d.f) + " · " + k); });
+    h += '<td class="tot m-no">' + (sn ? "<b>" + esc(fmtN(sa)) + '</b><span style="color:var(--text2)"> / ' + esc(fmtN(sn)) + "</span>" : '<span style="color:var(--text3)">—</span>') + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  if (filas.length > vis.length) h += '<div class="mas"><button class="btn" data-act="padel-mas">Ver ' + fmtN(Math.min(14, filas.length - vis.length)) + ' días más <span style="color:var(--text2)">(' + fmtN(filas.length - vis.length) + " restantes)</span></button></div>";
+  h += '<div class="niveles"><span>Arrendadas:</span>';
+  for (var i = 0; i <= N && N <= 12; i++) h += '<span class="ocup" style="' + estiloOcup(i / N) + '">' + i + "/" + N + "</span>";
+  h += '<span>— = sin turno o sin lectura (todas ocupadas desde antes, club cerrado o sin lectura previa)</span></div>';
+  return h + '<p class="pie">Toca o pasa el mouse por una celda para ver qué canchas estaban libres y el precio publicado. «datos parciales» = parte del día sin ninguna lectura (no cuenta en las horas abiertas).</p></section>';
+}
+/* Mapa de calor: horas (filas) × día de la semana (columnas), así cabe en el celular.
+   El API trae bloques de 30 min ("17:00" = 17:00–17:30, ver aggregate.js); aquí cada fila es una hora de reloj
+   con el promedio de sus bloques, para no confundirla con la hora de inicio de un turno de 90 min. */
+function zHeatmap(c) {
+  var hm = c.heatmap && typeof c.heatmap === "object" ? c.heatmap : {}, porH = {};
+  ORDEN_DOW.forEach(function (dw) {
+    var x = hm[dw]; if (!x || typeof x !== "object") return;
+    Object.keys(x).forEach(function (k) {
+      var v = Number(x[k]); if (!esHora(k) || x[k] == null || !isFinite(v)) return;
+      var hh = k.slice(0, 2), s = ((porH[hh] = porH[hh] || {})[dw] = porH[hh][dw] || [0, 0]);
+      s[0] += Math.max(0, Math.min(1, v)); s[1]++;
+    });
+  });
+  var hs = Object.keys(porH).sort();
+  var h = '<section class="card"><div class="card-cab"><div><h2>Mapa de calor</h2><div class="sub">Ocupación promedio por día de la semana y hora · últimas 8 semanas, días ya cerrados (incluye festivos)</div></div></div>';
+  if (!hs.length) return h + '<div class="vacio">Todavía no hay días cerrados para promediar.</div></section>';
+  h += '<div class="tw"><table class="hm"><thead><tr><th scope="col"><span class="sr">Hora</span></th>';
+  ORDEN_DOW.forEach(function (dw) { h += '<th scope="col"><abbr title="' + DOW_L[dw] + '" style="text-decoration:none">' + DOW_C[dw] + "</abbr></th>"; });
+  h += "</tr></thead><tbody>";
+  hs.forEach(function (hh) {
+    var rango = hh + ":00–" + String(+hh + 1).padStart(2, "0") + ":00";
+    h += '<tr><th scope="row"' + (+hh >= 17 ? ' class="noche"' : "") + "><span aria-hidden=\"true\">" + esc(+hh + " h") + '</span><span class="sr">' + esc(rango) + "</span></th>";
+    ORDEN_DOW.forEach(function (dw) {
+      var s = porH[hh][dw], et = DOW_L[dw] + " " + rango;
+      if (!s || !s[1]) { h += '<td class="nada">' + botonTip("", "", et, [["Sin turno", "club cerrado o sin datos"]], '<span aria-hidden="true">·</span>') + "</td>"; return; }
+      var v = s[0] / s[1];
+      h += '<td style="' + estiloOcup(v) + '">' + botonTip("", "", et, [["Ocupación promedio", pct(v)]], Math.round(v * 100) + '<span class="sr"> %</span>') + "</td>";
+    });
+    h += "</tr>";
+  });
+  h += '</tbody></table></div><div class="escala"><span>0 %</span><span class="g" aria-hidden="true"></span><span>100 % ocupado</span></div>';
+  return h + '<p class="pie">Cada fila es una hora de reloj (17 h = de 17:00 a 18:00), no la hora de inicio de un turno. En negrita la noche, desde las 17:00. Toca una celda para ver el detalle.</p></section>';
+}
+/* Reservas detectadas entre lecturas */
+function zEventos(c) {
+  var u = S.ui.padel;
+  var evs = arr(c.eventos).filter(function (e) { return e && esFecha(e.f) && esHora(e.hora) && (e.tipo === "reserva" || e.tipo === "liberada"); });
+  evs.sort(function (a, b) { return (Date.parse(b.detectado || "") || 0) - (Date.parse(a.detectado || "") || 0); });
+  var nRes = evs.filter(function (e) { return e.tipo === "reserva"; }), nLib = evs.length - nRes.length;
+  var lista = u.ev === "reserva" ? nRes : u.ev === "liberada" ? evs.filter(function (e) { return e.tipo === "liberada"; }) : evs;
+  var h = '<section class="card"><div class="card-cab"><div><h2>Reservas detectadas</h2><div class="sub">Cambios vistos entre lecturas · más recientes primero</div></div></div>';
+  if (!evs.length) return h + '<div class="vacio">Todavía no se han detectado reservas nuevas.</div></section>';
+  h += '<div class="ctrls"><div class="pills" role="group" aria-label="Tipo de cambio">' +
+    [["todos", "Todos", evs.length], ["reserva", "Reservas", nRes.length], ["liberada", "Liberadas", nLib]].map(function (p) {
+      return '<button class="pill" data-act="padel-ev" data-v="' + p[0] + '" aria-pressed="' + (u.ev === p[0]) + '">' + p[1] + ' <span class="c">' + fmtN(p[2]) + "</span></button>";
+    }).join("") + "</div></div>";
+  var ants = nRes.map(function (e) { return num(e.anticipacionH); }).sort(function (a, b) { return a - b; });
+  if (ants.length) {
+    var med = ants.length % 2 ? ants[(ants.length - 1) / 2] : (ants[ants.length / 2 - 1] + ants[ants.length / 2]) / 2;
+    var m24 = ants.filter(function (x) { return x < 24; }).length;
+    h += '<div class="resumen-f">' + esc("Las reservas se hacen en promedio (mediana) " + anticipacion(med).replace(" antes", "") + " antes · " + pct(m24 / ants.length) + " con menos de 24 h") + "</div>";
+  }
+  if (!lista.length) return h + '<div class="vacio">Sin cambios de este tipo.</div></section>';
+  h += '<ul class="evs">';
+  lista.slice(0, u.evN).forEach(function (e) {
+    var res = e.tipo === "reserva", t = Date.parse(e.detectado || "") || 0;
+    var cancha = /^\d{1,3}$/.test(String(e.cancha)) ? "Cancha " + e.cancha : "Cancha";
+    h += '<li><span class="pt ' + (res ? "bg-green" : "bg-orange") + '" aria-hidden="true"></span><span class="q">' + esc(cancha + " · " + diaC(e.f) + " · " + e.hora) + "</span>" +
+      '<span class="cu">' + esc(t ? hace(t) : "—") + '</span><span class="d2">' + esc((res ? "Reservada " : "Liberada ") + anticipacion(e.anticipacionH)) + "</span></li>";
+  });
+  h += "</ul>";
+  if (lista.length > u.evN) h += '<div class="mas"><button class="btn" data-act="padel-ev-mas">Ver más <span style="color:var(--text2)">(' + fmtN(lista.length - u.evN) + " restantes)</span></button></div>";
+  return h + "</section>";
+}
+
+/* Carga de /padel: misma sesión (Bearer), copia local propia y revalidación con If-None-Match.
+   Sin forzar, no repite la consulta si se revisó hace menos de 1 minuto (cambiar de pestaña no martilla el Worker). */
+function revalidarPadel(forzar) {
+  var P = S.padel;
+  if (S.dev || !S.token) return Promise.resolve();
+  if (P.cargando && Date.now() - P.desde < 60000) return Promise.resolve();
+  if (!forzar && P.data && !P.error && Date.now() - P.revisado < 60000) return Promise.resolve();
+  var gen = S.gen, tok = S.token;
+  function vigente() { return gen === S.gen && tok === S.token; }
+  P.cargando = true; P.desde = Date.now();
+  // Lo que cambia la vista (sin datos, la vista depende también de P.cargando): si al final es igual, no se redibuja
+  function firma() { return P.data ? "d\u0001" + (P.error || "") : "s\u0001" + (P.error || "") + "\u0001" + (P.vacio || ""); }
+  var firmaAntes = firma();
+  if (S.tab === "padel") { $("b-refrescar").classList.add("girando"); pintarEstado(); }
+  var hd = { Authorization: "Bearer " + tok };
+  if (P.etag && P.data) hd["If-None-Match"] = P.etag;
+  var opts = { headers: hd, cache: "no-store" }, nuevo = null;
+  var p = conTiempo(API + "/padel", opts, 30000);
+  P.ctl = opts._ctl || null;
+  return p.then(function (r) {
+    if (!vigente()) return;
+    if (r.status === 304) { P.error = null; P.vacio = null; P.revisado = Date.now(); return; }
+    if (r.status === 401) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return; }
+    if (r.status === 404 || r.status === 503) {
+      return leerError(r).then(function (m) {
+        if (!vigente()) return;
+        P.error = null; P.revisado = Date.now();
+        if (!P.data) P.vacio = m || "Todavía no hay lecturas de easycancha: la primera corrida automática no ha terminado. Vuelve a intentar en unos minutos.";
+      });
+    }
+    if (!r.ok) { var eh = new Error("El servidor respondió con un error (" + r.status + ")."); eh.http = true; throw eh; }
+    var etag = r.headers.get("ETag");
+    // Un 200 que no es JSON (página HTML de un proxy, cuerpo cortado) es un problema de datos, no de conexión
+    return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); }).then(function (j) {
+      if (!vigente()) return;
+      if (!datosPadelValidos(j)) throw errorDatos("respuesta sin clubes");
+      P.data = j; P.etag = etag || null; P.error = null; P.vacio = null; P.revisado = Date.now();
+      if (S.ui.padel.club >= j.clubes.length) S.ui.padel.club = 0;
+      nuevo = { etag: etag || null, data: j, guardado: Date.now() };
+    });
+  }).catch(function (e) {
+    if (!vigente()) return;
+    P.vacio = null; // un error posterior a un "todavía no hay datos" se tiene que ver
+    P.error = e && e.datos ? "Los datos recibidos no se pudieron mostrar (" + e.message + ")." : e && e.http ? e.message :
+      e && e.name === "AbortError" ? "El servidor tardó demasiado en responder." : "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
+  }).then(function () {
+    if (gen !== S.gen) return; // cerrarSesion ya dejó todo limpio
+    P.cargando = false; P.ctl = null;
+    if (!S.cargando) $("b-refrescar").classList.remove("girando");
+    var fallo = false;
+    // Un 304 o una respuesta sin cambios visibles no redibuja (no se pierde el deslizamiento de las tablas ni el tooltip).
+    // Si hay datos nuevos se redibuja conservando el deslizamiento lateral de cada tabla.
+    if (S.tab === "padel" && (nuevo || !P.data || firma() !== firmaAntes)) {
+      var desl = Array.prototype.map.call(document.querySelectorAll("#view .tw"), function (x) { return x.scrollLeft; });
+      render(); fallo = S.fallaRender;
+      Array.prototype.forEach.call(document.querySelectorAll("#view .tw"), function (x, i) { if (desl[i]) x.scrollLeft = desl[i]; });
+    }
+    pintarEstado();
+    // Solo se guarda una copia que se pudo dibujar
+    if (nuevo) { if (fallo || !ls.set(K_PADEL, JSON.stringify(nuevo))) ls.del(K_PADEL); }
+  });
+}
+
 /* ═══════════ Render ═══════════ */
-var VISTAS = { resumen: vResumen, productos: vProductos, clientes: vClientes, vendedores: vVendedores, inventario: vInventario, cartera: vCartera, movimiento: vMovimiento };
+var VISTAS = { resumen: vResumen, productos: vProductos, clientes: vClientes, vendedores: vVendedores, inventario: vInventario, cartera: vCartera, movimiento: vMovimiento, padel: vPadel };
 var ZONAS = { prod: ["z-prod", zProductos], top: ["z-top", zTop], riesgo: ["z-riesgo", zRiesgo], inv: ["z-inv", zInv], car: ["z-car", zCartera], mov: ["z-mov", zMov], mensual: ["z-mensual", zMensual] };
 
 function pintarTabs() {
-  // Solo las 7 secciones van dentro del tablist; los enlaces externos quedan fuera (no son pestañas)
+  // Solo las 8 secciones van dentro del tablist; los enlaces externos quedan fuera (no son pestañas)
   var h = '<div class="tablist" role="tablist" aria-label="Secciones">';
   TABS.forEach(function (t) {
     h += '<button class="tab" role="tab" id="tab-' + t[0] + '" aria-controls="view" aria-selected="' + (S.tab === t[0]) + '" tabindex="' + (S.tab === t[0] ? 0 : -1) + '" data-tab="' + t[0] + '">' + t[1] + "</button>";
@@ -1347,7 +1746,12 @@ function restaurarFoco(f) {
   if (f.ini != null) { try { n.setSelectionRange(f.ini, f.fin); } catch (e) {} }
 }
 function render() {
-  if (!S.data) return;
+  // Casa Padel no depende del JSON del dashboard: se dibuja aunque /data no haya cargado o haya fallado
+  if (!S.data && S.tab !== "padel") {
+    ocultarTip(); S.charts = [];
+    $("view").innerHTML = S.msgSinDatos ? sinDatosHTML(S.msgSinDatos) : cargandoHTML();
+    pintarAvisos(); return;
+  }
   ocultarTip();
   S.charts = [];
   var y = window.scrollY, foco = claveFoco(), html;
@@ -1374,7 +1778,8 @@ function irTab(t, enfocar) {
   if (!propia(VISTAS, t)) t = "resumen";
   S.tab = t; guardarPref();
   try { history.replaceState(null, "", "#" + t); } catch (e) {}
-  pintarTabs(); render(); window.scrollTo(0, 0);
+  pintarTabs(); render(); pintarEstado(); window.scrollTo(0, 0);
+  if (t === "padel") revalidarPadel();
   var b = $("tab-" + t); if (b) { b.scrollIntoView({ block: "nearest", inline: "nearest" }); if (enfocar) b.focus(); }
   marcarDesborde();
 }
@@ -1384,6 +1789,7 @@ function guardarPref() { ls.set(K_PREF, JSON.stringify({ periodo: S.periodo, tab
 function pintarEstado() {
   var el = $("estado"), d = S.data;
   if (S.dev) { el.innerHTML = '<span class="punto"></span><span>Vista previa local</span>'; return; }
+  if (S.tab === "padel") { pintarEstadoPadel(); return; }
   if (!d) { el.innerHTML = '<span class="punto off"></span><span>' + (S.cargando ? "Cargando…" : "Sin datos") + "</span>"; return; }
   var t = Date.parse(d.sincronizado || d.generado || "") || 0;
   var viejo = t && Date.now() - t > 90 * 60000;
@@ -1392,8 +1798,21 @@ function pintarEstado() {
   el.innerHTML = '<span class="punto' + (S.errorRed ? " off" : viejo ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>";
   el.title = t ? "Última sincronización con Siigo: " + new Date(t).toLocaleString("es-CO") : "";
 }
+/* En Casa Padel el indicador muestra la última lectura de easycancha */
+function pintarEstadoPadel() {
+  var el = $("estado"), P = S.padel, c = clubPadel();
+  if (!P.data) { el.innerHTML = '<span class="punto off"></span><span>' + (P.cargando ? "Cargando…" : P.error ? "No se pudo cargar" : "Sin datos") + "</span>"; el.title = ""; return; }
+  var l = lecturaPadel(c), t = l.t;
+  var txt = (t ? "Lectura " + hace(t) : "Sin lecturas") + (P.error ? " · copia guardada" : "");
+  el.innerHTML = '<span class="punto' + (P.error ? " off" : l.viejo ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>";
+  el.title = t ? "Última lectura de easycancha: " + new Date(t).toLocaleString("es-CO") : "";
+  // La cabecera de la pestaña repite la lectura: se actualiza con el mismo reloj para que no quede atrás
+  var pl = $("p-lect"); if (pl && c) pl.innerHTML = textoLecturaPadel(c);
+}
 function pintarAvisos() {
   var h = "", d = S.data;
+  // En Casa Padel los avisos del dashboard de ventas no aplican (esa pestaña trae los suyos)
+  if (S.tab === "padel") d = null;
   if (d && d.backfillCompleto === false) {
     var det = describirEstado(S.estadoSync);
     h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Cargando el historial desde Siigo</b><p>La primera sincronización todavía está trayendo meses antiguos: los totales históricos pueden estar incompletos por ahora.' + (det ? " " + esc(det) : "") + "</p></div></div>";
@@ -1418,7 +1837,7 @@ function describirEstado(e) {
   return l.length ? "Vamos por: " + l.join(", ") + "." : "";
 }
 function aplicarDatos(data, etag) {
-  S.data = data; S.etag = etag || null; S.memo = {};
+  S.data = data; S.etag = etag || null; S.memo = {}; S.msgSinDatos = null;
   // si el mes elegido ya no existe en el período, se limpia
   var ms = mesesPeriodo();
   ["prod", "vend", "mov"].forEach(function (k) { if (S.ui[k].mes && ms.indexOf(S.ui[k].mes) < 0) S.ui[k].mes = ""; });
@@ -1479,7 +1898,8 @@ function revalidar() {
       S.errorRed = null; S.revisado = Date.now();
       // Primero se pinta; solo si funcionó se guarda la copia local (así no queda guardada una copia que rompe)
       try { aplicarDatos(j, etag); } catch (e) { throw errorDatos(e && e.message ? e.message : "error al dibujar"); }
-      if (S.fallaRender || !ls.set(K_CACHE, JSON.stringify({ etag: etag, data: j, guardado: Date.now() }))) ls.del(K_CACHE);
+      // (en Casa Padel el dibujo no usa este JSON: su resultado no decide si se guarda la copia)
+      if ((S.fallaRender && S.tab !== "padel") || !ls.set(K_CACHE, JSON.stringify({ etag: etag, data: j, guardado: Date.now() }))) ls.del(K_CACHE);
       if (j.backfillCompleto === false) cargarEstado();
     });
   }).catch(function (e) {
@@ -1489,7 +1909,7 @@ function revalidar() {
     if (!S.data) mostrarSinDatos(S.errorRed + (e && e.datos ? " Avisa a soporte si sigue igual." : " Revisa tu internet y vuelve a intentar."));
   }).then(function () {
     if (gen !== S.gen) return; // cerrarSesion ya dejó todo limpio
-    S.cargando = false; S.ctl = null; $("b-refrescar").classList.remove("girando"); pintarEstado(); pintarAvisos();
+    S.cargando = false; S.ctl = null; if (!S.padel.cargando) $("b-refrescar").classList.remove("girando"); pintarEstado(); pintarAvisos();
   });
 }
 function cargarEstado() {
@@ -1501,7 +1921,12 @@ function cargarEstado() {
     .catch(function () {});
 }
 function mostrarSinDatos(msg) {
-  $("view").innerHTML = '<div class="cargando"><div style="text-align:center;max-width:420px"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">Sin datos para mostrar</div>' +
+  S.msgSinDatos = msg;
+  if (S.tab === "padel") return; // Casa Padel tiene su propia carga: no se le pisa la vista
+  $("view").innerHTML = sinDatosHTML(msg);
+}
+function sinDatosHTML(msg) {
+  return '<div class="cargando"><div style="text-align:center;max-width:420px"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">Sin datos para mostrar</div>' +
     "<div>" + esc(msg) + '</div><div style="margin-top:14px"><button class="btn prim" data-act="reintentar">Reintentar</button></div></div></div>';
 }
 
@@ -1546,7 +1971,9 @@ function cerrarSesion(msg) {
   // Invalida y cancela lo que esté en vuelo: ninguna respuesta vieja vuelve a guardar datos
   S.gen++;
   if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
-  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER);
+  if (S.padel.ctl) { try { S.padel.ctl.abort(); } catch (e) {} }
+  S.padel = padelInicial(); S.msgSinDatos = null;
+  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PADEL);
   S.token = null; S.data = null; S.etag = null; S.memo = {}; S.errorRed = null;
   S.cargando = false; S.usuario = null; S.rol = null; S.estadoSync = null; S.msgSync = null; S.syncEnCurso = false;
   S.ui = uiInicial();
@@ -1582,6 +2009,7 @@ $("f-login").addEventListener("submit", function (ev) {
       $("l-clave").value = "";
       mostrarApp();
       $("view").innerHTML = cargandoHTML();
+      if (S.tab === "padel") { render(); revalidarPadel(true); }
       return revalidar();
     })
     .catch(function (e) {
@@ -1627,7 +2055,7 @@ document.addEventListener("keydown", function (ev) {
 });
 $("b-refrescar").addEventListener("click", function () {
   if (S.dev) { location.reload(); return; }
-  revalidar();
+  if (S.tab === "padel") revalidarPadel(true); else revalidar();
 });
 
 /* ═══════════ Eventos de la vista (delegación) ═══════════ */
@@ -1680,8 +2108,30 @@ $("view").addEventListener("click", function (ev) {
     return;
   }
   if (act === "mov-abrir") { var c = b.getAttribute("data-c"); S.ui.mov.abierto = S.ui.mov.abierto === c ? "" : c; renderZona("mov"); var fila = document.querySelector('[data-act="mov-abrir"][data-c="' + CSS.escape(c) + '"]'); if (fila) fila.focus({ preventScroll: true }); return; }
-  if (act === "reintentar") { $("view").innerHTML = cargandoHTML(); revalidar(); return; }
+  if (act === "reintentar") { S.msgSinDatos = null; $("view").innerHTML = cargandoHTML(); revalidar(); return; }
+  // Casa Padel
+  if (act === "padel-rango") { if (S.ui.padel.rango !== v) { S.ui.padel.rango = v; render(); } return; }
+  if (act === "padel-club") { S.ui.padel.club = Math.max(0, parseInt(v, 10) || 0); S.ui.padel.n = 14; S.ui.padel.evN = 15; render(); pintarEstado(); return; }
+  if (act === "padel-horas") { S.ui.padel.todas = !S.ui.padel.todas; render(); return; }
+  if (act === "padel-mas") { S.ui.padel.n += 14; render(); return; }
+  if (act === "padel-ev") { if (S.ui.padel.ev !== v) { S.ui.padel.ev = v; S.ui.padel.evN = 15; render(); } return; }
+  if (act === "padel-ev-mas") { S.ui.padel.evN += 30; render(); return; }
+  if (act === "padel-reintentar") { revalidarPadel(true); render(); return; }
+  if (act === "padel-tip") { tipCelda(b); return; }
 });
+/* Casa Padel: detalle de las celdas de turnos y del mapa de calor en el mismo #tip de los gráficos.
+   Tocar o Enter lo abre; pasar el mouse también; Escape, tocar fuera o deslizar la tabla lo cierra. */
+function tipCelda(b) { var r = b.getBoundingClientRect(); verTip(b.getAttribute("data-tip") || "", r.left + r.width / 2, r.top); }
+$("view").addEventListener("pointerover", function (ev) {
+  if (ev.pointerType !== "mouse" || !ev.target.closest) return;
+  var b = ev.target.closest('[data-act="padel-tip"]'); if (b) tipCelda(b);
+});
+$("view").addEventListener("pointerout", function (ev) {
+  if (ev.pointerType !== "mouse" || !ev.target.closest) return;
+  var b = ev.target.closest('[data-act="padel-tip"]');
+  if (b && !(ev.relatedTarget && b.contains(ev.relatedTarget))) ocultarTip();
+});
+$("view").addEventListener("scroll", function (ev) { if (S.tab === "padel" && ev.target.classList && ev.target.classList.contains("tw")) ocultarTip(); }, { capture: true, passive: true });
 $("view").addEventListener("keydown", function (ev) {
   if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches("tr[data-act]")) { ev.preventDefault(); ev.target.click(); }
 });
@@ -1707,15 +2157,17 @@ $("view").addEventListener("input", function (ev) {
 var anchoPrevio = window.innerWidth, tRes = null;
 window.addEventListener("resize", function () {
   clearTimeout(tRes);
-  tRes = setTimeout(function () { marcarDesborde(); if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (S.data) render(); } }, 180);
+  tRes = setTimeout(function () { marcarDesborde(); if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (S.data || S.tab === "padel") render(); } }, 180);
 });
 window.addEventListener("hashchange", function () { var t = location.hash.slice(1); if (propia(VISTAS, t) && t !== S.tab) irTab(t); });
 
 /* Reloj del indicador + revalidación periódica */
 setInterval(pintarEstado, 30000);
-setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) revalidar(); }, 5 * 60000);
+setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) { revalidar(); if (S.tab === "padel") revalidarPadel(); } }, 5 * 60000);
 document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "visible" && S.token && !S.dev && Date.now() - S.revisado > 60000) revalidar();
+  if (document.visibilityState !== "visible" || !S.token || S.dev) return;
+  if (Date.now() - S.revisado > 60000) revalidar();
+  if (S.tab === "padel") revalidarPadel();
 });
 
 /* ═══════════ Arranque ═══════════ */
@@ -1725,17 +2177,28 @@ document.addEventListener("visibilitychange", function () {
   var h = location.hash.slice(1);
   S.tab = propia(VISTAS, h) ? h : propia(VISTAS, pref.tab) ? pref.tab : "resumen";
 
-  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json>
+  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json> y/o ?padel=<ruta relativa .json>
   var host = location.hostname;
-  var datos = null;
-  try { datos = new URLSearchParams(location.search).get("datos"); } catch (e) {}
-  if ((host === "localhost" || host === "127.0.0.1") && datos) {
-    if (!/^[\w.\-\/]+\.json$/.test(datos) || datos.indexOf("//") >= 0) { document.body.textContent = "Parámetro ?datos inválido: debe ser una ruta relativa a un .json"; return; }
+  var datos = null, padelJ = null;
+  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); padelJ = qs.get("padel"); } catch (e) {}
+  if ((host === "localhost" || host === "127.0.0.1") && (datos || padelJ)) {
+    var rutaOk = function (x) { return !x || (/^[\w.\-\/]+\.json$/.test(x) && x.indexOf("//") < 0); };
+    if (!rutaOk(datos) || !rutaOk(padelJ)) { document.body.textContent = "Parámetro ?datos o ?padel inválido: debe ser una ruta relativa a un .json"; return; }
     S.dev = true;
-    mostrarApp(); $("view").innerHTML = cargandoHTML();
-    fetch(datos, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function (j) { aplicarDatos(j, null); })
-      .catch(function (e) { mostrarSinDatos("No se pudo leer " + datos + ": " + e.message); });
+    if (!datos) S.msgSinDatos = "Vista previa sin ?datos=: solo se puede ver la pestaña Casa Padel.";
+    if (padelJ) S.padel.cargando = true; else S.padel.vacio = "Vista previa sin ?padel=<ruta .json>.";
+    mostrarApp(); render();
+    if (datos) {
+      fetch(datos, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (j) { aplicarDatos(j, null); })
+        .catch(function (e) { mostrarSinDatos("No se pudo leer " + datos + ": " + e.message); });
+    }
+    if (padelJ) {
+      fetch(padelJ, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (j) { if (!datosPadelValidos(j)) throw new Error("el JSON no trae clubes"); S.padel.data = j; })
+        .catch(function (e) { S.padel.error = "No se pudo leer " + padelJ + ": " + e.message + "."; })
+        .then(function () { S.padel.cargando = false; if (S.tab === "padel") render(); });
+    }
     return;
   }
 
@@ -1744,15 +2207,26 @@ document.addEventListener("visibilitychange", function () {
   S.usuario = u.usuario || null; S.rol = u.rol || null;
   if (!S.token || tokenVencido(u.expira)) { if (S.token) cerrarSesion("Tu sesión venció. Vuelve a entrar."); else mostrarLogin(""); return; }
   mostrarApp();
+  // Copia local de Casa Padel (independiente): si no se puede dibujar se descarta
+  var cp = ls.json(K_PADEL);
+  if (cp && datosPadelValidos(cp.data)) {
+    S.padel.data = cp.data; S.padel.etag = cp.etag || null;
+    if (S.tab === "padel") {
+      try { vPadel(); } catch (e) { console.error("Copia local de Casa Padel inválida", e); S.padel = padelInicial(); ls.del(K_PADEL); }
+      S.charts = [];
+    }
+  }
   var c = ls.json(K_CACHE);
   var okCache = false;
   if (c && c.data && Array.isArray(c.data.meses)) {
     // Una copia guardada que rompa el dibujo se descarta; igual se pide la versión del servidor
-    try { aplicarDatos(c.data, c.etag); okCache = !S.fallaRender; } catch (e) { console.error("Copia local inválida", e); }
+    // (en Casa Padel el dibujo no usa este JSON, así que ahí no sirve para juzgarla)
+    try { aplicarDatos(c.data, c.etag); okCache = !S.fallaRender || S.tab === "padel"; } catch (e) { console.error("Copia local inválida", e); }
     if (!okCache) { ls.del(K_CACHE); S.data = null; S.etag = null; S.memo = {}; }
   }
-  if (!okCache) $("view").innerHTML = cargandoHTML();
+  if (!okCache) render(); // sin copia: "Cargando…" (o Casa Padel, que no depende de este JSON)
   revalidar();
+  if (S.tab === "padel") revalidarPadel(true);
 })();
 
 /* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
