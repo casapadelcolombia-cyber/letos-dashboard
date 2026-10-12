@@ -267,6 +267,7 @@ tr.det td{background:var(--fill);padding:4px 8px 14px}
 .p-lect{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ocup{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 6px;border-radius:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ocup.nada{background:none;color:var(--text3);font-weight:400}
+.ocup.cerr{font-size:11px;padding:0 2px}
 table.turnos th,table.turnos td{text-align:center;padding:6px 3px}
 /* Columna "Día" fija al deslizar. Se pega 18 px adentro (relleno de .tw): el ::before tapa ese hueco con el mismo fondo
    de la celda, para que no se vean pasar las celdas de debajo (box-shadow no se pinta en tablas border-collapse) */
@@ -337,6 +338,39 @@ table.rk small.rk-c{display:block;font-size:11px;color:var(--text2);font-weight:
 .nt-h{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums}
 .nt-v{font-size:13px;color:var(--text3)}
 .metodo li+li{margin-top:4px}
+/* Consultar una fecha (/padel/dia): campo en la cabecera y panel del día */
+.pd-f{display:grid;grid-template-columns:190px auto;gap:8px;align-items:end}
+.pd-f .btn{justify-self:start}
+/* El aviso ocupa el ancho del formulario sin ensancharlo (width 0 + min-width 100 %) */
+.pd-msg{grid-column:1/-1;width:0;min-width:100%;font-size:13px;color:var(--neg)}
+@media (max-width:600px){.pd-f{flex:1 1 100%;grid-template-columns:minmax(0,1fr) auto}}
+.pd-cab{flex-wrap:nowrap}
+.pd-cab>div{min-width:0}
+.pd-cab .btn{flex:none}
+.pd-tags .tag{margin:0 4px 0 0}
+table.pd th.d,table.pd td.d{text-align:right}
+table.pd td.tot{white-space:nowrap}
+table.pd td:first-child{min-width:118px}
+table.pd small{display:block;font-size:11px;color:var(--text2);font-weight:400;white-space:nowrap}
+table.pd td.pd-sin{color:var(--text3);font-size:13px}
+table.pd td .minibar{margin-left:auto;max-width:90px}
+/* Celular: cada club se apila (nombre y resumen arriba, sus turnos de la noche debajo), así caben 5 o más turnos */
+@media (max-width:600px){
+  table.pd,table.pd tbody{display:block}
+  table.pd thead{display:none}
+  table.pd tr{display:flex;flex-wrap:wrap;gap:4px 6px;padding:10px 0;border-bottom:.5px solid var(--sep)}
+  table.pd tr:last-child{border-bottom:0}
+  table.turnos.pd td{padding:0;border:0}
+  table.turnos.pd td:first-child{flex:1 1 100%;position:static;min-width:0;padding-bottom:4px}
+  table.turnos.pd td:first-child::before{content:none}
+  table.pd td.pd-v{display:none}
+  table.pd td.pd-sin{flex:1 1 100%;text-align:left}
+}
+table.pd-h th,table.pd-h td{padding:6px 8px}
+table.pd-h tbody th{font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+table.pd-h tr.noche th,table.pd-h tr.noche td{background:rgba(var(--blueRGB),.06)}
+.pd-a{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.pd-c .cmp-n:hover span:last-child{color:inherit;text-decoration:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -474,12 +508,16 @@ function uiInicial() {
     mov: { mes: "", q: "", sort: { k: "t", dir: -1 }, n: 50, abierto: "" },
     mensual: { n: 12 },
     // Casa Padel: club elegido ("todos" o id del club), rango de los gráficos, horas plegables, filas de turnos,
-    // filtro de eventos, orden del ranking y fecha de "Turnos de la noche" en la vista Todos ("0" hoy, "1" mañana)
-    padel: { club: "todos", rango: "30", todas: false, n: 14, ev: "todos", evN: 15, orden: { k: "oc30", dir: -1 }, nocheF: "0" }
+    // filtro de eventos, orden del ranking, fecha de "Turnos de la noche" en la vista Todos ("0" hoy, "1" mañana),
+    // fecha escrita en "Consultar una fecha" (diaF) y reservas a la vista en el día consultado (devN)
+    padel: { club: "todos", rango: "30", todas: false, n: 14, ev: "todos", evN: 15, orden: { k: "oc30", dir: -1 }, nocheF: "0", diaF: "", devN: 20 }
   };
 }
-/* Casa Padel tiene su propia carga, copia local y errores: si falla no toca las otras pestañas */
-function padelInicial() { return { data: null, etag: null, cargando: false, desde: 0, error: null, vacio: null, revisado: 0, ctl: null }; }
+/* Casa Padel tiene su propia carga, copia local y errores: si falla no toca las otras pestañas.
+   dia = consulta de una fecha exacta (/padel/dia): fecha abierta ("" = cerrada), respuesta (de la fecha dataF), carga,
+   errores y una caché en memoria por fecha. */
+function padelInicial() { return { data: null, etag: null, cargando: false, desde: 0, error: null, vacio: null, revisado: 0, ctl: null, dia: diaPadelInicial() }; }
+function diaPadelInicial() { return { fecha: "", data: null, dataF: "", cargando: false, error: null, reintentar: true, aviso: "", n: 0, ctl: null, cache: {} }; }
 var S = {
   data: null, etag: null, dev: false, token: null, usuario: null, rol: null,
   tab: "resumen", periodo: "12", revisado: 0, errorRed: null, cargando: false, sinDatos: null, estadoSync: null,
@@ -1499,6 +1537,60 @@ function sinTraslape(hs) {
   for (var i = 1; i < ms.length; i++) if (ms[i] - ms[i - 1] < TURNO_SIN_TRASLAPE_MIN) return false;
   return true;
 }
+/* ─────────── Turnos fijos de 90 min (decisión de Mau, 12-oct-2026) ───────────
+   Todo el día solo cuentan los turnos fijos de 90 min de cada club: el API los manda en club.turnos (todos los del día,
+   p. ej. 06:30 … 21:30) y club.noche = {desde, turnos} (los de la noche, que se usan tal cual: La Jaula tiene solo
+   16:00 … 22:00, todos de noche), y porHora ya solo trae esas horas. Sin estos campos (datos de antes del cambio) se usa
+   la lógica anterior: las horas de inicio que vengan en porHora (la noche, desde las 17:00). */
+function horasValidas(xs) {
+  var out = [], vistos = {};
+  arr(xs).forEach(function (k) { if (esHora(k) && !vistos[k]) { vistos[k] = 1; out.push(k); } });
+  return out.sort();
+}
+function turnosClub(c) { var t = horasValidas(c && c.turnos); return t.length ? t : null; }
+function nocheClub(c) {
+  var n = c && c.noche && typeof c.noche === "object" ? c.noche : null, ts = horasValidas(n && n.turnos);
+  if (!ts.length) {
+    // Sin `noche` pero con los turnos del día: la noche son los turnos desde las 17:00
+    var t = turnosClub(c); ts = t ? t.filter(function (k) { return k >= NOCHE_DESDE; }) : [];
+    return ts.length ? { desde: ts[0], turnos: ts } : null;
+  }
+  return { desde: esHora(n.desde) && n.desde <= ts[0] ? n.desde : ts[0], turnos: ts };
+}
+/* Todas las horas de un club: sus turnos fijos del día; sin ellos, las horas de los datos de `lista`
+   (con la noche reducida a sus turnos fijos si el club trae `noche`) */
+function horasDiaClub(c, lista) {
+  var t = turnosClub(c); if (t) return t.slice();
+  var n = nocheClub(c), m = {};
+  lista.forEach(function (d) { if (d && d.porHora && typeof d.porHora === "object") Object.keys(d.porHora).forEach(function (k) { if (esHora(k) && (!n || k < n.desde)) m[k] = 1; }); });
+  if (n) n.turnos.forEach(function (k) { m[k] = 1; });
+  return Object.keys(m).sort();
+}
+function listaY(xs) { return xs.length > 1 ? xs.slice(0, -1).join(", ") + " y " + xs[xs.length - 1] : xs.join(""); }
+/* "de 06:30 a 21:30, con la noche en 17:00, 18:30, 20:00 y 21:30"; si todos sus turnos son de noche (La Jaula),
+   "solo 16:00, 17:30, 19:00, 20:30 y 22:00" */
+function textoTurnos(c) {
+  var t = turnosClub(c), n = nocheClub(c), s = "";
+  if (t && n && t.join() === n.turnos.join()) return "solo " + listaY(t);
+  if (t) s = t.length > 1 ? "de " + t[0] + " a " + t[t.length - 1] : "a las " + t[0];
+  if (n) s += (s ? ", con la noche en " : "en la noche: ") + listaY(n.turnos);
+  return s;
+}
+/* Método de la vista Todos: el horario de turnos más común y los clubes que lo tienen distinto (p. ej. La Jaula) */
+function textoTurnosTodos(cs) {
+  var grupos = {}, orden = [];
+  cs.forEach(function (c, i) {
+    var t = turnosClub(c), n = nocheClub(c); if (!t && !n) return;
+    var k = (t || []).join(",") + "|" + (n ? n.turnos.join(",") : "");
+    if (!propia(grupos, k)) { grupos[k] = { c: c, nombres: [] }; orden.push(k); }
+    grupos[k].nombres.push(nombreCorto(c, i));
+  });
+  if (!orden.length) return "";
+  var mayor = orden.reduce(function (a, k) { return grupos[k].nombres.length > grupos[a].nombres.length ? k : a; }, orden[0]);
+  if (orden.length === 1) return "Horario: " + textoTurnos(grupos[mayor].c) + ".";
+  return orden.filter(function (k) { return k !== mayor; }).map(function (k) { return listaY(grupos[k].nombres) + ": " + textoTurnos(grupos[k].c) + "."; }).join(" ") +
+    " Los demás: " + textoTurnos(grupos[mayor].c) + ".";
+}
 /* Canchas libres de una hora de inicio. El API manda una lista [1, 4] (PADEL_SPEC: canchas libres con cualquier
    duración, sin minutos), igual en los días viejos del club 1125 (v1) que en los nuevos. Por si algún día llega
    {cancha: minutos} también se lee, sin romper. → [{c:"1", d:minutos|null}] */
@@ -1519,20 +1611,21 @@ function textoPrecio(x) {
   if (num(x.precio) > 0) return money(x.precio) + " / 90 min";
   return "";
 }
-function cabeceraPadel(c) {
+/* extra = HTML ya escapado que va a la derecha de la cabecera (el campo "Consultar una fecha") */
+function cabeceraPadel(c, extra) {
   var h = '<div class="cab"><div><h1>Casa Padel</h1>';
   if (c) {
     h += "<p>" + esc("Ocupación de la competencia en easycancha · " + nombreClub(c, clubesPadel().indexOf(c)) + (c.ciudad ? " (" + c.ciudad + ")" : "") + " · " + fmtN(canchasDe(c).length) + " canchas") + "</p>" +
       '<p class="p-lect" id="p-lect">' + textoLecturaPadel(c) + "</p>";
   } else h += "<p>Ocupación de la competencia en easycancha</p>";
-  return h + "</div></div>";
+  return h + "</div>" + (extra || "") + "</div>";
 }
-function cabeceraTodos(cs) {
+function cabeceraTodos(cs, extra) {
   var nC = 0, ciudades = {};
   cs.forEach(function (c) { nC += canchasDe(c).length; if (c.ciudad) ciudades[String(c.ciudad)] = 1; });
   var cds = Object.keys(ciudades);
   return '<div class="cab"><div><h1>Casa Padel</h1><p>' + esc("Ocupación de la competencia en easycancha · " + fmtN(cs.length) + " clubes · " + fmtN(nC) + " canchas" + (cds.length === 1 ? " · " + cds[0] : "")) +
-    '</p><p class="p-lect" id="p-lect">' + textoLecturaPadel(null) + "</p></div></div>";
+    '</p><p class="p-lect" id="p-lect">' + textoLecturaPadel(null) + "</p></div>" + (extra || "") + "</div>";
 }
 /* Selector de club: "Todos" + un botón por club (con su color). En el celular se desliza de lado. */
 function selectorPadel() {
@@ -1563,12 +1656,14 @@ function vPadel() {
     return cabeceraPadel(null) + '<div class="grid kpis k3">' + [1, 2, 3].map(function () { return '<div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:80%"></div></div>'; }).join("") + "</div>";
   }
   var cs = clubesPadel(), c = clubPadel(), u = S.ui.padel;
-  var h = c || !cs.length ? cabeceraPadel(c) : cabeceraTodos(cs);
+  var h = c || !cs.length ? cabeceraPadel(c, cs.length ? formDiaPadel() : "") : cabeceraTodos(cs, formDiaPadel());
   h += selectorPadel();
   if (P.error) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Mostrando la última copia guardada de Casa Padel</b><p>' + esc(P.error) +
     '</p></div><button class="btn" data-act="padel-reintentar" style="margin-left:auto">Reintentar</button></div>';
   if (P.data.version !== 1) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Versión de datos de Casa Padel no reconocida</b><p>Recarga la página; si sigue igual, avisa a soporte.</p></div></div>';
   if (!cs.length) return h + '<section class="card"><div class="vacio">Todavía no hay clubes configurados para seguir.</div></section>';
+  // Fecha consultada: su panel reemplaza la vista normal hasta tocar "Cerrar" (el selector sigue eligiendo el club)
+  if (P.dia.fecha) return h + vPadelDia(c, cs);
   if (!c) return h + vPadelTodos(cs);
 
   var hoy = hoyPadel(), ayer = sumarDias(hoy, -1), dias = diasPadel(c), canchas = canchasDe(c), N = canchas.length || 4;
@@ -1601,10 +1696,14 @@ function vPadel() {
 
   h += zTurnos(c, dias, hoy, canchas, N);
   h += '<div class="grid g2">' + zHeatmap(c) + zEventos(c) + "</div>";
+  // Turnos fijos de 90 min: con `turnos` reemplazan la regla de "el turno más largo desde esa hora"; con solo `noche`, se suman a ella
+  var tFijos = turnosClub(c), nFijos = nocheClub(c);
+  var liLibre = "<li>Una cancha cuenta como libre mientras dure el turno más largo que se puede reservar desde esa hora (30, 60 o 90 min según el club). Los huecos más cortos que la reserva mínima del club no se ven en easycancha, así que cuentan como ocupados.</li>";
   h += '<section class="card metodo"><h2>Cómo se calcula</h2><ul>' +
     "<li>Es una <b>estimación</b> hecha con la disponibilidad pública de easycancha, leída varias veces al día (hoy en cada lectura y los próximos días por turnos).</li>" +
     "<li>Una cancha que deja de aparecer libre cuenta como arrendada: si a una hora salen 3 canchas libres en un club de 4, hay 1 arrendada. Las reservas hechas por fuera de la app (en el club, por WhatsApp) también salen como ocupadas porque bloquean la cancha.</li>" +
-    "<li>Una cancha cuenta como libre mientras dure el turno más largo que se puede reservar desde esa hora (30, 60 o 90 min según el club). Los huecos más cortos que la reserva mínima del club no se ven en easycancha, así que cuentan como ocupados.</li>" +
+    (tFijos ? "<li>Solo cuentan los <b>turnos fijos de 90 min</b> del club: " + esc(listaY(tFijos)) + ". Las horas de inicio intermedias no cuentan, y una cancha libre por menos de 90 min cuenta como arrendada en ese turno.</li>"
+      : liLibre + (nFijos ? "<li>En la noche solo cuentan los <b>turnos fijos de 90 min</b> del club: " + esc(listaY(nFijos.turnos)) + ". Las horas de inicio intermedias de la noche no cuentan.</li>" : "")) +
     "<li>Días pasados: estado final con la última lectura antes de que empiece cada media hora. Hoy y los próximos días: la última lectura (lo reservado hasta ahora).</li>" +
     "<li>Ingreso estimado = horas arrendadas × precio por hora publicado en esa franja. No descuenta promociones ni membresías.</li></ul></section>";
 
@@ -1682,9 +1781,11 @@ function vPadelTodos(cs) {
   h += zRanking(rs);
   h += '<div class="grid g2">' + zComparada(rs) + zOcupDiaria(rs, hoy, u) + "</div>";
   h += zNocheTodos(rs, hoy, u);
+  var tTodos = textoTurnosTodos(cs), diaFijo = cs.every(function (c) { return turnosClub(c); });
   h += '<section class="card metodo"><h2>Cómo se compara</h2><ul>' +
     "<li>Los clubes tienen distinto número de canchas (3, 4 o 5) y distinto horario, así que la cifra para compararlos es la <b>ocupación</b>: horas arrendadas ÷ horas abiertas de todas sus canchas.</li>" +
     "<li>Las horas y el ingreso son <b>estimaciones</b> con la disponibilidad pública de easycancha: una cancha que no aparece libre cuenta como arrendada (también si la reservaron en el club o por WhatsApp).</li>" +
+    (tTodos ? "<li>" + (diaFijo ? "Solo" : "En la noche solo") + " cuentan los <b>turnos fijos de 90 min</b> de cada club; las horas de inicio intermedias no cuentan. " + esc(tTodos) + "</li>" : "") +
     "<li>7 y 30 días = días ya cerrados hasta ayer. Ingreso estimado = horas arrendadas × precio por hora publicado en cada franja; no descuenta promociones ni membresías.</li>" +
     "<li>Toca un club para ver su detalle: horas por cancha, turnos de la noche, mapa de calor y reservas detectadas.</li></ul></section>";
   return h;
@@ -1774,20 +1875,24 @@ function zOcupDiaria(rs, hoy, u) {
   });
   return h;
 }
-/* Turnos de la noche de hoy (o mañana) en todos los clubes: arrendadas / canchas de cada club */
+/* Turnos de la noche de hoy (o mañana) en todos los clubes: arrendadas / canchas de cada club.
+   Con `noche`, las celdas son los turnos fijos del club (un turno sin dato sale "—"); sin ella, las horas de los datos. */
 function zNocheTodos(rs, hoy, u) {
   var f = u.nocheF === "1" ? sumarDias(hoy, 1) : hoy;
-  var seg = '<div class="seg" role="group" aria-label="Fecha">' + [["0", "Hoy"], ["1", "Mañana"]].map(function (p) {
+  var fijos = rs.length > 0 && rs.every(function (r) { return nocheClub(r.c); });
+  var fest = rs.some(function (r) { return r.dias.some(function (x) { return x.f === f && x.festivo === true; }); });
+  var seg ='<div class="seg" role="group" aria-label="Fecha">' + [["0", "Hoy"], ["1", "Mañana"]].map(function (p) {
     return '<button data-act="padel-noche" data-v="' + p[0] + '" aria-pressed="' + ((u.nocheF === "1" ? "1" : "0") === p[0]) + '">' + p[1] + "</button>";
   }).join("") + "</div>";
   var h = '<section class="card"><div class="card-cab"><div><h2>Turnos de la noche</h2><div class="sub">' +
-    esc(diaC(f) + (f === hoy ? " (en curso)" : " (reservado hasta ahora)") + " · canchas arrendadas en cada hora de inicio desde las 17:00 que publica cada club") + "</div></div>" + seg + "</div>";
+    esc(diaC(f) + (f === hoy ? " (en curso)" : " (reservado hasta ahora)") + (fest ? " · festivo" : "") + (fijos ?" · canchas arrendadas en cada turno fijo de 90 min de la noche de cada club" : " · canchas arrendadas en cada hora de inicio desde las 17:00 que publica cada club")) + "</div></div>" + seg + "</div>";
   h += '<div class="nt">';
   rs.forEach(function (r) {
     var d = null; r.dias.forEach(function (x) { if (x.f === f) d = x; });
-    var canchas = canchasDe(r.c), N = canchas.length || 1;
-    var hs = d ? horasNoche([d]) : [], ph = d && d.porHora && typeof d.porHora === "object" ? d.porHora : {};
-    // Total "x de y" solo si las horas de inicio no se traslapan (si no, una reserva se contaría 2–4 veces)
+    var canchas = canchasDe(r.c), N = canchas.length || 1, noche = nocheClub(r.c);
+    var hs = !d ? [] : noche ? noche.turnos.slice() : horasNoche([d]), ph = d && d.porHora && typeof d.porHora === "object" ? d.porHora : {};
+    // Total "x de y" solo si las horas de inicio no se traslapan (si no, una reserva se contaría 2–4 veces);
+    // los turnos fijos de la noche nunca se traslapan
     var ks = hs.filter(function (k) { return ph[k] && typeof ph[k] === "object"; }), sa = 0;
     ks.forEach(function (k) { sa += arrendadasDe(ph[k], N); });
     var tot = ks.length && sinTraslape(ks) ? " · " + fmtN(sa) + " de " + fmtN(ks.length * N) : "";
@@ -1797,13 +1902,17 @@ function zNocheTodos(rs, hoy, u) {
     else if (!hs.length) h += '<div class="nt-v">Sin turnos desde las 17:00 (club cerrado en la noche).</div>';
     else {
       h += '<div class="nt-cs">';
-      hs.forEach(function (k) { h += '<span class="nt-c"><span class="nt-h">' + esc(k) + "</span>" + botonTurno(ph[k], canchas, N, r.nombre + " · " + diaC(f) + " · " + k) + "</span>"; });
+      hs.forEach(function (k) { h += '<span class="nt-c"><span class="nt-h">' + esc(k) + "</span>" + botonTurno(ph[k], canchas, N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(d, k)) + "</span>"; });
       h += "</div>";
     }
     h += "</div>";
   });
   h += "</div>";
-  return h + '<p class="pie">Cada número es arrendadas / canchas del club en esa hora de inicio. Toca uno para ver qué canchas estaban libres y el precio publicado. El total «x de y» solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas.</p></section>';
+  return h + '<p class="pie">' + (fijos
+    ? "Cada número es arrendadas / canchas del club en ese turno (la hora va encima). Toca uno para ver qué canchas estaban libres y el precio publicado. " +
+      "En la noche solo cuentan los turnos fijos de 90 min de cada club; las horas de inicio intermedias no cuentan. Como no se traslapan, «x de y» suma las canchas arrendadas de las posibles. " +
+      "Un turno que falta entre turnos publicados cuenta lleno; «cerrado» = el club no publicó ese turno ese día, antes de su primer turno o después del último (p. ej. en festivos cierran más temprano); «—» = sin lectura."
+    : "Cada número es arrendadas / canchas del club en esa hora de inicio. Toca uno para ver qué canchas estaban libres y el precio publicado. El total «x de y» solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas.") + "</p></section>";
 }
 
 /* Tabla de turnos fecha × hora de inicio: arrendadas / canchas, como lo cuenta Mau */
@@ -1813,8 +1922,18 @@ function botonTip(cls, estilo, etiqueta, filas, contenido) {
   var txt = etiqueta + ": " + filas.map(function (f) { return f[0] + " " + f[1]; }).join(" · ");
   return '<button type="button"' + (cls ? ' class="' + cls + '"' : "") + (estilo ? ' style="' + estilo + '"' : "") + ' data-act="padel-tip" data-tip="' + esc(html) + '" aria-label="' + esc(txt) + '">' + contenido + "</button>";
 }
-function botonTurno(x, canchas, N, etiqueta) {
-  if (!x || typeof x !== "object") return botonTip("ocup nada", "", etiqueta, [["Sin turno", "todas ocupadas desde antes, club cerrado o sin lectura"]], '<span aria-hidden="true">—</span>');
+/* Turno que el club no abrió ese día: sin dato y antes del primer turno o después del último que publicó.
+   El turno que falta ENTRE turnos vistos ya viene lleno (N/N) en porHora; en los extremos el modelo lo toma
+   como club cerrado (p. ej. festivos: cierran más temprano). */
+function turnoCerrado(d, k) {
+  var ph = d && d.porHora && typeof d.porHora === "object" ? d.porHora : null;
+  if (!ph || (ph[k] && typeof ph[k] === "object")) return false;
+  var ks = Object.keys(ph).filter(esHora).sort();
+  return !ks.length || k < ks[0] || k > ks[ks.length - 1];
+}
+function botonTurno(x, canchas, N, etiqueta, cerrado) {
+  if ((!x || typeof x !== "object") && cerrado) return botonTip("ocup nada cerr", "", etiqueta, [["Cerrado", "el club no publicó este turno en easycancha ese día"]], "cerrado");
+  if (!x || typeof x !== "object") return botonTip("ocup nada", "", etiqueta, [["Sin dato", "no hubo lectura de easycancha para este turno"]], '<span aria-hidden="true">—</span>');
   var a = arrendadasDe(x, N), libres = libresDe(x);
   var ls_ = libres.map(function (l) { return l.c; });
   var arrend = canchas.filter(function (k) { return ls_.indexOf(k) < 0; });
@@ -1827,24 +1946,25 @@ function botonTurno(x, canchas, N, etiqueta) {
   var pr = textoPrecio(x); if (pr) filas.push(["Precio", pr]);
   return botonTip("ocup", estiloOcup(a / N), etiqueta, filas, a + "/" + N);
 }
-function celdaTurno(x, canchas, N, cls, etiqueta) {
-  return "<td" + (cls ? ' class="' + cls + '"' : "") + ">" + botonTurno(x, canchas, N, etiqueta) + "</td>";
+function celdaTurno(x, canchas, N, cls, etiqueta, cerrado) {
+  return "<td" + (cls ? ' class="' + cls + '"' : "") + ">" + botonTurno(x, canchas, N, etiqueta, cerrado) + "</td>";
 }
 function zTurnos(c, dias, hoy, canchas, N) {
-  var u = S.ui.padel;
+  var u = S.ui.padel, turnos = turnosClub(c), noche = nocheClub(c), desdeN = noche ? noche.desde : NOCHE_DESDE;
   var filas = dias.slice().reverse();
   var vis = filas.slice(0, u.n);
   var hs;
-  if (u.todas) {
-    var m = {};
-    vis.forEach(function (d) { if (d.porHora && typeof d.porHora === "object") Object.keys(d.porHora).forEach(function (k) { if (esHora(k)) m[k] = 1; }); });
-    hs = Object.keys(m).sort();
-  } else {
-    // Las horas de la noche salen de los datos del club (no son fijas): primero las de los días a la vista
-    hs = horasNoche(vis); if (!hs.length) hs = horasNoche(dias);
+  // Todas las horas: los turnos fijos del día del club (respaldo: las horas de los días a la vista)
+  if (u.todas) hs = horasDiaClub(c, vis);
+  else {
+    // La noche: los turnos fijos del club; sin ellos, las horas desde las 17:00 de los datos (primero las de los días a la vista)
+    hs = noche ? noche.turnos.slice() : horasNoche(vis); if (!hs.length) hs = horasNoche(dias);
   }
+  var sub = "Canchas arrendadas de " + N + " en cada " + (u.todas
+    ? (turnos ? "turno fijo de 90 min del club" : "hora de inicio que publica el club" + (noche ? " (en la noche, solo sus turnos fijos de 90 min)" : ""))
+    : (noche ? "turno fijo de 90 min de la noche" : "hora de inicio desde las 17:00 que publica el club")) + " · lo más reciente arriba (incluye lo ya reservado para los próximos días)";
   var h = '<section class="card"><div class="card-cab"><div><h2>' + (u.todas ? "Turnos del día" : "Turnos de la noche") + '</h2><div class="sub">' +
-    esc("Canchas arrendadas de " + N + " en cada hora de inicio" + (u.todas ? "" : " desde las 17:00") + " que publica el club · lo más reciente arriba (incluye lo ya reservado para los próximos días)") + "</div></div>" +
+    esc(sub) + "</div></div>" +
     '<button class="btn" data-act="padel-horas" aria-pressed="' + u.todas + '">' + (u.todas ? "Solo la noche" : "Ver todas las horas") + "</button></div>";
   if (!vis.length) return h + '<div class="vacio">Todavía no hay días con lecturas.</div></section>';
   if (!hs.length) return h + '<div class="vacio">' + (u.todas ? "Todavía no hay horas de inicio en los días a la vista." : "Este club no publica turnos desde las 17:00 en los días con lecturas.") + "</div></section>";
@@ -1859,7 +1979,7 @@ function zTurnos(c, dias, hoy, canchas, N) {
   });
   var conTot = tots.some(function (t) { return t; });
   h += '<div class="tw"><table class="turnos' + (u.todas ? " todas" : "") + '"><thead><tr><th scope="col">Día</th>';
-  hs.forEach(function (k) { h += '<th scope="col"' + (k >= NOCHE_DESDE ? ' class="noche"' : "") + ">" + esc(k) + "</th>"; });
+  hs.forEach(function (k) { h += '<th scope="col"' + (k >= desdeN ? ' class="noche"' : "") + ">" + esc(k) + "</th>"; });
   if (conTot) h += '<th scope="col" class="tot m-no">' + (u.todas ? "Día" : "Noche") + "</th>";
   h += "</tr></thead><tbody>";
   vis.forEach(function (d, iv) {
@@ -1870,7 +1990,7 @@ function zTurnos(c, dias, hoy, canchas, N) {
     if (sinDatoPadel(d)) tags += '<span class="tag">datos parciales</span> ';
     h += "<tr" + (d.f === hoy ? ' class="hoy"' : "") + '><td><div class="p-dia">' + esc(diaC(d.f)) + '</div><div class="n2">' + tags +
       '<span class="solo-m">' + (sn ? esc(fmtN(sa) + " de " + fmtN(sn)) : "") + "</span></div></td>";
-    hs.forEach(function (k) { h += celdaTurno(ph[k], canchas, N, u.todas && k >= NOCHE_DESDE ? "noche" : "", diaC(d.f) + " · " + k); });
+    hs.forEach(function (k) { h += celdaTurno(ph[k], canchas, N, u.todas && k >= desdeN ? "noche" : "", diaC(d.f) + " · " + k, turnoCerrado(d, k)); });
     if (conTot) h += '<td class="tot m-no">' + (sn ? "<b>" + esc(fmtN(sa)) + '</b><span style="color:var(--text2)"> / ' + esc(fmtN(sn)) + "</span>" : '<span style="color:var(--text3)">—</span>') + "</td>";
     h += "</tr>";
   });
@@ -1878,9 +1998,15 @@ function zTurnos(c, dias, hoy, canchas, N) {
   if (filas.length > vis.length) h += '<div class="mas"><button class="btn" data-act="padel-mas">Ver ' + fmtN(Math.min(14, filas.length - vis.length)) + ' días más <span style="color:var(--text2)">(' + fmtN(filas.length - vis.length) + " restantes)</span></button></div>";
   h += '<div class="niveles"><span>Arrendadas:</span>';
   for (var i = 0; i <= N && N <= 12; i++) h += '<span class="ocup" style="' + estiloOcup(i / N) + '">' + i + "/" + N + "</span>";
-  h += '<span>— = sin turno o sin lectura (todas ocupadas desde antes, club cerrado o sin lectura previa)</span></div>';
-  return h + '<p class="pie">Toca o pasa el mouse por una celda para ver qué canchas estaban libres y el precio publicado. ' +
-    "El total del día (arrendadas de las posibles) solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas. " +
+  h += '<span>cerrado = el club no publicó ese turno ese día (p. ej. festivos) · — = sin lectura</span></div>';
+  // Con turnos fijos (todo el día o solo la noche) el total no se traslapa; sin ellos se explica la regla anterior
+  var nota = "El total del día (arrendadas de las posibles) solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas. ";
+  if (turnos || noche) {
+    nota = (turnos ? "Solo cuentan los turnos fijos de 90 min del club" : "En la noche solo cuentan los turnos fijos de 90 min del club") + "; las horas de inicio intermedias no cuentan. " +
+      (conTot ? "Como no se traslapan, el total " + (u.todas ? "del día" : "de la noche") + " suma las canchas arrendadas de las posibles. "
+        : u.todas ? "El total solo sale cuando los turnos no se traslapan: con inicios cada 30 min una misma reserva aparece en varias horas. " : "");
+  }
+  return h + '<p class="pie">Toca o pasa el mouse por una celda para ver qué canchas estaban libres y el precio publicado. ' + nota +
     "«datos parciales» = parte del día sin ninguna lectura (no cuenta en las horas abiertas).</p></section>";
 }
 /* Mapa de calor: horas (filas) × día de la semana (columnas), así cabe en el celular.
@@ -1897,6 +2023,8 @@ function zHeatmap(c) {
     });
   });
   var hs = Object.keys(porH).sort();
+  // La noche en negrita desde la hora de reloj en que empieza la noche del club (La Jaula: 16 h); sin `noche`, 17 h
+  var nC = nocheClub(c), desdeN = nC ? nC.desde : NOCHE_DESDE, hN = +desdeN.slice(0, 2);
   var h = '<section class="card"><div class="card-cab"><div><h2>Mapa de calor</h2><div class="sub">Ocupación promedio por día de la semana y hora · últimas 8 semanas, días ya cerrados (incluye festivos)</div></div></div>';
   if (!hs.length) return h + '<div class="vacio">Todavía no hay días cerrados para promediar.</div></section>';
   h += '<div class="tw"><table class="hm"><thead><tr><th scope="col"><span class="sr">Hora</span></th>';
@@ -1904,7 +2032,7 @@ function zHeatmap(c) {
   h += "</tr></thead><tbody>";
   hs.forEach(function (hh) {
     var rango = hh + ":00–" + String(+hh + 1).padStart(2, "0") + ":00";
-    h += '<tr><th scope="row"' + (+hh >= 17 ? ' class="noche"' : "") + "><span aria-hidden=\"true\">" + esc(+hh + " h") + '</span><span class="sr">' + esc(rango) + "</span></th>";
+    h += '<tr><th scope="row"' + (+hh >= hN ? ' class="noche"' : "") + "><span aria-hidden=\"true\">" + esc(+hh + " h") + '</span><span class="sr">' + esc(rango) + "</span></th>";
     ORDEN_DOW.forEach(function (dw) {
       var s = porH[hh][dw], et = DOW_L[dw] + " " + rango;
       if (!s || !s[1]) { h += '<td class="nada">' + botonTip("", "", et, [["Sin turno", "club cerrado o sin datos"]], '<span aria-hidden="true">·</span>') + "</td>"; return; }
@@ -1914,7 +2042,7 @@ function zHeatmap(c) {
     h += "</tr>";
   });
   h += '</tbody></table></div><div class="escala"><span>0 %</span><span class="g" aria-hidden="true"></span><span>100 % ocupado</span></div>';
-  return h + '<p class="pie">Cada fila es una hora de reloj (17 h = de 17:00 a 18:00), no la hora de inicio de un turno. En negrita la noche, desde las 17:00. Toca una celda para ver el detalle.</p></section>';
+  return h + '<p class="pie">Cada fila es una hora de reloj (17 h = de 17:00 a 18:00), no la hora de inicio de un turno. En negrita la noche, desde las ' + esc(desdeN) + ". Toca una celda para ver el detalle.</p></section>";
 }
 /* Reservas detectadas entre lecturas */
 function zEventos(c) {
@@ -1946,6 +2074,288 @@ function zEventos(c) {
   h += "</ul>";
   if (lista.length > u.evN) h += '<div class="mas"><button class="btn" data-act="padel-ev-mas">Ver más <span style="color:var(--text2)">(' + fmtN(lista.length - u.evN) + " restantes)</span></button></div>";
   return h + "</section>";
+}
+
+/* ─────────── Consultar una fecha (GET /padel/dia) ───────────
+   Detalle de un día exacto del historial (o de los próximos días: lo reservado hasta ahora). La respuesta trae todos los
+   clubes con el día completo (porHora sin recorte) y las reservas detectadas de esa fecha; dia: null = sin datos ese día.
+   La fecha queda en la URL (#padel/2026-10-12) y su panel reemplaza la vista normal hasta tocar "Cerrar"; el selector de
+   arriba sigue eligiendo "Todos" o un club. Las respuestas se guardan un rato en memoria (no en localStorage). */
+var PADEL_DIA_ADELANTE = 4; // el API acepta hasta hoy + 4 (easycancha publica unos días hacia adelante)
+function fechaLarga(f) { var p = f.split("-"); return DOW_L[dowDe(f)] + " " + (+p[2]) + " de " + (MES_L[+p[1] - 1] || "") + " de " + p[0]; }
+function fechaDeHash(h) { var m = /^padel\/(\d{4}-\d{2}-\d{2})$/.exec(String(h || "")); return m && esFecha(m[1]) ? m[1] : ""; }
+function hashTab(t) { return t === "padel" && S.padel.dia.fecha ? "padel/" + S.padel.dia.fecha : t; }
+function hashPadel() { if (S.tab === "padel") { try { history.replaceState(null, "", "#" + hashTab("padel")); } catch (e) {} } }
+/* Rango de la consulta: desde el primer día con historial (el menor `desde` de los clubes) hasta hoy + 4 */
+function limitesDiaPadel() {
+  var hoy = hoyPadel(), max = sumarDias(hoy, PADEL_DIA_ADELANTE), min = "";
+  clubesPadel().forEach(function (c) { var f = esFecha(c.desde) ? c.desde : (diasPadel(c)[0] || {}).f; if (esFecha(f) && (!min || f < min)) min = f; });
+  if (!min || min > max) min = hoy;
+  return { hoy: hoy, min: min, max: max };
+}
+function formDiaPadel() {
+  var D = S.padel.dia, lim = limitesDiaPadel(), v = esFecha(S.ui.padel.diaF) ? S.ui.padel.diaF : D.fecha || lim.hoy;
+  return '<form class="pd-f" id="pd-form" novalidate><label class="fld"><span>Consultar una fecha</span>' +
+    '<input type="date" class="fecha" id="pd-fecha" data-act="padel-dia-f" value="' + esc(v) + '" min="' + esc(lim.min) + '" max="' + esc(lim.max) + '"' +
+    (D.aviso ? ' aria-invalid="true" aria-describedby="pd-msg"' : "") + "></label>" +
+    '<button class="btn prim" type="submit" data-act="padel-dia-ver">Ver</button>' +
+    (D.aviso ? '<p class="pd-msg" id="pd-msg" role="alert">' + esc(D.aviso) + "</p>" : "") + "</form>";
+}
+/* Botón "Ver" (o Enter en el campo) */
+function verDiaPadel() {
+  var inp = $("pd-fecha"), f = inp ? String(inp.value || "") : "", lim = limitesDiaPadel();
+  S.ui.padel.diaF = f;
+  if (!esFecha(f) || f < lim.min || f > lim.max) {
+    S.padel.dia.aviso = "Elige una fecha entre el " + fechaC(lim.min) + " y el " + fechaC(lim.max) + ".";
+    render(); return;
+  }
+  abrirDiaPadel(f, false);
+}
+/* Abre una fecha. Si se consultó hace poco se usa la copia en memoria (días cerrados 5 min; hoy y los próximos 1 min). */
+function abrirDiaPadel(f, forzar) {
+  var D = S.padel.dia;
+  if (!esFecha(f)) return;
+  if (D.fecha !== f) S.ui.padel.devN = 20;
+  D.fecha = f; D.aviso = ""; S.ui.padel.diaF = f;
+  hashPadel();
+  var cc = propia(D.cache, f) ? D.cache[f] : null;
+  if (!forzar && cc && Date.now() - cc.t < (f < cc.hoy ? 300000 : 60000)) {
+    if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
+    D.n++; D.data = cc.j; D.dataF = f; D.cargando = false; D.error = null;
+    if (S.tab === "padel") render();
+    return;
+  }
+  cargarDiaPadel(f);
+}
+function cerrarDiaPadel() {
+  var D = S.padel.dia;
+  if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
+  D.n++; D.fecha = ""; D.data = null; D.dataF = ""; D.cargando = false; D.error = null; D.aviso = "";
+  hashPadel(); render();
+}
+function datosDiaValidos(j) { return !!(j && typeof j === "object" && Array.isArray(j.clubes)); }
+function errorDia(msg, reintentar) { var e = new Error(msg); e.dia = true; e.sinReintento = !reintentar; return e; }
+function errorHttpDia(st, m) {
+  if (S.dev) return errorDia("No se pudo leer " + S.devPadelDia + " (HTTP " + st + ").", true);
+  if (st === 400) return errorDia(m || "La fecha no es válida.", false);
+  if (st === 404) return errorDia("La consulta por fecha todavía no está disponible en el servidor.", true);
+  if (st === 503) return errorDia(m || "La consulta por fecha todavía no está configurada en el servidor.", true);
+  return errorDia("El servidor respondió con un error (" + st + ").", true);
+}
+function textoErrorDia(e) {
+  if (e && e.dia) return e.message;
+  if (e && e.datos) return "Los datos recibidos no se pudieron mostrar (" + e.message + ").";
+  if (e && e.name === "AbortError") return "El servidor tardó demasiado en responder.";
+  return S.dev ? "No se pudo leer " + S.devPadelDia + " (" + (e && e.message ? e.message : "error") + ")." : "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
+}
+/* Carga de /padel/dia: misma sesión (Bearer) y mismos errores que /padel (401 = sesión vencida). Una consulta nueva
+   (otra fecha, Reintentar, Cerrar o cerrar sesión) cancela la anterior y su respuesta se descarta.
+   En vista previa (?padeldia=) se lee un JSON fijo. */
+function cargarDiaPadel(f) {
+  var D = S.padel.dia;
+  if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
+  var n = ++D.n, gen = S.gen, tok = S.token, mismo = !!D.data && D.dataF === f;
+  function vigente() { return S.padel.dia === D && D.n === n && gen === S.gen && tok === S.token; }
+  if (!mismo) { D.data = null; D.dataF = ""; }
+  D.fecha = f; D.error = null; D.reintentar = true;
+  D.cargando = S.dev || !!S.token; // sin sesión no se consulta: al entrar se abre la fecha de la URL
+  if (S.tab === "padel") render();
+  if (!D.cargando) return;
+  var p;
+  if (S.dev) p = S.devPadelDia ? fetch(S.devPadelDia, { cache: "no-store" }) : Promise.reject(errorDia("Vista previa sin ?padeldia=<ruta .json>.", false));
+  else {
+    var opts = { headers: { Authorization: "Bearer " + tok }, cache: "no-store" };
+    p = conTiempo(API + "/padel/dia?fecha=" + encodeURIComponent(f), opts, 30000);
+    D.ctl = opts._ctl || null;
+  }
+  p.then(function (r) {
+    if (!vigente()) return;
+    if (r.status === 401 && !S.dev) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return; }
+    if (!r.ok) return leerError(r).then(function (m) { throw errorHttpDia(r.status, m); });
+    // Un 200 que no es JSON (página HTML de un proxy, cuerpo cortado) es un problema de datos, no de conexión
+    return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); }).then(function (j) {
+      if (!vigente()) return;
+      if (!datosDiaValidos(j)) throw errorDatos("respuesta sin clubes");
+      D.data = j; D.dataF = f; D.error = null;
+      D.cache[f] = { j: j, t: Date.now(), hoy: esFecha(j.hoy) ? j.hoy : hoyPadel() };
+      Object.keys(D.cache).sort(function (a, b) { return D.cache[b].t - D.cache[a].t; }).slice(8).forEach(function (k) { delete D.cache[k]; });
+    });
+  }).catch(function (e) {
+    if (!vigente()) return;
+    D.error = textoErrorDia(e); D.reintentar = !(e && e.sinReintento);
+  }).then(function () {
+    if (!vigente()) return; // otra consulta, Cerrar o cerrar sesión ya tomaron el control
+    D.cargando = false; D.ctl = null;
+    if (S.tab !== "padel") return;
+    // Al actualizar la misma fecha se conserva el deslizamiento lateral de las tablas
+    var desl = mismo ? Array.prototype.map.call(document.querySelectorAll("#view .tw"), function (x) { return x.scrollLeft; }) : [];
+    render();
+    Array.prototype.forEach.call(document.querySelectorAll("#view .tw"), function (x, i) { if (desl[i]) x.scrollLeft = desl[i]; });
+  });
+}
+/* Clubes de la respuesta unidos al JSON principal por id (color, nombre y botón del selector). Turnos y noche: los de la
+   respuesta; si no vienen, los del JSON principal; si tampoco, la lógica anterior (horas desde las 17:00 de porHora). */
+function filasDia(j, cs) {
+  var out = [];
+  arr(j.clubes).forEach(function (cd, i) {
+    if (!cd || typeof cd !== "object") return;
+    var id = idClub(cd, i), iM = -1;
+    for (var k = 0; k < cs.length; k++) if (idClub(cs[k], k) === id) { iM = k; break; }
+    var cM = iM >= 0 ? cs[iM] : null, dia = cd.dia && typeof cd.dia === "object" ? cd.dia : null;
+    var ref = turnosClub(cd) || nocheClub(cd) || !cM ? cd : cM;
+    var canchas = canchasDe({ canchas: num(cd.canchas) > 0 ? cd.canchas : cM && cM.canchas, dias: dia ? [dia] : [] }), N = canchas.length || 1;
+    var noche = nocheClub(ref), ph = dia && dia.porHora && typeof dia.porHora === "object" ? dia.porHora : {};
+    var hs = !dia ? [] : noche ? noche.turnos.slice() : horasNoche([dia]);
+    var ks = hs.filter(function (x) { return ph[x] && typeof ph[x] === "object"; }), sa = 0;
+    ks.forEach(function (x) { sa += arrendadasDe(ph[x], N); });
+    out.push({
+      cd: cd, cM: cM, ref: ref, id: cM ? idClub(cM, iM) : "", nombre: cM ? nombreClub(cM, iM) : nombreClub(cd, i), corto: cM ? nombreCorto(cM, iM) : nombreCorto(cd, i),
+      color: colorClubI(iM >= 0 ? iM : i), dia: dia, canchas: canchas, N: N, noche: noche, ph: ph, hs: hs, ks: ks, sa: sa, tot: ks.length > 0 && sinTraslape(ks)
+    });
+  });
+  return out;
+}
+/* Panel del día consultado: "Todos" = tabla por club; un club = sus KPIs, todas las horas, horas por cancha y reservas */
+function vPadelDia(c, cs) {
+  var D = S.padel.dia, j = D.data && D.dataF === D.fecha ? D.data : null;
+  var f = j && esFecha(j.fecha) ? j.fecha : D.fecha, hoyJ = j && esFecha(j.hoy) ? j.hoy : hoyPadel();
+  var fs = j ? filasDia(j, cs) : [], r = null;
+  if (c) fs.forEach(function (x) { if (x.cM === c) r = x; });
+  var fest = fs.some(function (x) { return x.dia && x.dia.festivo === true; });
+  var tags = (f === hoyJ ? '<span class="tag">hoy · en curso</span>' : f > hoyJ ? '<span class="tag">próximo · lo reservado hasta ahora</span>' : "") +
+    (fest ? '<span class="tag">festivo</span>' : "") + (r && r.dia && sinDatoPadel(r.dia) ? '<span class="tag">datos parciales</span>' : "");
+  var sub = c ? nombreClub(c, cs.indexOf(c)) + " · " + fmtN(r ? r.N : canchasDe(c).length) + " canchas"
+    : j ? (fs.length === 1 ? "1 club" : fmtN(fs.length) + " clubes") + " · toca un club para ver todas sus horas" : "";
+  if (D.cargando && j) sub += (sub ? " · " : "") + "actualizando…";
+  function cab(solo) {
+    return '<div class="card-cab pd-cab"' + (solo ? ' style="margin-bottom:0"' : "") + '><div><h2>' + esc("Día " + fechaLarga(f)) + '</h2><div class="sub pd-tags">' + tags + esc(sub) + "</div></div>" +
+      '<button class="btn" data-act="padel-dia-cerrar">Cerrar</button></div>';
+  }
+  if (!j) {
+    if (D.error && !D.cargando) return '<section class="card">' + cab() + '<div class="vacio"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">No se pudo consultar esta fecha</div><div>' + esc(D.error) + "</div>" +
+      (D.reintentar ? '<div style="margin-top:14px"><button class="btn prim" data-act="padel-dia-reintentar">Reintentar</button></div>' : "") + "</div></section>";
+    return '<section class="card" aria-busy="true">' + cab() + '<p class="sub">Buscando los datos de ese día…</p>' +
+      [64, 92, 80, 88, 72].map(function (w) { return '<div class="skel" style="width:' + w + '%"></div>'; }).join("") + "</section>";
+  }
+  var h = "";
+  if (D.error) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>No se pudo actualizar este día</b><p>' + esc(D.error) + "</p></div>" +
+    (D.reintentar ? '<button class="btn" data-act="padel-dia-reintentar" style="margin-left:auto">Reintentar</button>' : "") + "</div>";
+  if (j.version !== 1) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Versión de datos del día no reconocida</b><p>Recarga la página; si sigue igual, avisa a soporte.</p></div></div>';
+  if (!c) return h + '<section class="card">' + cab() + (fs.length ? zDiaTodos(fs, f, hoyJ) : '<div class="vacio">La respuesta no trae clubes para esa fecha.</div>') + "</section>";
+  if (!r) return h + '<section class="card">' + cab() + '<div class="vacio">' + esc(nombreClub(c, cs.indexOf(c)) + " no viene en la respuesta de esa fecha.") + "</div></section>";
+  return h + '<section class="card">' + cab(true) + "</section>" + zDiaClub(r, f, hoyJ);
+}
+/* Todos los clubes en la fecha: canchas, horas arrendadas de las abiertas, ocupación, ingreso y los turnos de la noche */
+function zDiaTodos(fs, f, hoyJ) {
+  var M = 1, t = { h: 0, ab: 0, ing: 0, n: 0 };
+  fs.forEach(function (r) {
+    M = Math.max(M, r.hs.length);
+    if (r.dia) { t.h += num(r.dia.horasArrendadas); t.ab += num(r.dia.horasAbiertas); t.ing += num(r.dia.ingresoEst); t.n++; }
+  });
+  var fijos = fs.every(function (r) { return r.noche; });
+  var h = '<div class="resumen-f">' + esc(t.n ? "Total: " + horas(t.h) + " de " + horas(t.ab) + " abiertas" + (t.ab > 0 ? " (" + pct(t.h / t.ab) + ")" : "") + " · ingreso est. " + moneyA(t.ing) +
+    (t.n < fs.length ? " · " + t.n + " de " + fs.length + " clubes con datos" : "") : "Ningún club tiene datos ese día.") + "</div>";
+  h += '<div class="tw"><table class="turnos pd"><thead><tr><th scope="col">Club</th><th scope="col" class="d m-no">Canchas</th><th scope="col" class="d m-no">Horas arrendadas</th>' +
+    '<th scope="col" class="d m-no">Ocupación</th><th scope="col" class="d m-no">Ingreso est.</th><th scope="colgroup" colspan="' + M + '" class="noche">Turnos de la noche</th>' +
+    '<th scope="col" class="tot m-no">Noche</th></tr></thead><tbody>';
+  fs.forEach(function (r) {
+    var d = r.dia, ab = d ? num(d.horasAbiertas) : 0, hh = d ? num(d.horasArrendadas) : 0, sd = !!d && sinDatoPadel(d);
+    var nom = '<span class="sw bg-' + r.color + '" aria-hidden="true"></span><span><span class="m-no">' + esc(r.nombre) + '</span><span class="solo-m">' + esc(r.corto) + "</span></span>";
+    var res = d ? (ab > 0 ? pct(hh / ab) + " · " : "") + horas(hh) + " de " + horas(ab) + (sd ? " · parcial" : "") : "sin datos ese día";
+    h += "<tr><td>" + (r.id ? '<button class="rk-n" data-act="padel-club" data-v="' + esc(r.id) + '">' + nom + "</button>" : '<span class="rk-n">' + nom + "</span>") +
+      // En el celular las columnas de horas, ocupación, ingreso y total de la noche se esconden: van debajo del nombre
+      (d ? '<div class="n2 solo-m">' + esc(res) + "<br>" + esc(fmtN(r.N) + " canchas · " + moneyA(d.ingresoEst) + (r.tot ? " · noche " + fmtN(r.sa) + " de " + fmtN(r.ks.length * r.N) : "")) + "</div>" : "") + "</td>" +
+      '<td class="d m-no">' + esc(fmtN(r.N)) + "</td>" +
+      '<td class="d m-no">' + (d ? esc(horas(hh)) + "<small>" + esc("de " + horas(ab) + (sd ? " · parcial" : "")) + "</small>" : "—") + "</td>" +
+      '<td class="d m-no">' + (d && ab > 0 ? "<b>" + esc(pct(hh / ab)) + '</b><div class="minibar" aria-hidden="true"><span class="bg-' + r.color + '" style="width:' + (Math.max(0, Math.min(1, hh / ab)) * 100).toFixed(1) + '%"></span></div>' : "—") + "</td>" +
+      '<td class="d m-no">' + (d ? esc(moneyA(d.ingresoEst)) : "—") + "</td>";
+    if (!d || !r.hs.length) h += '<td colspan="' + M + '" class="pd-sin">' + (d ? "sin turnos desde las 17:00" : "sin datos ese día") + "</td>";
+    else {
+      r.hs.forEach(function (k) { h += '<td><span class="nt-c"><span class="nt-h">' + esc(k) + "</span>" + botonTurno(r.ph[k], r.canchas, r.N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(r.dia, k)) + "</span></td>"; });
+      for (var q = r.hs.length; q < M; q++) h += '<td class="pd-v"></td>'; // club con menos turnos (p. ej. 4 frente a los 5 de La Jaula)
+    }
+    h += '<td class="tot m-no">' + (r.tot ? "<b>" + esc(fmtN(r.sa)) + '</b><span style="color:var(--text2)"> / ' + esc(fmtN(r.ks.length * r.N)) + "</span>" : '<span style="color:var(--text3)">—</span>') + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  return h + '<p class="pie">' + (fijos
+    ? "Cada celda es arrendadas / canchas del club en un turno fijo de 90 min de la noche (la hora va encima); tócala para ver qué canchas estaban arrendadas y cuáles libres. «Noche» suma las arrendadas de las posibles en esos turnos. "
+    : "Cada celda es arrendadas / canchas del club en esa hora de inicio desde las 17:00; tócala para ver qué canchas estaban arrendadas y cuáles libres. «Noche» solo sale cuando los turnos no se traslapan. ") +
+    "Horas, ocupación e ingreso son del día completo" + (f > hoyJ ? " (lo reservado hasta ahora)" : f === hoyJ ? " (hoy va en curso)" : "") +
+    ". «cerrado» = el club no publicó ese turno ese día (p. ej. festivos); «—» = sin lectura; «parcial» = parte del día sin ninguna lectura.</p>";
+}
+/* Un club en la fecha: KPIs, todas las horas (sus turnos fijos), horas por cancha y reservas detectadas */
+function zDiaClub(r, f, hoyJ) {
+  var d = r.dia, ev = zDiaEventos(r);
+  if (!d) return '<section class="card"><div class="vacio">' + esc("Sin datos de " + r.nombre + " ese día.") + "</div></section>" + (ev.n ? ev.h : "");
+  var ab = num(d.horasAbiertas), hh = num(d.horasArrendadas), sd = sinDatoPadel(d), turnos = turnosClub(r.ref), noche = r.noche, desdeN = noche ? noche.desde : NOCHE_DESDE;
+  var h = '<div class="grid kpis">' +
+    kpi("Horas arrendadas", horas(hh), esc(ab > 0 ? "de " + horas(ab) + " abiertas" + (sd ? " · sin lectura en parte del día" : "") : sd ? "sin lecturas" : "club cerrado"), "azul") +
+    kpi("Ocupación", ab > 0 ? pct(hh / ab) : "—", esc("de las horas abiertas" + (d.festivo === true ? " · festivo" : "")), "naranja") +
+    kpi("Turnos de la noche", r.tot ? fmtN(r.sa) + " de " + fmtN(r.ks.length * r.N) : "—", esc(r.tot ? "canchas arrendadas de las posibles" : r.ks.length ? "inicios traslapados: sin total" : "sin turnos de noche ese día"), "") +
+    kpi("Ingreso estimado", moneyA(d.ingresoEst), esc("precio publicado" + (f > hoyJ ? " · lo reservado hasta ahora" : f === hoyJ ? " · en curso" : "")), "verde") + "</div>";
+  // Todas las horas: una fila por turno (con `turnos`, los fijos del club; un turno sin dato sale "—")
+  var hs = horasDiaClub(r.ref, [d]), ph = r.ph, enNoche = false;
+  var t = '<section class="card"><div class="card-cab"><div><h2>Todas las horas</h2><div class="sub">' +
+    esc("Canchas arrendadas de " + r.N + " en cada " + (turnos ? "turno fijo de 90 min del club" : "hora de inicio") + " · toca una cifra para ver el detalle") + "</div></div></div>";
+  if (!hs.length) t += '<div class="vacio">Sin horas de inicio ese día (club cerrado o sin lecturas).</div>';
+  else {
+    t += '<div class="tw"><table class="pd-h"><thead><tr><th scope="col">' + (turnos ? "Turno" : "Hora") + '</th><th scope="col">Arrendadas</th><th scope="col" class="m-no">Libres</th><th scope="col" class="d m-no">Precio</th></tr></thead><tbody>';
+    hs.forEach(function (k) {
+      var x = ph[k] && typeof ph[k] === "object" ? ph[k] : null, esN = k >= desdeN, cuales = "", libT = "—", prT = "—";
+      if (x) {
+        var a = arrendadasDe(x, r.N), lib = libresDe(x).map(function (l) { return l.c; });
+        var arrC = r.canchas.filter(function (k2) { return lib.indexOf(k2) < 0; });
+        // Se nombran las canchas ("cancha 2", "canchas 1, 3") para no confundir el número de cancha con la cantidad
+        cuales = !a ? "ninguna" : arrC.length === a ? (a === 1 ? "cancha " : "canchas ") + arrC.join(", ") : "";
+        libT = lib.length ? (lib.length === 1 ? "cancha " : "canchas ") + lib.join(", ") : "ninguna";
+        prT = textoPrecio(x) || "—";
+      }
+      t += "<tr" + (esN ? ' class="noche"' : "") + '><th scope="row">' + esc(k) + (esN ? (enNoche ? '<span class="sr"> (noche)</span>' : ' <span class="tag">noche</span>') : "") + "</th>" +
+        '<td><span class="pd-a">' + botonTurno(x, r.canchas, r.N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(d, k)) + (cuales ?"<span>" + esc(cuales) + "</span>" : "") + "</span></td>" +
+        '<td class="m-no">' + esc(libT) + '</td><td class="d m-no">' + esc(prT) + "</td></tr>";
+      if (esN) enNoche = true;
+    });
+    t += "</tbody></table></div>" + '<p class="pie">' + esc((turnos ? "Solo cuentan los turnos fijos de 90 min del club; las horas de inicio intermedias no cuentan. " : noche ? "En la noche solo cuentan los turnos fijos de 90 min del club. " : "") +
+      "Un turno que falta entre turnos publicados cuenta lleno; «cerrado» = el club no publicó ese turno ese día (p. ej. festivos); «—» = sin lectura." + (enNoche ?" Fondo azul = noche, desde las " + desdeN + "." : "")) + "</p>";
+  }
+  t += "</section>";
+  // Horas por cancha: la barra llega a las horas abiertas de una cancha (todas las canchas del club abren igual)
+  var pc = d.porCancha && typeof d.porCancha === "object" ? d.porCancha : {}, porC = ab > 0 ? ab / r.N : 0, maxV = 0;
+  r.canchas.forEach(function (k) { maxV = Math.max(maxV, num(pc[k])); });
+  var tope = porC > 0 ? porC : maxV || 1;
+  var p = '<section class="card"><div class="card-cab"><div><h2>Horas por cancha</h2><div class="sub">' +
+    esc("Horas arrendadas de cada cancha ese día" + (porC > 0 ? " · la barra llega a " + horas(porC) + " (horas abiertas por cancha)" : "")) + '</div></div></div><ul class="cmp pd-c">';
+  r.canchas.forEach(function (k, i) {
+    var v = Math.max(0, num(pc[k])), col = COLOR_CANCHA[i % COLOR_CANCHA.length], w = Math.min(1, v / tope) * 100;
+    p += '<li><span class="cmp-n"><span class="sw bg-' + col + '" aria-hidden="true"></span><span>' + esc("Cancha " + k) + '</span></span><span class="cmp-v">' + esc(horas(v)) +
+      (porC > 0 ? "<small>" + esc(pct(Math.min(1, v / porC))) + "</small>" : "") + '</span><div class="cmp-b" role="img" aria-label="' +
+      esc("Cancha " + k + ": " + horas(v) + " arrendadas" + (porC > 0 ? " de " + horas(porC) + " abiertas" : "")) + '"><span class="bg-' + col + '" style="width:' + w.toFixed(1) + '%"></span></div></li>';
+  });
+  p += "</ul></section>";
+  // Escritorio: horas y canchas a la izquierda, reservas (la lista más larga) a la derecha; cada tarjeta con su alto
+  return h + '<div class="grid g2" style="align-items:start"><div class="grid">' + t + p + "</div>" + ev.h + "</div>";
+}
+/* Reservas detectadas en los turnos de la fecha, por hora del turno → {n, h} */
+function zDiaEventos(r) {
+  var u = S.ui.padel;
+  var evs = arr(r.cd.eventos).filter(function (e) { return e && esFecha(e.f) && esHora(e.hora) && (e.tipo === "reserva" || e.tipo === "liberada"); });
+  evs.sort(function (a, b) {
+    return a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : (num(a.cancha) - num(b.cancha)) || ((Date.parse(a.detectado || "") || 0) - (Date.parse(b.detectado || "") || 0));
+  });
+  var nRes = evs.filter(function (e) { return e.tipo === "reserva"; }).length, nLib = evs.length - nRes;
+  var h = '<section class="card"><div class="card-cab"><div><h2>Reservas detectadas</h2><div class="sub">Cambios vistos entre lecturas en los turnos de ese día · por hora del turno</div></div></div>';
+  if (!evs.length) return { n: 0, h: h + '<div class="vacio">No se detectaron reservas para ese día.</div></section>' };
+  h += '<div class="resumen-f">' + esc(fmtN(nRes) + (nRes === 1 ? " reserva" : " reservas") + (nLib ? " · " + fmtN(nLib) + (nLib === 1 ? " liberada" : " liberadas") : "")) + '</div><ul class="evs">';
+  evs.slice(0, u.devN).forEach(function (e) {
+    var res = e.tipo === "reserva", t = Date.parse(e.detectado || "") || 0;
+    var ant = e.anticipacionH != null && String(e.anticipacionH).trim() !== "" && isFinite(Number(e.anticipacionH));
+    var cancha = /^\d{1,3}$/.test(String(e.cancha)) ? "Cancha " + e.cancha : "Cancha";
+    h += '<li><span class="pt ' + (res ? "bg-green" : "bg-orange") + '" aria-hidden="true"></span><span class="q">' + esc(e.hora + " · " + cancha) + "</span>" +
+      '<span class="cu">' + esc(t ? hace(t) : "—") + '</span><span class="d2">' + esc((res ? "Reservada" : "Liberada") + (ant ? " " + anticipacion(e.anticipacionH) : "") + (num(e.horas) > 0 ? " · " + horas(e.horas) : "")) + "</span></li>";
+  });
+  h += "</ul>";
+  if (evs.length > u.devN) h += '<div class="mas"><button class="btn" data-act="padel-dia-ev-mas">Ver más <span style="color:var(--text2)">(' + fmtN(evs.length - u.devN) + " restantes)</span></button></div>";
+  return { n: evs.length, h: h + "</section>" };
 }
 
 /* Copia local de /padel. Con 6 clubes y meses de historial el JSON puede pasar de 3 MB y localStorage
@@ -2112,7 +2522,7 @@ function renderZona(t) {
 function irTab(t, enfocar) {
   if (!propia(VISTAS, t)) t = "resumen";
   S.tab = t; guardarPref();
-  try { history.replaceState(null, "", "#" + t); } catch (e) {}
+  try { history.replaceState(null, "", "#" + hashTab(t)); } catch (e) {}
   pintarTabs(); render(); pintarEstado(); window.scrollTo(0, 0);
   if (t === "padel") revalidarPadel();
   var b = $("tab-" + t); if (b) { b.scrollIntoView({ block: "nearest", inline: "nearest" }); if (enfocar) b.focus(); }
@@ -2314,6 +2724,7 @@ function cerrarSesion(msg) {
   S.gen++;
   if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
   if (S.padel.ctl) { try { S.padel.ctl.abort(); } catch (e) {} }
+  if (S.padel.dia.ctl) { try { S.padel.dia.ctl.abort(); } catch (e) {} }
   S.padel = padelInicial(); S.msgSinDatos = null;
   ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PADEL);
   S.token = null; S.data = null; S.etag = null; S.memo = {}; S.errorRed = null;
@@ -2351,7 +2762,11 @@ $("f-login").addEventListener("submit", function (ev) {
       $("l-clave").value = "";
       mostrarApp();
       $("view").innerHTML = cargandoHTML();
-      if (S.tab === "padel") { render(); revalidarPadel(true); }
+      if (S.tab === "padel") {
+        render(); revalidarPadel(true);
+        // Fecha consultada que estaba en la URL (#padel/2026-10-12) antes de entrar
+        var fUrl = S.padel.dia.fecha || fechaDeHash(location.hash.slice(1)); if (fUrl) abrirDiaPadel(fUrl, true);
+      }
       return revalidar();
     })
     .catch(function (e) {
@@ -2397,7 +2812,7 @@ document.addEventListener("keydown", function (ev) {
 });
 $("b-refrescar").addEventListener("click", function () {
   if (S.dev) { location.reload(); return; }
-  if (S.tab === "padel") revalidarPadel(true); else revalidar();
+  if (S.tab === "padel") { revalidarPadel(true); if (S.padel.dia.fecha) cargarDiaPadel(S.padel.dia.fecha); } else revalidar();
 });
 
 /* ═══════════ Eventos de la vista (delegación) ═══════════ */
@@ -2456,7 +2871,7 @@ $("view").addEventListener("click", function (ev) {
   if (act === "padel-club") {
     if (!/^[\w-]{1,20}$/.test(v || "")) return;
     var cambio = S.ui.padel.club !== v;
-    S.ui.padel.club = v; S.ui.padel.n = 14; S.ui.padel.evN = 15; guardarPref(); render(); pintarEstado();
+    S.ui.padel.club = v; S.ui.padel.n = 14; S.ui.padel.evN = 15; S.ui.padel.devN = 20; guardarPref(); render(); pintarEstado();
     // Desde el ranking (más abajo) se sube hasta el selector; el botón elegido queda a la vista dentro del carrusel
     var ps = $("p-sel"), on = ps && ps.querySelector('[aria-pressed="true"]');
     if (ps && cambio && ps.getBoundingClientRect().top < 0) window.scrollTo(0, Math.max(0, window.scrollY + ps.getBoundingClientRect().top - 120));
@@ -2477,6 +2892,21 @@ $("view").addEventListener("click", function (ev) {
   if (act === "padel-ev-mas") { S.ui.padel.evN += 30; render(); return; }
   if (act === "padel-reintentar") { revalidarPadel(true); render(); return; }
   if (act === "padel-tip") { tipCelda(b); return; }
+  // Consultar una fecha ("Ver" va por el submit del formulario, más abajo)
+  if (act === "padel-dia-cerrar") {
+    var enVista = $("view").contains(document.activeElement);
+    cerrarDiaPadel();
+    var bv = document.querySelector('#view [data-act="padel-dia-ver"]');
+    if (bv && enVista) { try { bv.focus({ preventScroll: true }); } catch (e) {} }
+    return;
+  }
+  if (act === "padel-dia-reintentar") { if (S.padel.dia.fecha) cargarDiaPadel(S.padel.dia.fecha); return; }
+  if (act === "padel-dia-ev-mas") { S.ui.padel.devN += 30; render(); return; }
+});
+/* Casa Padel: "Consultar una fecha" (botón Ver o Enter en el campo) */
+$("view").addEventListener("submit", function (ev) {
+  if (!ev.target || ev.target.id !== "pd-form") return;
+  ev.preventDefault(); verDiaPadel();
 });
 /* Casa Padel: detalle de las celdas de turnos y del mapa de calor en el mismo #tip de los gráficos.
    Tocar o Enter lo abre; pasar el mouse también; Escape, tocar fuera o deslizar la tabla lo cierra. */
@@ -2504,6 +2934,7 @@ $("view").addEventListener("change", function (ev) {
     S.ui.car[act === "car-desde" ? "desde" : "hasta"] = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : "";
     S.ui.car.rapido = "todas"; S.ui.car.n = 50; render();
   }
+  else if (act === "padel-dia-f") S.ui.padel.diaF = el.value; // se recuerda lo elegido aunque la vista se redibuje
 });
 var tBusca = null;
 $("view").addEventListener("input", function (ev) {
@@ -2518,7 +2949,13 @@ window.addEventListener("resize", function () {
   clearTimeout(tRes);
   tRes = setTimeout(function () { marcarDesborde(); if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (S.data || S.tab === "padel") render(); } }, 180);
 });
-window.addEventListener("hashchange", function () { var t = location.hash.slice(1); if (propia(VISTAS, t) && t !== S.tab) irTab(t); });
+window.addEventListener("hashchange", function () {
+  var t = location.hash.slice(1), fd = fechaDeHash(t);
+  // Casa Padel con una fecha consultada (#padel/2026-10-12); "#padel" a secas la cierra
+  if (fd) { if (S.tab !== "padel") irTab("padel"); if (fd !== S.padel.dia.fecha) abrirDiaPadel(fd, false); else hashPadel(); return; }
+  if (t === "padel" && S.tab === "padel" && S.padel.dia.fecha) { cerrarDiaPadel(); return; }
+  if (propia(VISTAS, t) && t !== S.tab) irTab(t);
+});
 
 /* Reloj del indicador + revalidación periódica */
 setInterval(pintarEstado, 30000);
@@ -2534,17 +2971,21 @@ document.addEventListener("visibilitychange", function () {
   var pref = ls.json(K_PREF) || {};
   if (pref.periodo && /^(3|6|12|todo)$/.test(pref.periodo)) S.periodo = pref.periodo;
   if (typeof pref.padelClub === "string" && /^[\w-]{1,20}$/.test(pref.padelClub)) S.ui.padel.club = pref.padelClub;
-  var h = location.hash.slice(1);
+  var h = location.hash.slice(1), fHash = fechaDeHash(h);
+  // #padel/2026-10-12 = Casa Padel con esa fecha consultada: se abre al final, con sesión o en vista previa
+  // (sin sesión la abre el login, que la lee de la URL)
+  if (fHash) { h = "padel"; S.ui.padel.diaF = fHash; }
   S.tab = propia(VISTAS, h) ? h : propia(VISTAS, pref.tab) ? pref.tab : "resumen";
 
-  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json> y/o ?padel=<ruta relativa .json>
+  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json>, ?padel=<ruta relativa .json>
+  // y/o ?padeldia=<ruta relativa .json> (respuesta fija de /padel/dia para cualquier fecha)
   var host = location.hostname;
-  var datos = null, padelJ = null;
-  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); padelJ = qs.get("padel"); } catch (e) {}
-  if ((host === "localhost" || host === "127.0.0.1") && (datos || padelJ)) {
+  var datos = null, padelJ = null, padelDiaJ = null;
+  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); padelJ = qs.get("padel"); padelDiaJ = qs.get("padeldia"); } catch (e) {}
+  if ((host === "localhost" || host === "127.0.0.1") && (datos || padelJ || padelDiaJ)) {
     var rutaOk = function (x) { return !x || (/^[\w.\-\/]+\.json$/.test(x) && x.indexOf("//") < 0); };
-    if (!rutaOk(datos) || !rutaOk(padelJ)) { document.body.textContent = "Parámetro ?datos o ?padel inválido: debe ser una ruta relativa a un .json"; return; }
-    S.dev = true;
+    if (!rutaOk(datos) || !rutaOk(padelJ) || !rutaOk(padelDiaJ)) { document.body.textContent = "Parámetro ?datos, ?padel o ?padeldia inválido: debe ser una ruta relativa a un .json"; return; }
+    S.dev = true; S.devPadelDia = padelDiaJ || null;
     if (!datos) S.msgSinDatos = "Vista previa sin ?datos=: solo se puede ver la pestaña Casa Padel.";
     if (padelJ) S.padel.cargando = true; else S.padel.vacio = "Vista previa sin ?padel=<ruta .json>.";
     mostrarApp(); render();
@@ -2559,6 +3000,7 @@ document.addEventListener("visibilitychange", function () {
         .catch(function (e) { S.padel.error = "No se pudo leer " + padelJ + ": " + e.message + "."; })
         .then(function () { S.padel.cargando = false; if (S.tab === "padel") render(); });
     }
+    if (fHash) abrirDiaPadel(fHash, false);
     return;
   }
 
@@ -2576,6 +3018,7 @@ document.addEventListener("visibilitychange", function () {
       S.charts = [];
     }
   }
+  if (fHash) S.padel.dia.fecha = fHash; // el primer dibujo ya muestra el panel de esa fecha (cargando)
   var c = ls.json(K_CACHE);
   var okCache = false;
   if (c && c.data && Array.isArray(c.data.meses)) {
@@ -2587,6 +3030,7 @@ document.addEventListener("visibilitychange", function () {
   if (!okCache) render(); // sin copia: "Cargando…" (o Casa Padel, que no depende de este JSON)
   revalidar();
   if (S.tab === "padel") revalidarPadel(true);
+  if (fHash) abrirDiaPadel(fHash, false);
 })();
 
 /* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
