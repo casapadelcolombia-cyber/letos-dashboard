@@ -1820,7 +1820,10 @@ function botonTurno(x, canchas, N, etiqueta) {
   var arrend = canchas.filter(function (k) { return ls_.indexOf(k) < 0; });
   // Hoy el API no manda la duración; si llegara, se aclara solo cuando no es el turno de 90 min ("3 (solo 60 min)")
   var txtLibres = libres.map(function (l) { return l.d && l.d < 90 ? l.c + " (solo " + l.d + " min)" : l.c; }).join(", ");
-  var filas = [["Arrendadas", a ? (arrend.length === a ? arrend.join(", ") : String(a)) : "ninguna"], ["Libres", libres.length ? txtLibres : "ninguna"]];
+  // Se nombran las canchas ("cancha 2", "canchas 1, 3") para no confundir el número de cancha con la cantidad.
+  var nCanchas = function (n) { return n === 1 ? "cancha " : "canchas "; };
+  var filas = [["Arrendadas", a ? (arrend.length === a ? a + " · " + nCanchas(a) + arrend.join(", ") : String(a)) : "ninguna"],
+    ["Libres", libres.length ? libres.length + " · " + nCanchas(libres.length) + txtLibres : "ninguna"]];
   var pr = textoPrecio(x); if (pr) filas.push(["Precio", pr]);
   return botonTip("ocup", estiloOcup(a / N), etiqueta, filas, a + "/" + N);
 }
