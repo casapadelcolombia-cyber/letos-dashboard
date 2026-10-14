@@ -439,7 +439,7 @@ table.pd-h tr.noche th,table.pd-h tr.noche td{background:rgba(var(--blueRGB),.06
 var API = "https://letos-mcp.casapadelcolombia.workers.dev/api/dashboard";
 var K_TOKEN = "letos_dash_token", K_CACHE = "letos_dash_cache", K_USER = "letos_dash_usuario", K_PREF = "letos_dash_pref";
 var K_PADEL = "letos_padel_cache"; // copia local de /api/dashboard/padel (independiente de la del dashboard)
-var EXTERNOS = [["Farmatodo", "https://dashboard.letos.co/farmatodo.html"], ["Aruma", "https://dashboard.letos.co/aruma.html"], ["Rappi", "https://dashboard.letos.co/rappi.html"]];
+var EXTERNOS = [["Farmatodo", "https://dashboard.letos.co/farmatodo.html"], ["Aruma", "https://dashboard.letos.co/aruma.html"], ["Rappi", "https://dashboard.letos.co/rappi.html"], ["Locatel", "https://dashboard.letos.co/locatel.html"]];
 var TABS = [
   ["resumen", "Resumen"], ["productos", "Productos"], ["clientes", "Clientes"], ["vendedores", "Vendedores"],
   ["inventario", "Inventario"], ["cartera", "Cartera"], ["movimiento", "Movimiento"], ["padel", "Casa Padel"]
@@ -2819,7 +2819,7 @@ function cerrarSesion(msg) {
   if (S.padel.ctl) { try { S.padel.ctl.abort(); } catch (e) {} }
   if (S.padel.dia.ctl) { try { S.padel.dia.ctl.abort(); } catch (e) {} }
   S.padel = padelInicial(); S.msgSinDatos = null;
-  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PADEL);
+  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PADEL); ls.del("letos_locatel_cache"); // copia de locatel.html (misma sesión)
   S.token = null; S.data = null; S.etag = null; S.memo = {}; S.errorRed = null;
   S.cargando = false; S.usuario = null; S.rol = null; S.estadoSync = null; S.msgSync = null; S.syncEnCurso = false;
   S.ui = uiInicial();

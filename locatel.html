@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<title>Locatel · LETOS</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+/* ═══════════ Tokens (claro) — mismos del dashboard principal ═══════════ */
+:root{
+  --bg:#f5f5f7; --card:#fff; --fill:#f2f2f7; --fill2:#e8e8ed; --text:#1d1d1f; --text2:#6e6e73; --text3:#6e6e73;
+  --sep:rgba(0,0,0,.09); --bar:rgba(245,245,247,.78); --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05);
+  --blue:#0071e3; --green:#34c759; --red:#ff3b30; --orange:#ff9500; --yellow:#ffcc00; --purple:#af52de; --pink:#ff2d55; --teal:#30b0c7; --indigo:#5856d6; --gray:#8e8e93;
+  --serieY:#d9a400;
+  --pos:#1e7a34; --neg:#d70015; --warn:#b25000; --blueT:#0066cc;
+  --grid:rgba(0,0,0,.07); --axis:#6e6e73; --focus:#0071e3;
+  --r:20px; --r2:12px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+/* ═══════════ Tokens (oscuro) ═══════════ */
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#000; --card:#1c1c1e; --fill:#2c2c2e; --fill2:#3a3a3c; --text:#f5f5f7; --text2:#aeaeb2; --text3:#98989d;
+    --sep:rgba(255,255,255,.12); --bar:rgba(22,22,23,.76); --shadow:none;
+    --blue:#0a84ff; --green:#30d158; --red:#ff453a; --orange:#ff9f0a; --yellow:#ffd60a; --purple:#bf5af2; --pink:#ff375f; --teal:#40c8e0; --indigo:#5e5ce6; --gray:#98989d;
+    --serieY:#ffd60a;
+    --pos:#30d158; --neg:#ff6961; --warn:#ffb340; --blueT:#409cff;
+    --grid:rgba(255,255,255,.09); --axis:#8e8e93; --focus:#0a84ff;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+a{color:var(--blueT)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+.num,.tn{font-variant-numeric:tabular-nums}
+.oculto{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ═══════════ Barra superior ═══════════ */
+.top{position:sticky;top:0;z-index:30;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
+.top-in{max-width:1240px;margin:0 auto;padding:0 16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.fila1{display:flex;align-items:center;gap:10px;height:52px}
+.marca{display:flex;align-items:center;gap:9px;min-width:0;flex:1;color:var(--text);text-decoration:none}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d1d1f,#48484a);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:.5px;flex:none}
+@media (prefers-color-scheme:dark){.logo{background:linear-gradient(135deg,#f5f5f7,#c7c7cc);color:#000}}
+.marca b{font-size:17px;font-weight:600;letter-spacing:-.2px;white-space:nowrap}
+.marca .canal{font-size:17px;font-weight:400;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estado{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.estado span:last-child{overflow:hidden;text-overflow:ellipsis}
+.punto{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.punto.viejo{background:var(--orange)}.punto.off{background:var(--gray)}
+.punto.busca{background:var(--blue);animation:late 1.2s ease-in-out infinite}
+@keyframes late{50%{opacity:.3}}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-padding:16px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;height:34px;padding:0 14px;border-radius:17px;font-size:14px;font-weight:500;color:var(--text2);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.tab:hover{color:var(--text);background:var(--fill)}
+.tab[aria-current="page"]{background:var(--text);color:var(--bg)}
+.tab.home{color:var(--blueT)}
+.tab.home svg{width:14px;height:14px}
+.tabs .div{flex:none;width:1px;background:var(--sep);margin:6px 6px}
+@media (max-width:420px){.tab{padding:0 11px}.tabs .div{margin:6px 3px}}
+
+/* ═══════════ Contenido ═══════════ */
+main{max-width:1240px;margin:0 auto;padding:16px 16px 56px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 16px}
+.cab-t{min-width:0;flex:1 1 200px}
+.cab h1{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.cab p{font-size:13px;color:var(--text2);margin-top:4px;font-variant-numeric:tabular-nums}
+#salir{flex:none}
+.seg{display:inline-flex;background:var(--fill2);border-radius:9px;padding:2px;gap:0}
+.seg button{min-width:52px;height:30px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04);font-weight:600}
+@media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:#636366}}
+.aviso{border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;background:var(--card);box-shadow:var(--shadow)}
+.aviso .ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:var(--orange)}
+.aviso.error .ic{background:var(--red)}.aviso.info .ic{background:var(--blue)}
+.aviso p{color:var(--text2);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.aviso .btn{margin-top:10px}
+
+.grid{display:grid;gap:12px}
+.bloque{margin-top:12px}
+.g2{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin-top:12px}
+@media (min-width:900px){.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:17px;font-weight:600;letter-spacing:-.2px}
+.card .sub{font-size:13px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
+.card-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.card-cab .acc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.azul{color:var(--blueT)}.verde{color:var(--pos)}.rojo{color:var(--neg)}.naranja{color:var(--warn)}
+
+/* Filtros */
+.filtros{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end}
+.pills{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 100%}
+.pill{height:32px;padding:0 12px;border-radius:16px;background:var(--fill);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.pill:hover{background:var(--fill2)}
+.pill[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+.fld{display:flex;flex-direction:column;gap:3px;flex:1 1 140px;max-width:200px;font-size:12px;color:var(--text2)}
+.fecha{height:36px;border-radius:10px;border:0;background:var(--fill);padding:0 10px;font-size:14px;min-width:0;width:100%;color:var(--text)}
+.flecha{color:var(--text3);padding-bottom:8px}
+.canales{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1 1 100%;border-top:.5px solid var(--sep);padding-top:12px;margin-top:2px}
+.canales .lbl{font-size:12px;color:var(--text2);margin-right:4px}
+.btn{height:36px;padding:0 14px;border-radius:10px;background:var(--fill);font-size:14px;font-weight:500;color:var(--blueT);display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--fill2)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.prim{background:var(--blue);color:#fff}
+.btn.prim:hover{filter:brightness(1.08)}
+.btn svg{width:15px;height:15px;flex:none}
+.buscar{flex:1 1 220px;min-width:0;height:36px;border-radius:10px;border:0;background:var(--fill);padding:0 12px 0 34px;font-size:15px;color:var(--text);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px 50%}
+.buscar::placeholder{color:var(--text3)}
+@media (min-width:1000px){.pills{flex:1 1 auto;align-self:center}}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+@media (max-width:600px){.fld{max-width:none}.flecha{display:none}}
+@media (max-width:600px),(pointer:coarse){.buscar,.fecha{font-size:16px}}
+
+/* Héroe */
+.heroe{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:900px){.heroe{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center}}
+.heroe .l{font-size:14px;color:var(--text2);font-weight:500}
+.heroe .big{font-size:40px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin:6px 0 10px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+@media (min-width:760px){.heroe .big{font-size:48px}}
+.heroe .nota{font-size:13px;color:var(--text2);margin-top:10px;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:500;padding:5px 10px;border-radius:999px;background:var(--fill);font-variant-numeric:tabular-nums}
+.chip.up{color:var(--pos);background:color-mix(in srgb,var(--green) 14%,transparent)}
+.chip.down{color:var(--neg);background:color-mix(in srgb,var(--red) 12%,transparent)}
+.minis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mini{background:var(--fill);border-radius:16px;padding:12px 14px;min-width:0}
+.mini .l{font-size:13px;color:var(--text2);font-weight:500}
+.mini .v{font-size:24px;font-weight:700;letter-spacing:-.4px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .s{font-size:12px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+/* Gráficos */
+.graf{position:relative;width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none;min-height:220px}
+.graf svg{display:block;width:100%;overflow:visible}
+.graf text{font-size:11px;fill:var(--axis);font-family:var(--font);font-variant-numeric:tabular-nums}
+.graf .gl{stroke:var(--grid);stroke-width:1}
+.graf .b{transition:opacity .12s}
+.graf.activo .col .b{opacity:.45}
+.graf.activo .col.on .b{opacity:1}
+.graf .col.parcial .b{fill-opacity:.5}
+.graf .hueco{fill:var(--fill2);opacity:.75}
+.graf .regla{stroke:var(--text3);stroke-width:1;stroke-dasharray:3 3}
+.graf .val{font-size:10px;fill:var(--text2);font-weight:600}
+.f-green{fill:var(--green)}.f-blue{fill:var(--blue)}
+.bg-green{background:var(--green)}.bg-blue{background:var(--blue)}
+#tip{position:fixed;z-index:60;pointer-events:none;background:var(--card);color:var(--text);border-radius:12px;padding:9px 11px;font-size:13px;box-shadow:0 8px 28px rgba(0,0,0,.2);border:.5px solid var(--sep);max-width:260px;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .1s;left:0;top:0}
+#tip.ver{opacity:1}
+#tip b{display:block;font-size:13px;margin-bottom:3px}
+#tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--text2)}
+#tip .r span:last-child{color:var(--text);font-weight:600}
+#tip .r.solo span{color:var(--text2);font-weight:400}
+.leyenda{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-top:8px;font-variant-numeric:tabular-nums}
+.leyenda i{display:inline-block;width:14px;height:0;border-top:1.5px dashed var(--text3);margin-right:6px;vertical-align:3px}
+.leyenda i.sw{width:10px;height:10px;border:0;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.leyenda i.sw.hueco{background:var(--fill2)}
+
+/* Datos del gráfico (plegable) */
+details.datos{margin-top:12px;border-top:.5px solid var(--sep);padding-top:6px}
+details.datos summary{cursor:pointer;font-size:14px;font-weight:500;color:var(--blueT);display:flex;align-items:center;gap:6px;min-height:36px;list-style:none;border-radius:8px}
+details.datos summary::-webkit-details-marker{display:none}
+details.datos summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px}
+details.datos[open] summary::before{transform:rotate(45deg)}
+
+/* Por canal y por marca */
+.rank{list-style:none;display:grid;grid-template-columns:minmax(0,1fr)}
+.rank li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:11px 0;border-bottom:.5px solid var(--sep);align-items:center}
+.rank li:last-child{border-bottom:0}
+.rank .nm{font-weight:600;overflow-wrap:anywhere}
+.rank .vv{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.rank .meta{grid-column:1/3;display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums}
+.rank .barra{grid-column:1/3;height:6px;border-radius:3px;background:var(--fill2);overflow:hidden}
+.rank .barra span{display:block;height:100%;border-radius:3px;background:var(--green)}
+.rank.filtrado li{opacity:.5}
+.rank.filtrado li.on{opacity:1}
+.sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;flex:none}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--fill);color:var(--text2);vertical-align:1px;margin-left:4px;white-space:nowrap}
+
+/* Tablas */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px;
+  background:linear-gradient(to right,var(--card) 30%,transparent) left/24px 100% no-repeat local,
+    linear-gradient(to left,var(--card) 30%,transparent) right/24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll;
+  background-color:var(--card)}
+.tw.alto thead th{position:sticky;top:0;background:var(--card);z-index:1}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;font-weight:600;color:var(--text2);text-align:left;padding:8px 8px;border-bottom:.5px solid var(--sep);white-space:nowrap}
+th.d,td.d{text-align:right}
+th button{font-weight:600;color:inherit;display:inline-flex;gap:3px;align-items:center;padding:2px 0}
+th[aria-sort] button{color:var(--text)}
+td{padding:10px 8px;border-bottom:.5px solid var(--sep);vertical-align:middle;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+td.d{white-space:nowrap}
+td .n1{font-weight:500;overflow-wrap:break-word;min-width:130px}
+td .n2{font-size:12px;color:var(--text3);margin-top:1px}
+td.idx{color:var(--text3);font-size:12px;width:28px}
+td.cat{color:var(--text2);font-size:13px;white-space:nowrap}
+td.tenue{color:var(--text3)}
+.solo-m{display:none}
+@media (max-width:600px){.m-no{display:none}div.solo-m{display:block}span.solo-m{display:inline}td .n1{min-width:100px}}
+/* Celular: sin la columna "#", el nombre queda fijo al deslizar la tabla de lado. El ::before tapa
+   el relleno de 18 px de .tw para que no se vean pasar las celdas de debajo (igual que el dashboard principal). */
+@media (max-width:600px){
+  table.fija .idx{display:none}
+  table.fija .fija{position:sticky;left:0;z-index:1;background:var(--card)}
+  table.fija th.fija{z-index:2}
+  table.fija .fija::before{content:"";position:absolute;top:0;bottom:0;left:-18px;width:18px;background:inherit}
+}
+.minibar{height:4px;border-radius:2px;background:var(--fill2);margin-top:5px;overflow:hidden;width:60px;margin-left:auto}
+.minibar span{display:block;height:100%;background:var(--green)}
+.mas{display:flex;justify-content:center;margin-top:12px}
+.vacio{padding:28px 8px;text-align:center;color:var(--text2);font-size:14px}
+.pie{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.5;font-variant-numeric:tabular-nums}
+.fuente{font-size:12px;color:var(--text3);line-height:1.5;margin:18px 4px 0}
+
+/* Entrada (misma sesión del dashboard principal) */
+.login-card{width:100%;max-width:380px;margin:8px auto 0;background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:28px 22px 22px;text-align:center}
+.login-card .logo{width:48px;height:48px;border-radius:13px;font-size:18px;margin:0 auto 12px}
+.login-card h2{font-size:21px;font-weight:700;letter-spacing:-.3px}
+.login-card>p{font-size:14px;color:var(--text2);margin:4px 0 20px}
+.campo{display:block;text-align:left;margin-bottom:12px}
+.campo>span:first-child{display:block;font-size:13px;color:var(--text2);margin:0 0 5px 4px}
+.campo input{width:100%;height:46px;border-radius:12px;border:1px solid transparent;background:var(--fill);padding:0 14px;font-size:17px;color:var(--text)}
+.campo input:focus{border-color:var(--blue);outline:none;background:var(--card)}
+.clave{position:relative;display:block}
+.clave input{padding-right:84px}
+.clave button{position:absolute;right:4px;top:50%;transform:translateY(-50%);height:38px;padding:0 10px;border-radius:9px;font-size:13px;color:var(--blueT)}
+.entrar{width:100%;height:48px;border-radius:12px;background:var(--blue);color:#fff;font-size:17px;font-weight:600;margin-top:6px}
+.entrar:disabled{opacity:.6}
+.err{color:var(--neg);font-size:14px;min-height:20px;margin-top:12px}
+
+/* Áreas de toque en pantallas táctiles, igual que el dashboard principal (va después de las reglas base para que gane) */
+@media (pointer:coarse){
+  .seg button{height:40px}
+  .tab,.pill,.btn,.buscar,.fecha{min-height:44px}
+  th button{min-height:44px;padding:0 4px}
+  details.datos summary{min-height:44px}
+  .clave button{height:44px}
+}
+
+/* Esqueleto de carga */
+.skel{height:14px;border-radius:7px;background:var(--fill);margin:8px 0;animation:late 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="fila1">
+      <a class="marca" href="/" aria-label="LETOS · volver al dashboard"><span class="logo" aria-hidden="true">L</span><b>LETOS</b><span class="canal">Locatel</span></a>
+      <div class="estado" id="estado" aria-live="polite"><span class="punto off"></span><span>Cargando…</span></div>
+    </div>
+    <nav class="tabs" aria-label="Canales">
+      <a class="tab home" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Dashboard</a>
+      <span class="div" aria-hidden="true"></span>
+      <a class="tab" href="farmatodo.html">Farmatodo</a>
+      <a class="tab" href="aruma.html">Aruma</a>
+      <a class="tab" href="rappi.html">Rappi</a>
+      <a class="tab" href="locatel.html" aria-current="page">Locatel</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="cab">
+    <div class="cab-t"><h1>Locatel</h1><p id="sub">Cargando…</p></div>
+    <button class="btn oculto" id="salir" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Salir</button>
+  </div>
+  <div id="avisos" aria-live="polite"></div>
+
+  <!-- Cargando -->
+  <div id="esqueleto" aria-hidden="true">
+    <section class="card"><div class="skel" style="width:40%"></div><div class="skel" style="height:34px;width:60%"></div><div class="skel" style="width:30%"></div></section>
+    <section class="card bloque"><div class="skel" style="width:25%"></div><div class="skel" style="height:190px;border-radius:14px"></div></section>
+    <section class="card bloque"><div class="skel" style="width:35%"></div><div class="skel"></div><div class="skel"></div><div class="skel" style="width:80%"></div></section>
+  </div>
+
+  <!-- Error o sin datos -->
+  <div id="error" class="oculto"></div>
+
+  <!-- Entrada: misma sesión del dashboard principal -->
+  <section id="login" class="oculto" aria-labelledby="t-login">
+    <form class="login-card" id="f-login" novalidate>
+      <div class="logo" aria-hidden="true">L</div>
+      <h2 id="t-login">Entra para ver Locatel</h2>
+      <p>Con el mismo usuario y clave del dashboard</p>
+      <label class="campo"><span>Usuario</span>
+        <input id="l-usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="campo"><span>Clave</span>
+        <span class="clave">
+          <input id="l-clave" name="clave" type="password" autocomplete="current-password" required>
+          <button type="button" id="l-ver" aria-label="Mostrar clave">Mostrar</button>
+        </span>
+      </label>
+      <button class="entrar" id="l-btn" type="submit">Entrar</button>
+      <div class="err" id="l-err" role="alert" aria-live="assertive"></div>
+    </form>
+  </section>
+
+  <!-- Contenido -->
+  <div id="contenido" class="oculto">
+    <section class="card filtros" aria-label="Filtros">
+      <div class="pills" role="group" aria-label="Rango rápido" id="presets"></div>
+      <label class="fld">Desde<input class="fecha" type="date" id="fi"></label>
+      <span class="flecha" aria-hidden="true">→</span>
+      <label class="fld">Hasta<input class="fecha" type="date" id="ff"></label>
+      <div class="canales oculto" role="group" aria-label="Canal de venta" id="canales"></div>
+    </section>
+
+    <section class="card bloque" aria-labelledby="t-ventas">
+      <div class="heroe">
+        <div>
+          <div class="l" id="t-ventas">Ventas del período</div>
+          <div class="big" id="kV">—</div>
+          <div class="chips" id="chipsV"></div>
+          <div class="nota" id="rangoTxt"></div>
+        </div>
+        <div class="minis">
+          <div class="mini"><div class="l">Unidades</div><div class="v azul" id="kU">—</div><div class="s" id="kUs"></div></div>
+          <div class="mini"><div class="l">Tiendas con venta</div><div class="v" id="kT">—</div><div class="s" id="kTs"></div></div>
+          <div class="mini"><div class="l">Productos vendidos</div><div class="v" id="kP">—</div><div class="s" id="kPs"></div></div>
+          <div class="mini"><div class="l">Precio promedio</div><div class="v verde" id="kX">—</div><div class="s" id="kXs"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card bloque" aria-labelledby="t-tend">
+      <div class="card-cab">
+        <div><h2 id="t-tend">Tendencia</h2><div class="sub" id="tendSub"></div></div>
+        <div class="acc">
+          <div class="seg" role="group" aria-label="Métrica">
+            <button type="button" data-m="ventas" aria-pressed="true">Ventas $</button>
+            <button type="button" data-m="unidades" aria-pressed="false">Unidades</button>
+          </div>
+          <div class="seg" role="group" aria-label="Agrupar por">
+            <button type="button" data-g="dia" aria-pressed="true">Día</button>
+            <button type="button" data-g="semana" aria-pressed="false">Semana</button>
+            <button type="button" data-g="mes" aria-pressed="false">Mes</button>
+          </div>
+        </div>
+      </div>
+      <div class="graf" id="chart"></div>
+      <div class="leyenda" id="leyenda"></div>
+      <details class="datos" id="detDatos">
+        <summary>Ver datos del gráfico</summary>
+        <div id="z-serie"></div>
+      </details>
+    </section>
+
+    <div class="g2">
+      <section class="card" aria-labelledby="t-can">
+        <div class="card-cab"><div><h2 id="t-can">Por canal</h2><div class="sub" id="canSub"></div></div></div>
+        <div id="z-canal"></div>
+      </section>
+      <section class="card" aria-labelledby="t-mar">
+        <div class="card-cab"><div><h2 id="t-mar">Por marca</h2><div class="sub" id="marSub"></div></div></div>
+        <div id="z-marca"></div>
+      </section>
+    </div>
+
+    <section class="card bloque" aria-labelledby="t-tie">
+      <div class="card-cab"><div><h2 id="t-tie">Tiendas</h2><div class="sub" id="tieSub"></div></div></div>
+      <div class="ctrls"><input type="search" id="q-tie" class="buscar" placeholder="Buscar tienda o código…" aria-label="Buscar tienda o código" autocomplete="off"></div>
+      <div id="z-tie"></div>
+      <div class="pie" id="tieCount" aria-live="polite"></div>
+    </section>
+
+    <section class="card bloque" aria-labelledby="t-prod">
+      <div class="card-cab">
+        <div><h2 id="t-prod">Productos del período</h2><div class="sub" id="prodSub"></div></div>
+        <button class="btn" id="csv" type="button" aria-label="Descargar los productos en CSV"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>CSV</button>
+      </div>
+      <div class="ctrls"><input type="search" id="q-pro" class="buscar" placeholder="Producto, marca, EAN o SAP…" aria-label="Buscar producto, marca, EAN o SAP" autocomplete="off"></div>
+      <div id="z-pro"></div>
+      <div class="pie" id="proCount" aria-live="polite"></div>
+    </section>
+
+    <p class="fuente">Fuente: Centro de Negociaciones de Locatel · Reporte Ventas Proveedor (línea 2-NO FARMACÉUTICOS). Venta neta según Locatel. Cada mañana se baja el día anterior y se vuelven a bajar los últimos 4 días por si Locatel ajusta.</p>
+  </div>
+</main>
+<div id="tip" role="tooltip" aria-hidden="true"></div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════
+   Locatel · LETOS — ventas del "Reporte Ventas Proveedor" de Locatel.
+   El Worker letos-mcp baja un CSV por día y entrega todo el historial
+   en /api/dashboard/locatel (contrato v1). Usa la MISMA sesión del
+   dashboard principal (letos_dash_token / letos_dash_usuario).
+   Los días que aún no se han bajado NO cuentan como cero: se muestran
+   como faltantes. Todo texto que viene del JSON pasa por esc().
+   ═══════════════════════════════════════════════════════════════════ */
+var API = "https://letos-mcp.casapadelcolombia.workers.dev/api/dashboard";
+var K_TOKEN = "letos_dash_token", K_USER = "letos_dash_usuario", K_CACHE = "letos_locatel_cache";
+// Al salir se borran también las copias del dashboard principal, igual que hace su "Cerrar sesión"
+var K_OTRAS = ["letos_dash_cache", "letos_padel_cache"];
+var MES_L = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+var MES_C = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+var DIA_C = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+var CANAL_BONITO = { "VENTAS RETAIL": "Tienda física", "PAGINA WEB": "Página web", "MARKETPLACE": "Marketplace", "TELEFONICO": "Telefónico" };
+var CANAL_ORDEN = ["Tienda física", "Página web", "Marketplace", "Telefónico"];
+// Mismos colores de marca del dashboard principal (Esponjabón no está allá: naranja)
+var COLOR_MARCA = { "Girlz Only": "pink", "Blondz Only": "serieY", "Evian": "teal", "Esponjabón": "orange", "Otros": "blue" };
+var COLORES_EXTRA = ["indigo", "purple", "green", "gray", "red"];
+var $ = function (id) { return document.getElementById(id); };
+
+function filtrosIniciales() { return { fi: "", ff: "", preset: "", canal: "" }; }
+function tablasIniciales() { return { tie: { q: "", sort: { k: "ventas", dir: -1 }, n: 25 }, pro: { q: "", sort: { k: "ventas", dir: -1 }, n: 50 }, nSerie: 31 }; }
+var S = { dev: false, token: null, usuario: null, gen: 0, data: null, etag: null, fuente: null, vista: "cargando", cargando: false, desde: 0, ctl: null, errorRed: null, revisado: 0 };
+var IDX = null;   // índice armado a partir del JSON (días bajados, filas, tiendas, productos, canales)
+var M = null;     // modelo del rango y canal elegidos (se recalcula en render)
+var F = filtrosIniciales();
+var _g = "dia", _m = "ventas";
+var ST = tablasIniciales();
+
+/* ─────────── localStorage siempre protegido ─────────── */
+var ls = {
+  get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+  set: function (k, v) { try { window.localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+  del: function (k) { try { window.localStorage.removeItem(k); } catch (e) {} },
+  json: function (k) { try { var v = window.localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+};
+
+/* ─────────── Formato es-CO ─────────── */
+var NF0 = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
+var NF1 = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+var NF1f = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+function num(n) { n = Number(n); return isFinite(n) ? n : 0; }
+function entero(x) { var n = Number(x); return isFinite(n) ? Math.trunc(n) : -1; }
+function arr(x) { return Array.isArray(x) ? x : []; }
+function fmt(n) { n = Math.round(num(n)); return (n < 0 ? "−" : "") + NF0.format(Math.abs(n)); }
+function cop(n) { n = Math.round(num(n)); return (n < 0 ? "−" : "") + "$ " + NF0.format(Math.abs(n)); }
+function moneyA(n) {
+  n = num(n); var a = Math.abs(n), s = n < 0 ? "−" : "";
+  if (a >= 999.5e6) return s + "$" + (a >= 1e11 ? NF0.format(a / 1e9) : NF1.format(a / 1e9)) + " MM";
+  if (a >= 999.5e3) return s + "$" + (a >= 1e8 ? NF0.format(a / 1e6) : NF1.format(a / 1e6)) + " M";
+  if (a >= 999.5) return s + "$" + (a >= 1e5 ? NF0.format(a / 1e3) : NF1.format(a / 1e3)) + " mil";
+  return s + "$ " + NF0.format(a);
+}
+function corto(v) { return _m === "ventas" ? moneyA(v) : (Math.abs(v) >= 1e4 ? NF1.format(v / 1000) + " mil" : fmt(v)); }
+function pct(x) { return isFinite(x) ? (x < 0 ? "−" : "") + NF1f.format(Math.abs(x) * 100) + " %" : "—"; }
+function anchoBarra(x) { return Math.max(0, Math.min(100, num(x) * 100)).toFixed(1); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"'`=\/]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;", "=": "&#61;", "/": "&#47;" }[c];
+  });
+}
+function norm(s) { return String(s == null ? "" : s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+function esFecha(s) { return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) && isFinite(Date.parse(s + "T00:00:00Z")); }
+function ds(d) { return String(d || "").substring(0, 10); }
+function tUTC(f) { return Date.parse(f + "T00:00:00Z"); }
+function isoUTC(t) { return new Date(t).toISOString().substring(0, 10); }
+function sumarDias(f, n) { return isoUTC(tUTC(f) + n * 864e5); }
+function diasEntre(a, b) { return Math.round((tUTC(b) - tUTC(a)) / 864e5); }
+function mx(a, b) { return a > b ? a : b; }
+function mn(a, b) { return a < b ? a : b; }
+function fechaC(f) { var p = ds(f).split("-"); return +p[2] + " " + (MES_C[+p[1] - 1] || "") + " " + p[0]; }
+function fechaSinAnio(f) { var p = ds(f).split("-"); return +p[2] + " " + (MES_C[+p[1] - 1] || ""); }
+function fechaDia(f) { var d = new Date(tUTC(ds(f))); return (DIA_C[d.getUTCDay()] || "") + " " + fechaC(f); }
+function mesL(k) { var p = String(k).split("-"); return (MES_L[+p[1] - 1] || k) + " " + p[0]; }
+function mesC(k) { var p = String(k).split("-"); return (MES_C[+p[1] - 1] || k) + " " + String(p[0]).slice(2); }
+/* "1 – 13 oct 2026", "18 sep – 30 sep 2026" o con año en ambos lados si cambia */
+function rangoC(a, b) {
+  if (a === b) return fechaC(a);
+  return (a.substring(0, 4) === b.substring(0, 4) ? fechaSinAnio(a) : fechaC(a)) + " – " + fechaC(b);
+}
+/* Hoy en Bogotá (UTC−5 todo el año, sin horario de verano) */
+function hoyB() { return isoUTC(Date.now() - 5 * 3600000); }
+function relDia(f) { var d = diasEntre(f, hoyB()); return d === 0 ? "hoy" : d === 1 ? "ayer" : d > 1 ? "hace " + d + " días" : ""; }
+function hace(ms) {
+  var s = (Date.now() - ms) / 1000;
+  if (s < 60) return "hace un momento";
+  var m = Math.round(s / 60); if (m < 60) return "hace " + m + " min";
+  var h = Math.round(m / 60); if (h < 36) return "hace " + h + " h";
+  var d = Math.round(h / 24); return "hace " + d + (d === 1 ? " día" : " días");
+}
+function variacion(cur, prev) { if (!prev) return null; return (cur - prev) / Math.abs(prev); }
+function chipVar(v, texto) {
+  var up = v >= 0;
+  return '<span class="chip ' + (up ? "up" : "down") + '"><span aria-hidden="true">' + (up ? "▲" : "▼") + "</span>" +
+    '<span class="sr">' + (up ? "sube" : "baja") + " </span>" + esc(pct(Math.abs(v))) + " " + esc(texto) + "</span>";
+}
+function plural(n, uno, varios) { return fmt(n) + " " + (Math.round(n) === 1 ? uno : varios); }
+/* Canal de Locatel → nombre claro. Desconocidos: en mayúscula inicial */
+function etiquetaCanal(raw) {
+  var s = String(raw == null ? "" : raw).trim().replace(/\s+/g, " ");
+  if (!s) return "Sin canal";
+  var k = s.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (CANAL_BONITO[k]) return CANAL_BONITO[k];
+  return s.toLowerCase().replace(/(^|[\s\-\/(])(\S)/g, function (m0, a, b) { return a + b.toUpperCase(); });
+}
+var _colorExtra = {};
+function colorMarca(m) {
+  if (COLOR_MARCA[m]) return COLOR_MARCA[m];
+  if (!_colorExtra[m]) _colorExtra[m] = COLORES_EXTRA[Object.keys(_colorExtra).length % COLORES_EXTRA.length];
+  return _colorExtra[m];
+}
+function cssColor(c) { return "var(--" + c + ")"; }
+
+/* ═══════════ Índice de los datos (una vez por JSON) ═══════════ */
+function datosValidos(j) { return !!j && typeof j === "object" && Array.isArray(j.dias); }
+function indexar(j) {
+  var hay = {}, filas = [];
+  // Día "bajado" = viene en dias (aunque sea un cero real). Uno que solo aparezca en filas también cuenta.
+  arr(j.dias).forEach(function (d) { if (d && esFecha(d.f)) hay[d.f] = true; });
+  var etq = arr(j.canales).map(etiquetaCanal);
+  arr(j.filas).forEach(function (r) {
+    if (!Array.isArray(r) || !esFecha(r[0])) return;
+    filas.push({ f: r[0], c: entero(r[1]), p: entero(r[2]), k: etq[entero(r[3])] || "Sin canal", v: num(r[4]), u: num(r[5]) });
+    hay[r[0]] = true;
+  });
+  var fs = Object.keys(hay).sort();
+  if (!fs.length) return null;
+  var primero = fs[0], ultimo = fs[fs.length - 1];
+  if (esFecha(j.desde) && j.desde < primero) primero = j.desde;
+  if (esFecha(j.hasta) && j.hasta > ultimo) ultimo = j.hasta;
+  var cen = arr(j.centros).map(function (c, i) {
+    c = c && typeof c === "object" ? c : {};
+    var nombre = String(c.n || c.c || "Tienda " + (i + 1)).trim();
+    return { cod: String(c.c == null ? "" : c.c), nombre: nombre, corto: nombre.replace(/^locatel\s+/i, "") || nombre };
+  });
+  var pro = arr(j.productos).map(function (p, i) {
+    p = p && typeof p === "object" ? p : {};
+    return { sap: String(p.s == null ? "" : p.s), ean: String(p.e == null ? "" : p.e), nombre: String(p.n || "Producto " + (i + 1)), marca: String(p.m || "Otros") };
+  });
+  var ks = {};
+  filas.forEach(function (r) { ks[r.k] = true; });
+  var canales = Object.keys(ks).sort(function (a, b) {
+    var ia = CANAL_ORDEN.indexOf(a), ib = CANAL_ORDEN.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b, "es");
+  });
+  return { hay: hay, filas: filas, primero: primero, ultimo: ultimo, cen: cen, pro: pro, canales: canales };
+}
+function cenDe(i) { return IDX.cen[i] || { cod: "", nombre: "Tienda sin nombre", corto: "Tienda sin nombre" }; }
+function proDe(i) { return IDX.pro[i] || { sap: "", ean: "", nombre: "Producto sin nombre", marca: "Otros" }; }
+
+/* ═══════════ Modelo del rango elegido ═══════════ */
+function rango() {
+  var a = F.fi && F.fi > IDX.primero ? F.fi : IDX.primero, b = F.ff && F.ff < IDX.ultimo ? F.ff : IDX.ultimo;
+  return { a: a, b: b, ok: a <= b, invertido: !!(F.fi && F.ff && F.fi > F.ff) };
+}
+function completo(a, b) {
+  for (var t = tUTC(a), tb = tUTC(b); t <= tb; t += 864e5) if (!IDX.hay[isoUTC(t)]) return false;
+  return true;
+}
+function porVentas(a, b) { return b.ventas - a.ventas || String(a.nombre).localeCompare(String(b.nombre), "es"); }
+function calcular() {
+  var R = rango(), m = { R: R, V: 0, U: 0, Vtodos: 0, pres: 0, falta: 0, dias: {}, tiendas: [], productos: [], marcas: [], canales: [], tiendasCon: 0, prodsVend: 0, sinVenta: [], cmp: null };
+  if (!R.ok) return m;
+  for (var t = tUTC(R.a), tb = tUTC(R.b); t <= tb; t += 864e5) { if (IDX.hay[isoUTC(t)]) m.pres++; else m.falta++; }
+  var can = {}, cen = {}, pro = {};
+  IDX.filas.forEach(function (r) {
+    if (r.f < R.a || r.f > R.b) return;
+    // "Por canal" muestra siempre todos los canales del rango
+    var k = can[r.k] || (can[r.k] = { n: r.k, v: 0, u: 0 }); k.v += r.v; k.u += r.u; m.Vtodos += r.v;
+    if (F.canal && r.k !== F.canal) return;
+    m.V += r.v; m.U += r.u;
+    var d = m.dias[r.f] || (m.dias[r.f] = { v: 0, u: 0 }); d.v += r.v; d.u += r.u;
+    var c = cen[r.c] || (cen[r.c] = { i: r.c, v: 0, u: 0, pu: {} }); c.v += r.v; c.u += r.u; c.pu[r.p] = (c.pu[r.p] || 0) + r.u;
+    var p = pro[r.p] || (pro[r.p] = { i: r.p, v: 0, u: 0 }); p.v += r.v; p.u += r.u;
+  });
+  m.tiendas = Object.keys(cen).map(function (i) {
+    var c = cen[i], info = cenDe(c.i), np = 0;
+    Object.keys(c.pu).forEach(function (q) { if (c.pu[q] > 0) np++; });
+    return { i: c.i, cod: info.cod, nombre: info.corto, completo: info.nombre, ventas: c.v, unidades: c.u, productos: np };
+  }).sort(porVentas);
+  m.productos = Object.keys(pro).map(function (i) {
+    var p = pro[i], info = proDe(p.i);
+    return { sap: info.sap, ean: info.ean, nombre: info.nombre, marca: info.marca, ventas: p.v, unidades: p.u };
+  }).sort(porVentas);
+  var mk = {};
+  m.productos.forEach(function (p) {
+    var x = mk[p.marca] || (mk[p.marca] = { n: p.marca, v: 0, u: 0, c: 0 });
+    x.v += p.ventas; x.u += p.unidades; if (p.unidades > 0) x.c++;
+  });
+  m.marcas = Object.keys(mk).map(function (k) { return mk[k]; }).sort(function (a, b) { return b.v - a.v || a.n.localeCompare(b.n, "es"); });
+  m.canales = Object.keys(can).map(function (k) { return can[k]; }).sort(function (a, b) { return b.v - a.v || a.n.localeCompare(b.n, "es"); });
+  m.tiendasCon = m.tiendas.filter(function (x) { return x.ventas > 0; }).length;
+  m.prodsVend = m.productos.filter(function (x) { return x.unidades > 0; }).length;
+  m.sinVenta = IDX.cen.filter(function (c, i) { return !(cen[i] && cen[i].v > 0); }).map(function (c) { return c.corto; });
+  m.cmp = comparacion(R, m.V, m.U);
+  return m;
+}
+/* Mismo número de días justo antes del rango. Solo se compara si los dos períodos están
+   completos (todos sus días bajados del portal): un día faltante inflaría o hundiría el %. */
+function comparacion(R, tV, tU) {
+  if (!R.ok) return null;
+  var n = diasEntre(R.a, R.b) + 1, pa = sumarDias(R.a, -n), pb = sumarDias(R.a, -1);
+  if (pa < IDX.primero || !completo(pa, pb) || !completo(R.a, R.b)) return null;
+  var pV = 0, pU = 0;
+  IDX.filas.forEach(function (r) { if (r.f >= pa && r.f <= pb && (!F.canal || r.k === F.canal)) { pV += r.v; pU += r.u; } });
+  return { n: n, pa: pa, pb: pb, v: variacion(tV, pV), u: variacion(tU, pU) };
+}
+/* Serie del gráfico: un punto por día / semana (lun–dom) / mes del rango. Los días no bajados
+   no suman: un punto sin ningún día bajado queda como hueco; si le faltan algunos, "falta" > 0. */
+function lunes(f) { var t = tUTC(f), dow = (new Date(t).getUTCDay() + 6) % 7; return isoUTC(t - dow * 864e5); }
+function serie(m, g) {
+  var R = m.R, out = [], o = {};
+  if (!R.ok || !m.pres) return out;
+  for (var t = tUTC(R.a), tb = tUTC(R.b); t <= tb; t += 864e5) {
+    var f = isoUTC(t), k = g === "dia" ? f : g === "mes" ? f.substring(0, 7) : lunes(f), b = o[k];
+    if (!b) { b = o[k] = { fecha: k, ventas: 0, unidades: 0, n: 0, falta: 0 }; out.push(b); }
+    if (IDX.hay[f]) { b.n++; var d = m.dias[f]; if (d) { b.ventas += d.v; b.unidades += d.u; } } else b.falta++;
+  }
+  out.forEach(function (b) { b.hueco = b.n === 0; });
+  while (out.length && out[0].hueco) out.shift();
+  while (out.length && out[out.length - 1].hueco) out.pop();
+  return out;
+}
+
+/* ═══════════ Rangos rápidos ═══════════ */
+function presets() {
+  var u = IDX.ultimo, p = IDX.primero, hoy = hoyB();
+  if (hoy < u) hoy = u; // reloj del equipo atrasado
+  var ini = hoy.substring(0, 7) + "-01", finAnt = sumarDias(ini, -1), iniAnt = finAnt.substring(0, 7) + "-01", out = [];
+  if (u >= ini) out.push(["mes", "Este mes", mx(ini, p), u]);
+  if (u >= iniAnt && finAnt >= p) out.push(["mesAnt", "Mes pasado", mx(iniAnt, p), mn(finAnt, u)]);
+  out.push(["7", "7 días", mx(sumarDias(u, -6), p), u]);
+  out.push(["30", "30 días", mx(sumarDias(u, -29), p), u]);
+  out.push(["todo", "Todo", "", ""]);
+  return out;
+}
+function aplicarPreset(key) {
+  var p = presets().filter(function (x) { return x[0] === key; })[0];
+  if (!p) return false;
+  F.fi = p[2]; F.ff = p[3]; F.preset = p[0];
+  return true;
+}
+/* Por defecto: este mes si ya tiene datos; si no (primer día del mes), el mes pasado; si no, todo */
+function presetInicial() { if (!aplicarPreset("mes") && !aplicarPreset("mesAnt")) aplicarPreset("todo"); }
+function pintarPresets() {
+  var h = "";
+  presets().forEach(function (p) {
+    var on = F.preset ? F.preset === p[0] : (F.fi === p[2] && F.ff === p[3]);
+    var tit = p[2] ? rangoC(p[2], p[3]) : rangoC(IDX.primero, IDX.ultimo);
+    h += '<button type="button" class="pill" data-p="' + esc(p[0]) + '" aria-pressed="' + on + '" title="' + esc(tit) + '">' + esc(p[1]) + "</button>";
+  });
+  $("presets").innerHTML = h;
+}
+function pintarFiltroCanal() {
+  var z = $("canales"), ks = IDX.canales;
+  if (ks.length < 2) { z.classList.add("oculto"); z.innerHTML = ""; return; }
+  var h = '<span class="lbl" aria-hidden="true">Canal</span>';
+  [""].concat(ks).forEach(function (k) {
+    h += '<button type="button" class="pill" data-c="' + esc(k) + '" aria-pressed="' + (F.canal === k) + '">' + esc(k || "Todos") + "</button>";
+  });
+  z.innerHTML = h; z.classList.remove("oculto");
+}
+
+/* ═══════════ Pintado ═══════════ */
+function render() {
+  if (!IDX) return;
+  M = calcular();
+  $("fi").value = F.fi; $("ff").value = F.ff;
+  pintarPresets(); pintarFiltroCanal();
+  pintarHeroe(M); pintarTendencia(M); pintarPorCanal(M); pintarMarcas(M);
+  pintarTabla("tie"); pintarTabla("pro");
+}
+function pintarHeroe(m) {
+  var R = m.R, c = m.cmp;
+  $("t-ventas").textContent = "Ventas del período" + (F.canal ? " · " + F.canal : "");
+  $("kV").textContent = cop(m.V);
+  $("chipsV").innerHTML = c && c.v != null ? chipVar(c.v, "vs " + c.n + (c.n === 1 ? " día anterior" : " días anteriores")) : "";
+  var nota;
+  if (R.invertido) nota = "La fecha «Desde» es posterior a «Hasta».";
+  else if (!R.ok) nota = "Sin datos en este rango.";
+  else {
+    var partes = [rangoC(R.a, R.b), m.pres ? plural(m.pres, "día con datos", "días con datos") : "ningún día bajado todavía"];
+    if (m.falta) partes.push((m.falta === 1 ? "falta 1 día" : "faltan " + fmt(m.falta) + " días") + " por bajar");
+    if (c) partes.push("comparado con " + rangoC(c.pa, c.pb));
+    nota = partes.join(" · ");
+  }
+  $("rangoTxt").textContent = nota;
+  $("kU").textContent = fmt(m.U);
+  $("kUs").innerHTML = c && c.u != null ? '<span class="' + (c.u >= 0 ? "verde" : "rojo") + '">' + (c.u >= 0 ? "▲ " : "▼ ") + esc(pct(Math.abs(c.u))) + "</span> vs anterior" : (m.pres ? esc(NF1.format(m.U / m.pres)) + " por día" : "");
+  $("kT").textContent = fmt(m.tiendasCon);
+  $("kTs").textContent = "de " + plural(IDX.cen.length, "tienda", "tiendas");
+  $("kP").textContent = fmt(m.prodsVend);
+  $("kPs").textContent = "de " + plural(IDX.pro.length, "referencia", "referencias");
+  $("kX").textContent = m.U > 0 ? cop(m.V / m.U) : "—";
+  $("kXs").textContent = m.U > 0 ? "por unidad vendida" : "";
+}
+function pintarTendencia(m) {
+  var rows = serie(m, _g), nd = rows.filter(function (r) { return !r.hueco; }).length;
+  m.serie = rows;
+  var u = _g === "dia" ? ["día", "días"] : _g === "semana" ? ["semana", "semanas"] : ["mes", "meses"];
+  $("tendSub").textContent = nd ? rangoC(m.R.a, m.R.b) + " · " + plural(nd, u[0], u[1]) + (_g === "semana" ? " (lun–dom)" : "") + (F.canal ? " · " + F.canal : "") : "";
+  dibujarGrafico(rows);
+  pintarSerie(rows);
+}
+function textoVacio() { return M && M.R.invertido ? "La fecha «Desde» es posterior a «Hasta»" : "Sin datos en este rango"; }
+function pintarPorCanal(m) {
+  var a = m.canales, tot = m.Vtodos;
+  $("canSub").textContent = a.length ? (F.canal ? "Todos los canales · " : "") + "participación en la venta del período" : "";
+  if (!a.length) { $("z-canal").innerHTML = '<div class="vacio">' + esc(textoVacio()) + "</div>"; return; }
+  var max = Math.max.apply(null, a.map(function (x) { return x.v; }).concat([0])) || 1, h = '<ul class="rank' + (F.canal ? " filtrado" : "") + '">';
+  a.forEach(function (c) {
+    var on = F.canal === c.n;
+    h += "<li" + (on ? ' class="on"' : "") + '><span class="nm">' + esc(c.n) + (on ? '<span class="tag">filtro</span>' : "") + '</span><span class="vv">' + esc(cop(c.v)) + "</span>" +
+      '<span class="barra" aria-hidden="true"><span style="width:' + anchoBarra(c.v / max) + '%"></span></span>' +
+      '<span class="meta"><span>' + esc(plural(c.u, "unidad", "unidades")) + "</span><span>" + esc(tot ? pct(c.v / tot) : "—") + "</span></span></li>";
+  });
+  $("z-canal").innerHTML = h + "</ul>";
+}
+function pintarMarcas(m) {
+  var a = m.marcas, tot = m.V;
+  $("marSub").textContent = a.length ? plural(a.length, "marca", "marcas") + " · participación en la venta" + (F.canal ? " de " + F.canal : " del período") : "";
+  if (!a.length) { $("z-marca").innerHTML = '<div class="vacio">' + esc(textoVacio()) + "</div>"; return; }
+  var max = Math.max.apply(null, a.map(function (x) { return x.v; }).concat([0])) || 1, h = '<ul class="rank">';
+  a.forEach(function (b) {
+    var col = cssColor(colorMarca(b.n));
+    h += '<li><span class="nm"><i class="sw" style="background:' + col + '" aria-hidden="true"></i>' + esc(b.n) + '</span><span class="vv">' + esc(cop(b.v)) + "</span>" +
+      '<span class="barra" aria-hidden="true"><span style="width:' + anchoBarra(b.v / max) + "%;background:" + col + '"></span></span>' +
+      '<span class="meta"><span>' + esc(plural(b.u, "unidad", "unidades") + " · " + plural(b.c, "producto", "productos")) + "</span><span>" + esc(tot ? pct(b.v / tot) : "—") + "</span></span></li>";
+  });
+  $("z-marca").innerHTML = h + "</ul>";
+}
+
+/* ─────────── Tablas (tiendas y productos): búsqueda, orden y "ver más" ─────────── */
+function codigos(p) { return [p.sap ? "SAP " + p.sap : "", p.ean ? "EAN " + p.ean : ""].filter(Boolean).join(" · "); }
+var TABLAS = {
+  tie: {
+    zona: "z-tie", sub: "tieSub", pieId: "tieCount", q: "q-tie", paso: 25, gen: "as",
+    cols: [["idx", "#", 0, 0, "idx"], ["nombre", "Tienda", 1, 0, "fija"], ["ventas", "Ventas", 1, 1, ""], ["part", "% total", 0, 1, "m-no"], ["unidades", "Uds", 1, 1, ""], ["productos", "Productos", 1, 1, "m-no"]],
+    nombres: { nombre: "tienda", ventas: "ventas", unidades: "unidades", productos: "productos distintos" },
+    base: function () { return M.tiendas; },
+    texto: function (r) { return norm(r.completo + " " + r.cod); },
+    fila: function (r, i, part) {
+      return '<td class="idx">' + (i + 1) + "</td>" +
+        '<td class="fija"><div class="n1">' + esc(r.nombre) + '</div><div class="n2">' + esc(r.cod) + '<span class="solo-m">' + esc((r.cod ? " · " : "") + plural(r.productos, "producto", "productos")) + "</span></div></td>" +
+        '<td class="d verde">' + esc(cop(r.ventas)) + '<div class="n2 solo-m">' + esc(pct(part)) + "</div></td>" +
+        '<td class="d m-no"><span>' + esc(pct(part)) + '</span><div class="minibar" aria-hidden="true"><span style="width:' + anchoBarra(part) + '%"></span></div></td>' +
+        '<td class="d azul">' + esc(fmt(r.unidades)) + "</td>" +
+        '<td class="d m-no">' + esc(fmt(r.productos)) + "</td>";
+    },
+    vacio: "Sin ventas en este rango", noHay: "Ninguna tienda coincide con la búsqueda", uno: "tienda", varios: "tiendas"
+  },
+  pro: {
+    zona: "z-pro", sub: "prodSub", pieId: "proCount", q: "q-pro", paso: 50, gen: "os",
+    cols: [["idx", "#", 0, 0, "idx"], ["nombre", "Producto", 1, 0, "fija"], ["marca", "Marca", 1, 0, "m-no"], ["ventas", "Ventas", 1, 1, ""], ["part", "% total", 0, 1, "m-no"], ["unidades", "Uds", 1, 1, ""]],
+    nombres: { nombre: "producto", marca: "marca", ventas: "ventas", unidades: "unidades" },
+    base: function () { return M.productos; },
+    texto: function (r) { return norm(r.nombre + " " + r.marca + " " + r.sap + " " + r.ean); },
+    fila: function (r, i, part) {
+      var col = cssColor(colorMarca(r.marca));
+      return '<td class="idx">' + (i + 1) + "</td>" +
+        '<td class="fija"><div class="n1">' + esc(r.nombre) + '</div><div class="n2"><span class="solo-m">' + esc(r.marca + " · ") + "</span>" + esc(codigos(r)) + "</div></td>" +
+        '<td class="cat m-no"><i class="sw" style="background:' + col + '" aria-hidden="true"></i>' + esc(r.marca) + "</td>" +
+        '<td class="d verde">' + esc(cop(r.ventas)) + '<div class="n2 solo-m">' + esc(pct(part)) + "</div></td>" +
+        '<td class="d m-no"><span>' + esc(pct(part)) + '</span><div class="minibar" aria-hidden="true"><span style="width:' + anchoBarra(part) + '%"></span></div></td>' +
+        '<td class="d azul">' + esc(fmt(r.unidades)) + "</td>";
+    },
+    vacio: "Sin productos vendidos en este rango", noHay: "Ningún producto coincide con la búsqueda", uno: "producto", varios: "productos"
+  }
+};
+function ordenar(rows, s) {
+  if (s.k === "ventas" && s.dir === -1) return rows; // ya vienen de mayor a menor venta
+  return rows.slice().sort(function (a, b) {
+    var x = a[s.k], y = b[s.k], r;
+    if (typeof x === "string" || typeof y === "string") r = String(x || "").localeCompare(String(y || ""), "es", { sensitivity: "base" });
+    else r = num(x) - num(y);
+    return s.dir * r || porVentas(a, b);
+  });
+}
+function filasTabla(t) {
+  var c = TABLAS[t], q = norm(ST[t].q.trim()), rows = c.base();
+  if (q) rows = rows.filter(function (r) { return c.texto(r).indexOf(q) >= 0; });
+  return ordenar(rows, ST[t].sort);
+}
+function textoOrden(c, s) {
+  var txt = s.k === "nombre" || s.k === "marca" ? (s.dir > 0 ? " (A→Z)" : " (Z→A)") : (s.dir < 0 ? " (mayor a menor)" : " (menor a mayor)");
+  return "Ordenad" + c.gen + " por " + c.nombres[s.k] + txt;
+}
+function pintarTabla(t) {
+  var c = TABLAS[t], st = ST[t], z = $(c.zona), rows = filasTabla(t), tot = M.V;
+  var ae = document.activeElement, foco = ae && z.contains(ae) && ae.getAttribute ? ae.getAttribute("data-sort") : null;
+  $(c.sub).textContent = textoOrden(c, st.sort);
+  if (!rows.length) {
+    z.innerHTML = '<div class="vacio">' + esc(st.q.trim() && c.base().length ? c.noHay : (M.R.invertido ? textoVacio() : c.vacio)) + "</div>";
+  } else {
+    var n = Math.min(rows.length, st.n), h = '<div class="tw alto"><table class="fija"><thead><tr>';
+    c.cols.forEach(function (col) {
+      var on = st.sort.k === col[0], cls = [col[3] ? "d" : "", col[4]].join(" ").trim();
+      h += "<th" + (cls ? ' class="' + cls + '"' : "") + (on ? ' aria-sort="' + (st.sort.dir > 0 ? "ascending" : "descending") + '"' : "") + ' scope="col">';
+      h += col[2] ? '<button type="button" data-sort="' + col[0] + '">' + esc(col[1]) + (on ? '<span aria-hidden="true">' + (st.sort.dir > 0 ? "↑" : "↓") + "</span>" : "") + "</button>" : esc(col[1]);
+      h += "</th>";
+    });
+    h += "</tr></thead><tbody>";
+    for (var i = 0; i < n; i++) h += "<tr>" + c.fila(rows[i], i, tot ? rows[i].ventas / tot : 0) + "</tr>";
+    h += "</tbody></table></div>";
+    if (rows.length > n) h += '<div class="mas"><button type="button" class="btn" data-mas="1">Ver ' + esc(fmt(Math.min(c.paso, rows.length - n))) + ' más <span style="color:var(--text2)">(' + esc(fmt(rows.length - n)) + " restantes)</span></button></div>";
+    z.innerHTML = h;
+  }
+  var sv = 0, su = 0;
+  rows.forEach(function (r) { sv += r.ventas; su += r.unidades; });
+  var pie = rows.length ? plural(rows.length, c.uno, c.varios) + " · " + cop(sv) + " · " + plural(su, "unidad", "unidades") : "";
+  if (t === "tie" && !st.q.trim() && M.R.ok && M.sinVenta.length) {
+    var sv2 = M.sinVenta;
+    pie += (pie ? " · " : "") + (sv2.length <= 6 ? "Sin venta: " + sv2.join(", ") : plural(sv2.length, "tienda", "tiendas") + " sin venta");
+  }
+  $(c.pieId).textContent = pie;
+  if (t === "pro") $("csv").disabled = !rows.length;
+  if (foco) { var b = z.querySelector('[data-sort="' + foco + '"]'); if (b) b.focus(); }
+}
+
+/* ═══════════ CSV (mismo formato del de Rappi) ═══════════ */
+function celdaCsv(x) {
+  var s = String(x == null ? "" : x);
+  if (typeof x === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s; // que Excel no lo tome como fórmula
+  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function slug(s) { return norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+function csv() {
+  if (!M || !M.R.ok) return;
+  var rows = [["Producto", "Marca", "SAP", "EAN", "Ventas", "Unidades"]];
+  filasTabla("pro").forEach(function (p) { rows.push([p.nombre, p.marca, p.sap, p.ean, Math.round(p.ventas), Math.round(p.unidades)]); });
+  var c = rows.map(function (r) { return r.map(celdaCsv).join(","); }).join("\n");
+  var b = new Blob(["﻿" + c], { type: "text/csv;charset=utf-8" });
+  var u = URL.createObjectURL(b);
+  var a = document.createElement("a");
+  a.href = u; a.download = "locatel-productos-" + M.R.a + "_" + M.R.b + (F.canal ? "-" + slug(F.canal) : "") + ".csv";
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 1000);
+}
+
+/* ═══════════ Gráfico SVG con tooltip (el mismo de Rappi, con huecos) ═══════════ */
+var tip = $("tip");
+function verTip(html, x, y) {
+  tip.innerHTML = html; tip.classList.add("ver");
+  var w = tip.offsetWidth, h = tip.offsetHeight, vw = window.innerWidth;
+  var left = Math.min(Math.max(8, x - w / 2), vw - w - 8);
+  var top = y - h - 14; if (top < 8) top = y + 18;
+  tip.style.left = left + "px"; tip.style.top = top + "px";
+}
+function ocultarTip() { tip.classList.remove("ver"); }
+function filaTip(nombre, valor) { return '<div class="r"><span>' + esc(nombre) + "</span><span>" + esc(valor) + "</span></div>"; }
+function escala(min, max, n, entero) {
+  if (max === min) { max = min + 1; }
+  var rango = max - min, paso = Math.pow(10, Math.floor(Math.log10(rango / n)));
+  var err = rango / n / paso;
+  if (err >= 7.5) paso *= 10; else if (err >= 3.5) paso *= 5; else if (err >= 1.5) paso *= 2;
+  if (entero && paso < 1) paso = 1; // unidades: sin marcas repetidas ("0, 1, 1, 2…")
+  var lo = Math.floor(min / paso) * paso, hi = Math.ceil(max / paso) * paso, t = [];
+  for (var v = lo; v <= hi + paso / 2; v += paso) t.push(Math.round(v * 1e6) / 1e6);
+  return { lo: lo, hi: hi, ticks: t };
+}
+function interactivo(el, n, xDe, alActivar, tipDe) {
+  var svg = el.querySelector("svg"), activo = -1, fijo = false;
+  function en(ev) {
+    var r = svg.getBoundingClientRect();
+    var x = (ev.clientX - r.left) * (svg.viewBox.baseVal.width / r.width);
+    var i = xDe(x); if (i < 0 || i >= n) { salir(); return; }
+    if (i !== activo) { activo = i; el.classList.add("activo"); alActivar(i); }
+    verTip(tipDe(i), ev.clientX, ev.clientY);
+  }
+  function salir() { activo = -1; el.classList.remove("activo"); alActivar(-1); ocultarTip(); }
+  svg.addEventListener("pointermove", function (ev) { if (ev.pointerType === "mouse" || fijo) en(ev); });
+  svg.addEventListener("pointerdown", function (ev) { fijo = ev.pointerType !== "mouse"; en(ev); });
+  svg.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") salir(); });
+  svg.addEventListener("pointercancel", function () { fijo = false; });
+  svg.addEventListener("pointerup", function () { fijo = false; });
+  el._salir = salir;
+}
+document.addEventListener("pointerdown", function (ev) {
+  if (!ev.target.closest || !ev.target.closest(".graf")) { ocultarTip(); var g = $("chart"); if (g && g._salir) g._salir(); }
+}, true);
+window.addEventListener("scroll", ocultarTip, { passive: true });
+
+function etiquetaPeriodo(r) {
+  if (_g === "mes") return mesL(r.fecha);
+  if (_g === "semana") return "Semana del " + fechaSinAnio(r.fecha) + " al " + fechaC(sumarDias(r.fecha, 6));
+  return fechaDia(r.fecha);
+}
+function tipDe(r) {
+  var h = "<b>" + esc(etiquetaPeriodo(r)) + "</b>";
+  if (r.hueco) return h + '<div class="r solo"><span>Todavía no se ha bajado del portal</span></div>';
+  h += filaTip("Ventas", cop(r.ventas)) + filaTip("Unidades", fmt(r.unidades));
+  if (_g !== "dia") h += filaTip("Días con datos", fmt(r.n));
+  if (r.falta) h += filaTip("Faltan por bajar", plural(r.falta, "día", "días"));
+  return h;
+}
+function dibujarGrafico(rows) {
+  var el = $("chart");
+  el.classList.remove("activo"); el._salir = null; ocultarTip();
+  var conD = rows.filter(function (r) { return !r.hueco; });
+  if (!conD.length) { el.innerHTML = '<div class="vacio">' + esc(textoVacio()) + "</div>"; $("leyenda").innerHTML = ""; return; }
+  var val = function (r) { return _m === "ventas" ? r.ventas : r.unidades; };
+  var n = rows.length, vals = rows.map(val), vd = conD.map(val);
+  var max = Math.max.apply(null, vd.concat([0])), min = Math.min.apply(null, vd.concat([0]));
+  var W = Math.max(280, Math.floor(el.clientWidth || 320)), H = W < 500 ? 210 : 250, L = 50, R = 8, T = 18, B = 24;
+  if (max === 0 && min === 0) max = _m === "ventas" ? 1e5 : 4; // todo en cero (p. ej. un canal sin ventas): escala legible
+  var e = escala(min, max, 4, _m !== "ventas"), lo = e.lo, hi = e.hi;
+  var y = function (v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+  var color = _m === "ventas" ? "green" : "blue";
+  var barras = _g !== "dia";
+  var prom = vd.reduce(function (s, v) { return s + v; }, 0) / vd.length;
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc((_m === "ventas" ? "Ventas" : "Unidades") + " por " + (_g === "dia" ? "día" : _g) + ", " + n + " puntos. Toca o pasa el cursor para ver cada valor.") + '">';
+  s += '<defs><linearGradient id="gArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--' + color + ')" stop-opacity=".28"/><stop offset="1" stop-color="var(--' + color + ')" stop-opacity="0"/></linearGradient></defs>';
+  e.ticks.forEach(function (t) {
+    var yy = y(t).toFixed(1);
+    s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (+yy + 4) + '" text-anchor="end">' + esc(t === 0 ? "0" : corto(t)) + "</text>";
+  });
+  var xLab = function (i) {
+    var f = rows[i].fecha;
+    if (_g === "mes") return n > 12 ? mesC(f) : MES_C[+f.slice(5, 7) - 1];
+    return fechaSinAnio(f);
+  };
+  var cada, x, paso, y0 = y(0);
+  if (barras) {
+    paso = (W - L - R) / n;
+    var bw = Math.max(1, Math.min(40, paso * (n > 40 ? 0.8 : 0.62))), rx = Math.min(5, bw / 3);
+    x = function (i) { return L + paso * i + paso / 2; };
+    var conValor = n <= 14 && W / n >= 40;
+    for (var i = 0; i < n; i++) {
+      if (rows[i].hueco) {
+        s += '<g class="col" data-i="' + i + '"><rect class="hueco" x="' + (x(i) - bw / 2).toFixed(1) + '" y="' + T + '" width="' + bw.toFixed(1) + '" height="' + (H - T - B) + '" rx="' + rx.toFixed(1) + '"/></g>';
+        continue;
+      }
+      var y1 = y(vals[i]), top = Math.min(y0, y1), hgt = Math.max(vals[i] ? 1 : 0, Math.abs(y0 - y1));
+      s += '<g class="col' + (rows[i].falta ? " parcial" : "") + '" data-i="' + i + '"><rect class="b f-' + color + '" x="' + (x(i) - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hgt.toFixed(1) + '" rx="' + rx.toFixed(1) + '"/>';
+      if (conValor) s += '<text class="val" x="' + x(i).toFixed(1) + '" y="' + (vals[i] < 0 ? top + hgt + 12 : top - 5).toFixed(1) + '" text-anchor="middle">' + esc(corto(vals[i])) + "</text>";
+      s += "</g>";
+    }
+    cada = Math.max(1, Math.ceil(n / Math.max(1, Math.floor((W - L) / 54))));
+  } else {
+    paso = n > 1 ? (W - L - R) / (n - 1) : W;
+    x = function (i) { return L + (n === 1 ? (W - L - R) / 2 : (W - L - R) * i / (n - 1)); };
+    // Franjas grises: días que todavía no se han bajado (no son ceros)
+    for (var a0 = 0; a0 < n; a0++) {
+      if (!rows[a0].hueco) continue;
+      var a1 = a0; while (a1 + 1 < n && rows[a1 + 1].hueco) a1++;
+      var xa = Math.max(L, x(a0) - paso / 2), xb = Math.min(W - R, x(a1) + paso / 2);
+      s += '<rect class="hueco" x="' + xa.toFixed(1) + '" y="' + T + '" width="' + Math.max(2, xb - xa).toFixed(1) + '" height="' + (H - T - B) + '" rx="3"/>';
+      a0 = a1;
+    }
+    // La línea se corta en los huecos: un tramo por cada grupo de días seguidos con datos
+    var y0s = y0.toFixed(1);
+    for (var b0 = 0; b0 < n; b0++) {
+      if (rows[b0].hueco) continue;
+      var b1 = b0; while (b1 + 1 < n && !rows[b1 + 1].hueco) b1++;
+      var d = "";
+      for (var j = b0; j <= b1; j++) d += (j > b0 ? "L" : "M") + x(j).toFixed(1) + " " + y(vals[j]).toFixed(1);
+      s += '<path d="' + d + "L" + x(b1).toFixed(1) + " " + y0s + "L" + x(b0).toFixed(1) + " " + y0s + 'Z" fill="url(#gArea)"/>';
+      s += '<path d="' + d + '" fill="none" stroke="var(--' + color + ')" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      if (n <= 45 || b0 === b1) for (var k = b0; k <= b1; k++) s += '<circle cx="' + x(k).toFixed(1) + '" cy="' + y(vals[k]).toFixed(1) + '" r="2.5" fill="var(--' + color + ')"/>';
+      b0 = b1;
+    }
+    cada = Math.max(1, Math.ceil(n / Math.max(1, Math.floor((W - L) / 58))));
+  }
+  if (vd.length > 1) { var yp = y(prom).toFixed(1); s += '<line class="regla" x1="' + L + '" x2="' + (W - R) + '" y1="' + yp + '" y2="' + yp + '"/>'; }
+  for (var q = 0; q < n; q += cada) s += '<text x="' + x(q).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(xLab(q)) + "</text>";
+  if (!barras) {
+    s += '<line class="regla oculto rg" y1="' + T + '" y2="' + (H - B) + '"/>';
+    s += '<circle class="oculto pto" r="4.5" fill="var(--' + color + ')" stroke="var(--card)" stroke-width="2"/>';
+  }
+  s += '<rect x="' + L + '" y="0" width="' + (W - L - R) + '" height="' + H + '" fill="transparent"/></svg>';
+  el.innerHTML = s;
+  var tipI = function (i) { return tipDe(rows[i]); };
+  if (barras) {
+    var cols = el.querySelectorAll(".col");
+    interactivo(el, n, function (px) { return Math.floor((px - L) / paso); }, function (i) { cols.forEach(function (c, jj) { c.classList.toggle("on", jj === i); }); }, tipI);
+  } else {
+    var regla = el.querySelector(".rg"), pto = el.querySelector(".pto");
+    interactivo(el, n, function (px) { return Math.round((px - L) / paso); }, function (i) {
+      if (i < 0) { regla.classList.add("oculto"); pto.classList.add("oculto"); return; }
+      regla.setAttribute("x1", x(i)); regla.setAttribute("x2", x(i)); regla.classList.remove("oculto");
+      if (rows[i].hueco) { pto.classList.add("oculto"); return; }
+      pto.setAttribute("cx", x(i)); pto.setAttribute("cy", y(vals[i])); pto.classList.remove("oculto");
+    }, tipI);
+  }
+  var unidadG = _g === "dia" ? "día" : _g === "semana" ? "semana" : "mes", ley = [];
+  if (vd.length > 1) ley.push("<span><i></i>Promedio por " + unidadG + " con datos: <b>" + esc(_m === "ventas" ? cop(prom) : NF1.format(prom) + " uds") + "</b></span>");
+  if (rows.some(function (r) { return r.hueco; })) ley.push('<span><i class="sw hueco"></i>Días sin bajar del portal</span>');
+  if (rows.some(function (r) { return !r.hueco && r.falta; })) ley.push('<span><i class="sw" style="background:var(--' + color + ');opacity:.5"></i>Barra clara: le faltan días por bajar</span>');
+  $("leyenda").innerHTML = ley.join("");
+}
+function pintarSerie(rows) {
+  var z = $("z-serie");
+  if (!rows.length) { z.innerHTML = '<div class="vacio">' + esc(textoVacio()) + "</div>"; return; }
+  var inv = rows.slice().reverse(), n = Math.min(inv.length, ST.nSerie);
+  var h = '<div class="tw"><table><thead><tr><th scope="col">' + (_g === "dia" ? "Día" : _g === "semana" ? "Semana" : "Mes") + '</th><th class="d" scope="col">Ventas</th><th class="d" scope="col">Uds</th>' + (_g !== "dia" ? '<th class="d m-no" scope="col">Días</th>' : "") + "</tr></thead><tbody>";
+  for (var i = 0; i < n; i++) {
+    var r = inv[i];
+    if (r.hueco) {
+      h += "<tr><td>" + esc(etiquetaPeriodo(r)) + '</td><td class="d tenue">Sin bajar</td><td class="d tenue">—</td>' + (_g !== "dia" ? '<td class="d m-no tenue">0</td>' : "") + "</tr>";
+      continue;
+    }
+    h += "<tr><td>" + esc(etiquetaPeriodo(r)) + '</td><td class="d verde">' + esc(cop(r.ventas)) + '</td><td class="d azul">' + esc(fmt(r.unidades)) + "</td>" +
+      (_g !== "dia" ? '<td class="d m-no">' + esc(fmt(r.n)) + (r.falta ? '<span class="tag">faltan ' + esc(fmt(r.falta)) + "</span>" : "") + "</td>" : "") + "</tr>";
+  }
+  h += "</tbody></table></div>";
+  if (inv.length > n) h += '<div class="mas"><button type="button" class="btn" data-mas="serie">Ver ' + esc(fmt(Math.min(31, inv.length - n))) + ' más <span style="color:var(--text2)">(' + esc(fmt(inv.length - n)) + " restantes)</span></button></div>";
+  z.innerHTML = h;
+}
+
+/* ─────────── Estado de actualización, avisos y subtítulo ─────────── */
+var _estadoHTML = "";
+function ponerEstado(clase, txt, title) {
+  var html = '<span class="punto' + clase + '"></span><span>' + esc(txt) + "</span>", el = $("estado");
+  if (html !== _estadoHTML) { el.innerHTML = html; _estadoHTML = html; } // sin cambios no se vuelve a anunciar
+  el.title = title || "";
+}
+function pintarEstado() {
+  var d = S.data;
+  if (S.vista === "login") { ponerEstado(" off", "Sin sesión"); return; }
+  if (!IDX || !d) { ponerEstado(" off", S.vista === "vacio" ? "Sin datos todavía" : S.vista === "error" ? "Sin datos" : "Cargando…"); return; }
+  var lec = d.lectura && typeof d.lectura === "object" ? d.lectura : {};
+  var t = Date.parse(lec.ultima || "") || Date.parse(d.generado || "") || 0;
+  var clase = "", txt = t ? "Actualizado " + hace(t) : "Sin fecha de lectura";
+  if (S.errorRed) { clase = " off"; txt += " · sin conexión"; }
+  else if (S.fuente === "cache") clase = " busca";
+  else if (lec.ok === false || (t && Date.now() - t > 30 * 3600000)) clase = " viejo";
+  ponerEstado(clase, txt, t ? "Última lectura del portal de Locatel: " + new Date(t).toLocaleString("es-CO") : "");
+}
+function aviso(ic, tipo, titulo, texto) {
+  return '<div class="aviso' + (tipo ? " " + tipo : "") + '"><span class="ic" aria-hidden="true">' + ic + "</span><div><b>" + esc(titulo) + "</b><p>" + esc(texto) + "</p></div></div>";
+}
+function pintarAvisos() {
+  var h = "", d = S.data;
+  if (d && IDX && S.vista === "ok") {
+    var lec = d.lectura && typeof d.lectura === "object" ? d.lectura : null;
+    if (lec && lec.ok === false) {
+      var av = typeof lec.aviso === "string" ? lec.aviso.trim().replace(/[.\s]+$/, "") : "";
+      h += aviso("!", "", "La última lectura del portal de Locatel falló", (av ? av + ". " : "") + "Se muestran los últimos datos guardados.");
+    }
+    var pend = Math.round(num(d.pendientes));
+    if (pend > 0) h += aviso("i", "info", "Completando el historial", (pend === 1 ? "Falta 1 día" : "Faltan " + fmt(pend) + " días") + " por bajar del portal.");
+    if (d.version !== 1) h += aviso("!", "", "Versión de datos no reconocida", "Recarga la página; si sigue igual, avisa a soporte.");
+    if (S.errorRed) h += aviso("i", "info", "Mostrando la última copia guardada", S.errorRed);
+  }
+  ponerAvisos(h);
+}
+var _avisosHTML = null;
+function ponerAvisos(h) { if (h !== _avisosHTML) { $("avisos").innerHTML = h; _avisosHTML = h; } } // sin cambios no se vuelve a anunciar
+function pintarSub() {
+  var t;
+  if (S.vista === "ok" && IDX) {
+    var r = relDia(IDX.ultimo);
+    t = "Ventas hasta el " + fechaDia(IDX.ultimo) + (r ? " (" + r + ")" : "") + (S.dev ? " · vista previa local" : "");
+  } else t = { cargando: "Cargando…", login: "Entra con tu usuario del dashboard", error: "No se pudieron cargar los datos", vacio: "Sin datos todavía" }[S.vista] || "";
+  $("sub").textContent = t;
+}
+function pintarSalir() {
+  var b = $("salir"), ver = !!S.token && !S.dev;
+  b.classList.toggle("oculto", !ver);
+  b.title = ver && S.usuario ? "Cerrar la sesión de " + S.usuario : "Cerrar sesión";
+}
+function mostrar(v) {
+  S.vista = v === "error" && S.vista === "vacio" ? "vacio" : v;
+  $("esqueleto").classList.toggle("oculto", v !== "cargando");
+  $("error").classList.toggle("oculto", v !== "error");
+  $("login").classList.toggle("oculto", v !== "login");
+  $("contenido").classList.toggle("oculto", v !== "ok");
+  if (v !== "ok") ponerAvisos("");
+}
+function mostrarError(titulo, msg, conBoton) {
+  S.vista = "error";
+  $("error").innerHTML = '<div class="aviso error" role="alert"><span class="ic" aria-hidden="true">!</span><div><b>' + esc(titulo) + "</b><p>" + esc(msg) + "</p>" +
+    (conBoton ? '<button type="button" class="btn prim" id="reintentar">Reintentar</button>' : "") + "</div></div>";
+  mostrar("error"); pintarSub(); pintarEstado();
+  var b = $("reintentar"); if (b) { b.addEventListener("click", reintentar); b.focus(); }
+}
+/* Sin ningún día bajado todavía (503 "sin_datos" o un JSON sin días) */
+function mostrarVacio() {
+  S.vista = "vacio";
+  $("error").innerHTML = '<div class="aviso info" role="status"><span class="ic" aria-hidden="true">i</span><div><b>Todavía no hay datos de Locatel</b><p>La primera descarga del portal aún no termina.</p>' +
+    (S.dev ? "" : '<button type="button" class="btn prim" id="reintentar">Reintentar</button>') + "</div></div>";
+  mostrar("error"); pintarSub(); pintarEstado();
+  var b = $("reintentar"); if (b) b.addEventListener("click", reintentar);
+}
+function reintentar() { mostrar("cargando"); pintarSub(); pintarEstado(); revalidar(); }
+
+/* ═══════════ Red y datos ═══════════ */
+/* El plazo cubre también la lectura del cuerpo (r.json()). opts._ctl permite cancelarla desde afuera. */
+function conTiempo(url, opts, ms) {
+  var ctl = window.AbortController ? new AbortController() : null;
+  if (ctl) { opts.signal = ctl.signal; opts._ctl = ctl; }
+  var t = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 30000);
+  return fetch(url, opts).then(function (r) { return r; }, function (e) { clearTimeout(t); throw e; });
+}
+/* Errores del Worker: {"error":{"code","message"}} (también acepta formatos viejos), igual que el dashboard */
+function textoError(j) {
+  if (!j || typeof j !== "object") return "";
+  var e = j.error, m = e && typeof e === "object" ? e.message : e;
+  if (typeof m === "string" && m) return m;
+  if (typeof j.mensaje === "string") return j.mensaje;
+  if (typeof j.message === "string") return j.message;
+  return "";
+}
+function leerError(r) {
+  return r.json().then(function (j) {
+    var e = j && typeof j === "object" ? j.error : null;
+    return { code: e && typeof e === "object" && typeof e.code === "string" ? e.code : "", msg: textoError(j) };
+  }, function () { return { code: "", msg: "" }; });
+}
+function errorDatos(msg) { var e = new Error(msg); e.datos = true; return e; }
+function errorHttp(msg) { var e = new Error(msg); e.http = true; return e; }
+function textoErrorRed(e) {
+  if (e && e.datos) return "Los datos recibidos no se pudieron mostrar (" + e.message + ").";
+  if (e && e.http) return e.message;
+  if (e && e.name === "AbortError") return "El servidor tardó demasiado en responder.";
+  return "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
+}
+/* Aplica un JSON: si no se puede dibujar, se vuelve a lo que había y se lanza el error */
+function aplicarDatos(j, etag, fuente) {
+  var idx = indexar(j);
+  if (!idx) { S.data = null; S.etag = null; S.fuente = fuente; IDX = null; M = null; mostrarVacio(); return "vacio"; }
+  var antes = { data: S.data, etag: S.etag, fuente: S.fuente, idx: IDX, F: JSON.stringify(F) }, primera = !IDX;
+  S.data = j; S.etag = etag || null; S.fuente = fuente; IDX = idx;
+  try {
+    $("fi").min = $("ff").min = IDX.primero; $("fi").max = $("ff").max = IDX.ultimo;
+    if (F.canal && IDX.canales.indexOf(F.canal) < 0) F.canal = "";
+    // Un rango rápido se recalcula con los días nuevos (p. ej. "7 días" se corre al bajar uno más)
+    if (primera || (F.preset && !aplicarPreset(F.preset))) presetInicial();
+    mostrar("ok"); render();
+  } catch (e) {
+    S.data = antes.data; S.etag = antes.etag; S.fuente = antes.fuente; IDX = antes.idx; F = JSON.parse(antes.F);
+    if (IDX) { try { render(); } catch (e2) {} } else mostrar("cargando");
+    throw e;
+  }
+  pintarSub(); pintarEstado(); pintarAvisos();
+  return "ok";
+}
+function limpiarDatos() { S.data = null; S.etag = null; S.fuente = null; IDX = null; M = null; F = filtrosIniciales(); }
+function revalidar() {
+  if (S.dev || !S.token) return;
+  // Una petición en curso bloquea las demás, salvo que lleve más de 60 s (red de seguridad)
+  if (S.cargando && Date.now() - S.desde < 60000) return;
+  // Si la sesión cambia mientras esto viaja (Salir u otro login), la respuesta se descarta
+  var gen = S.gen, tok = S.token;
+  function vigente() { return gen === S.gen && tok === S.token; }
+  S.cargando = true; S.desde = Date.now(); pintarEstado();
+  var h = { Authorization: "Bearer " + tok };
+  if (S.etag && S.data) h["If-None-Match"] = S.etag;
+  var opts = { headers: h, cache: "no-store" };
+  var p = conTiempo(API + "/locatel", opts, 45000);
+  S.ctl = opts._ctl || null;
+  p.then(function (r) {
+    if (!vigente()) return;
+    if (r.status === 304) { S.errorRed = null; S.revisado = Date.now(); if (S.fuente === "cache") S.fuente = "api"; return; }
+    if (r.status === 401) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return; }
+    if (!r.ok) {
+      return leerError(r).then(function (er) {
+        if (!vigente()) return;
+        if (er.code === "sin_datos") {
+          S.revisado = Date.now();
+          if (!IDX) { S.errorRed = null; mostrarVacio(); return; }
+          throw errorHttp("Todavía no hay datos de Locatel: la primera descarga del portal aún no termina.");
+        }
+        throw errorHttp(er.msg ? er.msg : "El servidor respondió con un error (" + r.status + ").");
+      });
+    }
+    var etag = r.headers.get("ETag");
+    // Un 200 que no es JSON (página de un proxy, cuerpo cortado) es un problema de datos, no de conexión
+    return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); }).then(function (j) {
+      if (!vigente()) return;
+      if (!datosValidos(j)) throw errorDatos("respuesta sin días");
+      var res;
+      try { res = aplicarDatos(j, etag, "api"); } catch (e) { console.error("Error dibujando Locatel", e); throw errorDatos(e && e.message ? e.message : "error al dibujar"); }
+      S.errorRed = null; S.revisado = Date.now();
+      // Solo se guarda una copia que se pudo dibujar; si no cabe en el navegador, se sigue sin copia
+      if (res === "ok") ls.set(K_CACHE, JSON.stringify({ etag: etag || null, data: j, guardado: Date.now() }));
+    });
+  }).catch(function (e) {
+    if (!vigente()) return;
+    S.errorRed = textoErrorRed(e);
+    if (!IDX && S.vista !== "vacio") mostrarError("No se pudieron cargar las ventas de Locatel", S.errorRed + (e && e.datos ? " Avisa a soporte si sigue igual." : " Revisa tu internet y vuelve a intentar."), true);
+  }).then(function () {
+    if (gen !== S.gen) return; // cerrarSesion ya dejó todo limpio
+    S.cargando = false; S.ctl = null;
+    pintarEstado(); pintarAvisos();
+  });
+}
+
+/* ═══════════ Sesión (la misma del dashboard principal) ═══════════ */
+function tokenVencido(exp) {
+  if (exp == null) return false;
+  var t = typeof exp === "number" ? (exp < 1e12 ? exp * 1000 : exp) : Date.parse(exp);
+  return isFinite(t) && t > 0 && t < Date.now();
+}
+function mostrarLogin(msg) {
+  mostrar("login"); pintarSub(); pintarEstado(); pintarSalir();
+  $("l-err").textContent = msg || "";
+  setTimeout(function () { var u = $("l-usuario"); (u.value ? $("l-clave") : u).focus(); }, 30);
+}
+function cerrarSesion(msg) {
+  // Invalida y cancela lo que esté en vuelo: ninguna respuesta vieja vuelve a guardar datos
+  S.gen++;
+  if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
+  ls.del(K_TOKEN); ls.del(K_USER); ls.del(K_CACHE);
+  K_OTRAS.forEach(function (k) { ls.del(k); });
+  S.token = null; S.usuario = null; S.errorRed = null; S.cargando = false; S.revisado = 0;
+  limpiarDatos(); ST = tablasIniciales(); _g = "dia"; _m = "ventas";
+  $("q-tie").value = ""; $("q-pro").value = "";
+  document.querySelectorAll("[data-g]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.g === "dia")); });
+  document.querySelectorAll("[data-m]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.m === "ventas")); });
+  mostrarLogin(msg);
+}
+$("f-login").addEventListener("submit", function (ev) {
+  ev.preventDefault();
+  var usuario = $("l-usuario").value.trim(), clave = $("l-clave").value, err = $("l-err"), btn = $("l-btn");
+  if (!usuario || !clave) { err.textContent = "Escribe tu usuario y tu clave."; return; }
+  btn.disabled = true; btn.textContent = "Entrando…"; err.textContent = "";
+  conTiempo(API + "/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario: usuario, clave: clave }), cache: "no-store" }, 20000)
+    .then(function (r) {
+      if (r.ok) return r.json();
+      if (r.status === 429) throw new Error("Demasiados intentos fallidos. Espera unos 15 minutos y vuelve a intentar.");
+      if (r.status === 503) throw new Error("El acceso al dashboard todavía no está configurado en el servidor (faltan las claves). Avísale a Mau.");
+      if (r.status === 401 || r.status === 403) throw new Error("Usuario o clave incorrectos.");
+      if (r.status === 400 || r.status === 422) throw new Error("Escribe tu usuario y tu clave.");
+      throw new Error("El servidor respondió con un error (" + r.status + "). Intenta de nuevo.");
+    })
+    .then(function (j) {
+      if (!j || !j.token) throw new Error("Respuesta inesperada del servidor.");
+      S.gen++;
+      S.token = j.token; S.usuario = j.usuario || usuario;
+      ls.set(K_TOKEN, j.token);
+      ls.set(K_USER, JSON.stringify({ usuario: S.usuario, rol: j.rol || null, expira: j.expira || null }));
+      $("l-clave").value = "";
+      mostrar("cargando"); pintarSub(); pintarEstado(); pintarSalir();
+      revalidar();
+    })
+    .catch(function (e) {
+      err.textContent = e && e.name === "AbortError" ? "El servidor tardó demasiado. Revisa tu conexión e intenta otra vez." :
+        e && e.message && !/Failed to fetch|NetworkError|Load failed/i.test(e.message) ? e.message : "No hay conexión con el servidor. Revisa tu internet.";
+    })
+    .then(function () { btn.disabled = false; btn.textContent = "Entrar"; });
+});
+$("l-ver").addEventListener("click", function () {
+  var i = $("l-clave"), ver = i.type === "password";
+  i.type = ver ? "text" : "password"; this.textContent = ver ? "Ocultar" : "Mostrar"; this.setAttribute("aria-label", ver ? "Ocultar clave" : "Mostrar clave");
+});
+$("salir").addEventListener("click", function () { cerrarSesion("Sesión cerrada."); });
+
+/* ─────────── Eventos ─────────── */
+function nuevoRango() { ST.tie.n = TABLAS.tie.paso; ST.pro.n = TABLAS.pro.paso; ST.nSerie = 31; render(); }
+document.querySelectorAll("[data-g]").forEach(function (b) {
+  b.addEventListener("click", function () { _g = b.dataset.g; ST.nSerie = 31; document.querySelectorAll("[data-g]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (M) pintarTendencia(M); });
+});
+document.querySelectorAll("[data-m]").forEach(function (b) {
+  b.addEventListener("click", function () { _m = b.dataset.m; document.querySelectorAll("[data-m]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (M) pintarTendencia(M); });
+});
+$("fi").addEventListener("change", function (e) { if (!IDX) return; F.fi = esFecha(e.target.value) ? e.target.value : ""; F.preset = ""; nuevoRango(); });
+$("ff").addEventListener("change", function (e) { if (!IDX) return; F.ff = esFecha(e.target.value) ? e.target.value : ""; F.preset = ""; nuevoRango(); });
+$("presets").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-p]"); if (!b || !IDX) return;
+  var k = b.getAttribute("data-p");
+  if (!aplicarPreset(k)) return;
+  nuevoRango();
+  var nb = $("presets").querySelector('[data-p="' + k + '"]'); if (nb) nb.focus();
+});
+$("canales").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-c]"); if (!b || !IDX) return;
+  var k = b.getAttribute("data-c"); if (k === F.canal) return;
+  F.canal = k; nuevoRango();
+  Array.prototype.forEach.call($("canales").querySelectorAll("[data-c]"), function (x) { if (x.getAttribute("data-c") === k) x.focus(); });
+});
+["tie", "pro"].forEach(function (t) {
+  var c = TABLAS[t];
+  $(c.q).addEventListener("input", function (e) { ST[t].q = e.target.value; ST[t].n = c.paso; if (M) pintarTabla(t); });
+  $(c.zona).addEventListener("click", function (e) {
+    var s = e.target.closest("[data-sort]");
+    if (s) {
+      var k = s.getAttribute("data-sort"), st = ST[t];
+      if (st.sort.k === k) st.sort.dir = -st.sort.dir; else st.sort = { k: k, dir: (k === "nombre" || k === "marca") ? 1 : -1 };
+      pintarTabla(t); return;
+    }
+    if (e.target.closest("[data-mas]")) { var n0 = ST[t].n; ST[t].n += c.paso; pintarTabla(t); enfocarMas(c.zona, n0); }
+  });
+});
+$("csv").addEventListener("click", csv);
+$("z-serie").addEventListener("click", function (e) {
+  if (e.target.closest('[data-mas="serie"]') && M) { var n0 = ST.nSerie; ST.nSerie += 31; pintarSerie(M.serie || []); enfocarMas("z-serie", n0); }
+});
+/* Tras "Ver más" el botón se vuelve a pintar: el foco pasa al nuevo botón o, si ya no hay más, a la primera fila nueva */
+function enfocarMas(zona, n0) {
+  var z = $(zona), b = z.querySelector("[data-mas]");
+  if (b) { b.focus(); return; }
+  var tr = z.querySelectorAll("tbody tr")[n0];
+  if (tr) { tr.setAttribute("tabindex", "-1"); tr.focus(); }
+}
+var _rz = null, _ancho = window.innerWidth;
+window.addEventListener("resize", function () {
+  if (window.innerWidth === _ancho) return; _ancho = window.innerWidth;
+  clearTimeout(_rz); _rz = setTimeout(function () { if (M && S.vista === "ok") dibujarGrafico(M.serie || []); }, 150);
+});
+
+/* Reloj del indicador + revisión periódica (con ETag: si no hay nada nuevo el servidor responde 304) */
+setInterval(function () { pintarEstado(); if (S.vista === "ok") pintarSub(); }, 30000);
+setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) revalidar(); }, 5 * 60000);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible" && S.token && !S.dev && Date.now() - S.revisado > 60000) revalidar();
+});
+
+/* ═══════════ Arranque ═══════════ */
+function iniciar() {
+  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json> (sin sesión)
+  var host = location.hostname, datos = null;
+  try { datos = new URLSearchParams(location.search).get("datos"); } catch (e) {}
+  if ((host === "localhost" || host === "127.0.0.1") && datos) {
+    S.dev = true;
+    if (!(/^[\w.\-\/]+\.json$/.test(datos) && datos.indexOf("//") < 0)) { mostrarError("Parámetro ?datos inválido", "Debe ser una ruta relativa a un archivo .json.", false); return; }
+    mostrar("cargando"); pintarSub(); pintarEstado();
+    fetch(datos, { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (j) { if (!datosValidos(j)) throw new Error("el JSON no trae «dias»"); aplicarDatos(j, null, "dev"); })
+      .catch(function (e) { mostrarError("No se pudo leer " + datos, e && e.message ? e.message : "error", false); });
+    return;
+  }
+  S.token = ls.get(K_TOKEN);
+  var u = ls.json(K_USER) || {};
+  S.usuario = typeof u.usuario === "string" ? u.usuario : null;
+  if (!S.token || tokenVencido(u.expira)) {
+    if (S.token) cerrarSesion("Tu sesión venció. Vuelve a entrar.");
+    else { ls.del(K_CACHE); mostrarLogin(""); } // sin sesión no se muestra ninguna copia guardada
+    return;
+  }
+  pintarSalir();
+  // Copia local: se pinta al instante y luego se pregunta al servidor con If-None-Match
+  var c = ls.json(K_CACHE);
+  if (c && datosValidos(c.data)) {
+    try { aplicarDatos(c.data, c.etag || null, "cache"); }
+    catch (e) { console.error("Copia local de Locatel inválida", e); ls.del(K_CACHE); limpiarDatos(); }
+  }
+  if (!IDX) { mostrar("cargando"); pintarSub(); pintarEstado(); }
+  revalidar();
+}
+iniciar();
+
+/* La pestaña actual siempre a la vista en la barra de canales (en el celular la barra se desliza) */
+(function () {
+  var t = document.querySelector('.tabs [aria-current="page"]'); if (!t) return;
+  var nav = t.parentNode, r = t.getBoundingClientRect(), rn = nav.getBoundingClientRect();
+  if (r.right > rn.right - 16) nav.scrollLeft += r.right - rn.right + 16;
+})();
+
+/* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
+   en vez de cortarla con "…". */
+(function(){
+  var pend=false;
+  function ajustarCifras(){
+    pend=false;
+    var els=document.querySelectorAll(".v");
+    for(var i=0;i<els.length;i++){
+      var e=els[i];
+      if(getComputedStyle(e).textOverflow!=="ellipsis") continue;
+      e.style.fontSize="";
+      var fs=parseFloat(getComputedStyle(e).fontSize);
+      while(e.scrollWidth>e.clientWidth+1 && fs>14){ fs-=1; e.style.fontSize=fs+"px"; }
+    }
+  }
+  function programar(){ if(!pend){ pend=true; setTimeout(ajustarCifras, 30); } }
+  new MutationObserver(programar).observe(document.body,{childList:true,subtree:true,characterData:true});
+  window.addEventListener("resize",programar);
+  programar();
+})();
+</script>
+</body>
+</html>
