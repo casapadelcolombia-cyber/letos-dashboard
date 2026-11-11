@@ -260,125 +260,88 @@ tr.det td{background:var(--fill);padding:4px 8px 14px}
 .cargando{min-height:60vh;display:grid;place-items:center;color:var(--text2);font-size:15px}
 .skel{height:14px;border-radius:7px;background:var(--fill);margin:8px 0}
 
-/* Casa Padel */
-/* Escala azul de ocupación. El texto de cada celda cambia de color según el alfa (ver estiloOcup):
-   --oc1 si alfa < .85, --oc2 entre .85 y .9, --oc3 desde .9; así todo queda ≥ 4,5:1 en claro y oscuro. */
-:root{--blueRGB:0,102,204;--oc1:#000;--oc2:#000;--oc3:#fff}
-@media (prefers-color-scheme:dark){:root{--blueRGB:10,132,255;--oc1:#fff;--oc2:#000;--oc3:#000}}
-.p-lect{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ocup{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:28px;padding:0 6px;border-radius:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.ocup.nada{background:none;color:var(--text3);font-weight:400}
-.ocup.cerr{font-size:11px;padding:0 2px}
-/* Canchas arrendadas por día */
-table.turnos.cd th .cd-club{display:inline-flex;align-items:flex-start;gap:5px;white-space:normal;max-width:96px;text-align:left;line-height:1.25}
-table.turnos.cd th .cd-club .sw{flex:none;margin-top:3px}
-.cd-n{min-width:34px;height:28px;padding:0 4px;border-radius:7px;font-size:14px;font-variant-numeric:tabular-nums}
-.cd-n.cd-t{font-weight:700}
-table.turnos.cd tfoot th,table.turnos.cd tfoot td{border-top:.5px solid var(--sep);font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums;padding-top:8px;padding-bottom:8px}
-table.turnos.cd tfoot td.tot b{color:var(--text)}
-table.turnos th,table.turnos td{text-align:center;padding:6px 3px}
-/* Columna "Día" fija al deslizar. Se pega 18 px adentro (relleno de .tw): el ::before tapa ese hueco con el mismo fondo
-   de la celda, para que no se vean pasar las celdas de debajo (box-shadow no se pinta en tablas border-collapse) */
-table.turnos th:first-child,table.turnos td:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--card);padding-left:0;padding-right:8px}
-table.turnos th:first-child::before,table.turnos td:first-child::before{content:"";position:absolute;top:0;bottom:0;left:-18px;width:18px;background:inherit}
-table.turnos th.noche{color:var(--text)}
-table.turnos.todas th.noche,table.turnos.todas td.noche{background:rgba(var(--blueRGB),.06)}
-table.turnos tr.hoy td{background:var(--fill)}
-table.turnos tr.hoy .tag{background:var(--card)}
-table.turnos th.tot,table.turnos td.tot{text-align:right;padding-left:10px}
-.p-dia{font-weight:600;white-space:nowrap}
-.p-dia+.n2{white-space:nowrap}
-.p-dia .tag{margin-left:0}
-.niveles{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text2);margin-top:10px}
-.niveles .ocup{min-width:36px;height:22px;font-size:12px}
-table.hm{border-collapse:separate;border-spacing:3px;width:100%;table-layout:fixed;min-width:300px}
-table.hm th{border:0;padding:2px 2px;font-size:11px;text-align:center;color:var(--text2)}
-table.hm th[scope="row"]{text-align:right;padding-right:6px;width:46px;font-variant-numeric:tabular-nums}
-table.hm th.noche{color:var(--text);font-weight:700}
-table.hm td{border:0;padding:0;height:24px;text-align:center;font-size:11px;font-weight:600;border-radius:5px}
-table.hm td.nada{background:none;color:var(--text3);font-weight:400}
-table.hm td button{display:block;width:100%;height:24px;border-radius:5px;font-weight:inherit}
-.escala{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-top:10px}
-.escala span.g{flex:0 1 160px;height:8px;border-radius:4px;background:linear-gradient(to right,rgba(var(--blueRGB),.1),rgba(var(--blueRGB),1))}
-.evs{list-style:none}
-.evs li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px 10px;padding:10px 0;border-bottom:.5px solid var(--sep);align-items:baseline}
-.evs li:last-child{border-bottom:0}
-.evs .pt{width:8px;height:8px;border-radius:50%;align-self:center}
-.evs .q{font-weight:600;overflow-wrap:anywhere}
-.evs .cu{font-size:12px;color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums}
-.evs .d2{grid-column:2/4;font-size:13px;color:var(--text2)}
-.metodo ul{margin:8px 0 0 18px;color:var(--text2);font-size:13px;line-height:1.55}
-/* Selector de club: en el celular es un carrusel que se desliza de lado (sin mover la página) */
-.p-sel{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-6px -16px 4px;padding:2px 16px 4px;scroll-padding:16px;-webkit-overflow-scrolling:touch}
-.p-sel::-webkit-scrollbar{display:none}
-.p-sel .pill{flex:none}
-@media (min-width:900px){.p-sel{flex-wrap:wrap;overflow:visible;margin:-6px 0 4px;padding:2px 0 4px}}
-.sw{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
-/* Ranking */
-table.rk td{padding:9px 8px}
-table.rk td.d .minibar{margin-left:auto;max-width:90px}
-table.rk small.rk-c{display:block;font-size:11px;color:var(--text2);font-weight:400;white-space:nowrap}
-.rk-n{display:inline-flex;align-items:center;gap:7px;font-weight:600;text-align:left;color:var(--text);padding:2px 0;max-width:100%}
-.rk-n span:last-child{overflow-wrap:anywhere}
-.rk-n:hover span:last-child{color:var(--blueT);text-decoration:underline}
-@media (max-width:600px){table.rk td:nth-child(2){min-width:120px}table.rk .minibar{min-width:52px}}
-/* Ocupación comparada (barras horizontales) */
-.cmp{list-style:none;display:grid;gap:12px}
-.cmp li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center}
-.cmp-n{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;text-align:left;color:var(--text);min-width:0}
-.cmp-n span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cmp-n:hover span:last-child{color:var(--blueT);text-decoration:underline}
-.cmp-v{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-size:14px}
-.cmp-v small{display:block;font-size:11px;font-weight:500;color:var(--text2)}
-.cmp-b{grid-column:1/-1;position:relative;height:10px;border-radius:5px;background:var(--fill2);
-  background-image:linear-gradient(to right,transparent calc(50% - .5px),var(--grid) calc(50% - .5px),var(--grid) calc(50% + .5px),transparent calc(50% + .5px))}
-.cmp-b span{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
-.cmp-b i{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--text);box-shadow:0 0 0 1.5px var(--card)}
-.cmp-eje{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:8px;font-variant-numeric:tabular-nums}
-/* Turnos de la noche de todos los clubes */
-.nt{display:grid;gap:4px}
-.nt-f{padding:10px 0;border-bottom:.5px solid var(--sep)}
-.nt-f:last-child{border-bottom:0}
-.nt-cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
-.nt-tot{font-size:12px;color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums}
-.nt-cs{display:flex;flex-wrap:wrap;gap:6px}
-.nt-c{display:inline-flex;flex-direction:column;align-items:center;gap:2px}
-.nt-h{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums}
-.nt-v{font-size:13px;color:var(--text3)}
-.metodo li+li{margin-top:4px}
-/* Consultar una fecha (/padel/dia): campo en la cabecera y panel del día */
-.pd-f{display:grid;grid-template-columns:190px auto;gap:8px;align-items:end}
-.pd-f .btn{justify-self:start}
-/* El aviso ocupa el ancho del formulario sin ensancharlo (width 0 + min-width 100 %) */
-.pd-msg{grid-column:1/-1;width:0;min-width:100%;font-size:13px;color:var(--neg)}
-@media (max-width:600px){.pd-f{flex:1 1 100%;grid-template-columns:minmax(0,1fr) auto}}
-.pd-cab{flex-wrap:nowrap}
-.pd-cab>div{min-width:0}
-.pd-cab .btn{flex:none}
-.pd-tags .tag{margin:0 4px 0 0}
-table.pd th.d,table.pd td.d{text-align:right}
-table.pd td.tot{white-space:nowrap}
-table.pd td:first-child{min-width:118px}
-table.pd small{display:block;font-size:11px;color:var(--text2);font-weight:400;white-space:nowrap}
-table.pd td.pd-sin{color:var(--text3);font-size:13px}
-table.pd td .minibar{margin-left:auto;max-width:90px}
-/* Celular: cada club se apila (nombre y resumen arriba, sus turnos de la noche debajo), así caben 5 o más turnos */
-@media (max-width:600px){
-  table.pd,table.pd tbody{display:block}
-  table.pd thead{display:none}
-  table.pd tr{display:flex;flex-wrap:wrap;gap:4px 6px;padding:10px 0;border-bottom:.5px solid var(--sep)}
-  table.pd tr:last-child{border-bottom:0}
-  table.turnos.pd td{padding:0;border:0}
-  table.turnos.pd td:first-child{flex:1 1 100%;position:static;min-width:0;padding-bottom:4px}
-  table.turnos.pd td:first-child::before{content:none}
-  table.pd td.pd-v{display:none}
-  table.pd td.pd-sin{flex:1 1 100%;text-align:left}
-}
-table.pd-h th,table.pd-h td{padding:6px 8px}
-table.pd-h tbody th{font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
-table.pd-h tr.noche th,table.pd-h tr.noche td{background:rgba(var(--blueRGB),.06)}
-.pd-a{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-.pd-c .cmp-n:hover span:last-child{color:inherit;text-decoration:none}
+/* Publicidad */
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;flex:none;vertical-align:0}
+.pub-sel{margin:0 0 2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.pub-sel::-webkit-scrollbar{display:none}
+.pub-sel .pill{flex:none}
+.pub-sel .pill .pdot{margin-right:0}
+#view>.aviso{margin-top:12px}
+.cta{display:block;width:100%;text-align:left;font:inherit;color:inherit;border:0;cursor:pointer;transition:transform .15s,box-shadow .15s}
+button.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.10)}
+.cta-cab{display:flex;align-items:center;gap:2px;font-size:15px;margin-bottom:10px}
+.cta-cab b{font-weight:600}
+.cta-pais{margin-left:auto;font-size:12px;color:var(--text2);background:var(--fill);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.cta-g{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:end}
+.cta-v{font-size:30px;font-weight:700;letter-spacing:-.6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cta-s{font-size:12px;color:var(--text2);margin-top:2px}
+.spark{width:100%;height:44px;display:block}
+.cta-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--sep)}
+.cta-k span,.ad-k span{display:block;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cta-k b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cta-p{font-size:12px;color:var(--text2);margin-top:10px}
+.ana{list-style:none;display:grid;gap:8px;margin:0;padding:0}
+@media (min-width:980px){.ana{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.ana-i{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--fill2);position:relative}
+.ana-i>div{flex:1;min-width:0}
+.ana-i b{font-size:14px;font-weight:600;display:block;overflow-wrap:anywhere}
+.ana-i p{font-size:13px;color:var(--text2);margin-top:3px;line-height:1.4}
+.ana-ic{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:var(--blue)}
+.ana-i.bien .ana-ic{background:var(--green)}.ana-i.ojo .ana-ic{background:var(--orange)}.ana-i.mal .ana-ic{background:var(--red)}
+.ana-i.bien{background:color-mix(in srgb,var(--green) 9%,var(--card))}
+.ana-i.ojo{background:color-mix(in srgb,var(--orange) 10%,var(--card))}
+.ana-i.mal{background:color-mix(in srgb,var(--red) 8%,var(--card))}
+.ana-i.info{background:color-mix(in srgb,var(--blue) 7%,var(--card))}
+.ana-ad{font:inherit;font-weight:600;color:inherit;background:none;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--text3);text-underline-offset:3px}
+.ana-c{flex:none;font:inherit;font-size:11px;color:var(--text2);background:var(--card);border:0;border-radius:999px;padding:4px 9px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
+@media (max-width:600px){.ana-i{flex-wrap:wrap}.ana-c{margin-left:36px}}
+.ads{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:700px){.ads{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1100px){.ads{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ad{border-radius:16px;background:var(--fill2);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ad-m{position:relative;display:block;width:100%;aspect-ratio:4/5;border:0;padding:0;cursor:pointer;overflow:hidden;background:var(--fill)}
+.ad-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:transform .35s}
+.ad-m:hover .ad-img{transform:scale(1.04)}
+.ad-ph{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px;opacity:.85}
+.ad-m::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.35));z-index:2;pointer-events:none}
+.ad-play{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;z-index:3;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ad-play svg{width:22px;height:22px;margin-left:3px}
+.ad-est{position:absolute;left:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap}
+.ad-est::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px;background:#aeaeb2}
+.ad-est.on::before{background:#30d158}.ad-est.rev::before{background:#ffd60a}.ad-est.mal::before{background:#ff453a}
+.ad-est.inl{position:static;background:var(--fill);color:var(--text)}
+.ad-tag{position:absolute;right:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;color:#fff}
+.ad-tag.bien{background:var(--green)}.ad-tag.mal{background:var(--red)}
+.ad-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
+.ad-n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-s{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+.ad-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;margin-top:8px}
+.ad-k b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ad-t{font-size:12px;color:var(--pos);margin-top:8px;font-weight:500}
+@media (max-width:600px){.ad-b{padding:9px 10px 10px}.ad-k{gap:5px 8px}.ad-k b{font-size:12.5px;letter-spacing:-.2px}.ad-k span{font-size:10.5px}.ad-n{font-size:13px}}
+body.sin-scroll{overflow:hidden}
+.pm-fondo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.pm{position:fixed;z-index:91;left:50%;top:50%;transform:translate(-50%,-50%);width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 40px);display:grid;grid-template-columns:minmax(0,1fr);background:var(--card);border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+@media (min-width:760px){.pm{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}}
+.pm-media{position:relative;background:#000;display:grid;place-items:center;min-height:240px;max-height:calc(100vh - 40px)}
+.pm-media img,.pm-media video{width:100%;height:100%;max-height:calc(100vh - 40px);object-fit:contain;display:block}
+@media (max-width:759px){.pm-media{max-height:46vh}.pm-media img,.pm-media video{max-height:46vh}}
+.pm-media .ad-ph{position:static;width:100%;height:240px}
+.pm-carga{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:5px 12px;border-radius:999px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+.pm-b{padding:20px 20px 18px;overflow-y:auto;position:relative}
+.pm-x{position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:50%;border:0;background:var(--fill);color:var(--text);font-size:14px;cursor:pointer}
+.pm-c{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;padding-right:40px}
+.pm h2{font-size:19px;font-weight:700;letter-spacing:-.3px;margin-top:8px;overflow-wrap:anywhere}
+.pm-s{font-size:13px;color:var(--text2);margin-top:2px}
+.pm-x2{font-size:13px;margin-top:10px;line-height:1.45;color:var(--text);background:var(--fill2);border-radius:12px;padding:10px 12px}
+.pm-t{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+.pm-t th,.pm-t td{padding:7px 4px;border-bottom:1px solid var(--sep);text-align:left;font-weight:400}
+.pm-t thead th{font-size:12px;color:var(--text2);font-weight:500}
+.pm-t tbody th{color:var(--text2)}
+.pm-t .d{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.pm-t thead .d{font-weight:500}
+.pm-l{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.btn svg{width:15px;height:15px;margin-right:6px;vertical-align:-2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -438,11 +401,11 @@ table.pd-h tr.noche th,table.pd-h tr.noche td{background:rgba(var(--blueRGB),.06
    ═══════════════════════════════════════════════════════════════════ */
 var API = "https://letos-mcp.casapadelcolombia.workers.dev/api/dashboard";
 var K_TOKEN = "letos_dash_token", K_CACHE = "letos_dash_cache", K_USER = "letos_dash_usuario", K_PREF = "letos_dash_pref";
-var K_PADEL = "letos_padel_cache"; // copia local de /api/dashboard/padel (independiente de la del dashboard)
+var K_PUB = "letos_pub_cache"; // copia local de /api/dashboard/publicidad (independiente de la del dashboard)
 var EXTERNOS = [["Farmatodo", "https://dashboard.letos.co/farmatodo.html"], ["Aruma", "https://dashboard.letos.co/aruma.html"], ["Rappi", "https://dashboard.letos.co/rappi.html"], ["Locatel", "https://dashboard.letos.co/locatel.html"]];
 var TABS = [
   ["resumen", "Resumen"], ["productos", "Productos"], ["clientes", "Clientes"], ["vendedores", "Vendedores"],
-  ["inventario", "Inventario"], ["cartera", "Cartera"], ["movimiento", "Movimiento"], ["padel", "Casa Padel"]
+  ["inventario", "Inventario"], ["cartera", "Cartera"], ["movimiento", "Movimiento"], ["publicidad", "Publicidad"]
 ];
 var PERIODOS = [["3", "3M"], ["6", "6M"], ["12", "12M"], ["todo", "Todo"]];
 var MES_L = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -515,23 +478,18 @@ function uiInicial() {
     car: { lado: "cxc", vista: "terceros", rapido: "todas", desde: "", hasta: "", q: "", nit: "", nitN: "", sort: { k: "s", dir: -1 }, n: 50 },
     mov: { mes: "", q: "", sort: { k: "t", dir: -1 }, n: 50, abierto: "" },
     mensual: { n: 12 },
-    // Casa Padel: club elegido ("todos" o id del club), rango de los gráficos, horas plegables, filas de turnos,
-    // filtro de eventos, orden del ranking, fecha de "Turnos de la noche" en la vista Todos ("0" hoy, "1" mañana),
-    // fecha escrita en "Consultar una fecha" (diaF) y reservas a la vista en el día consultado (devN)
-    padel: { club: "todos", rango: "30", todas: true, n: 14, ev: "todos", evN: 15, orden: { k: "oc30", dir: -1 }, nocheF: "0", diaF: "", devN: 20, cdN: 14 }
+    // Publicidad: cuenta elegida ("todas" o id), período (7 o 30 días), orden y filtro de la galería y anuncios a la vista
+    pub: { cta: "todas", per: "7", orden: "gasto", activos: true, n: 12 }
   };
 }
-/* Casa Padel tiene su propia carga, copia local y errores: si falla no toca las otras pestañas.
-   dia = consulta de una fecha exacta (/padel/dia): fecha abierta ("" = cerrada), respuesta (de la fecha dataF), carga,
-   errores y una caché en memoria por fecha. */
-function padelInicial() { return { data: null, etag: null, cargando: false, desde: 0, error: null, vacio: null, revisado: 0, ctl: null, dia: diaPadelInicial() }; }
-function diaPadelInicial() { return { fecha: "", data: null, dataF: "", cargando: false, error: null, reintentar: true, aviso: "", n: 0, ctl: null, cache: {} }; }
+/* Publicidad tiene su propia carga, copia local y errores: si falla no toca las otras pestañas. */
+function pubInicial() { return { data: null, etag: null, cargando: false, desde: 0, error: null, vacio: null, revisado: 0, ctl: null, leyendo: false, msg: null, modal: null }; }
 var S = {
   data: null, etag: null, dev: false, token: null, usuario: null, rol: null,
   tab: "resumen", periodo: "12", revisado: 0, errorRed: null, cargando: false, sinDatos: null, estadoSync: null,
   gen: 0, ctl: null, syncEnCurso: false, // gen cambia en cada login/logout: invalida respuestas viejas
   memo: {}, charts: [], msgSinDatos: null,
-  padel: padelInicial(),
+  pub: pubInicial(),
   ui: uiInicial()
 };
 var $ = function (id) { return document.getElementById(id); };
@@ -1435,1113 +1393,524 @@ function zMov() {
   });
 }
 
-/* ═══════════ Casa Padel: ocupación de la competencia (easycancha) ═══════════
-   Lee /api/dashboard/padel (contrato padel:data:v1, ver PADEL_SPEC.md). Todo lo que viene del API
-   se valida (fechas, horas, canchas) y se escapa antes de insertarlo.
-   Varios clubes: vista "Todos" (ranking + comparación) por defecto y el detalle de cada club con el selector. */
-var NOCHE_DESDE = "17:00"; // la noche empieza aquí; las horas de inicio se toman de los datos de cada club
-var DOW_C = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-var DOW_L = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-var ORDEN_DOW = [1, 2, 3, 4, 5, 6, 0];
-var COLOR_CANCHA = ["blue", "orange", "green", "purple", "pink", "teal", "indigo", "gray"];
-var COLOR_CLUB = ["blue", "orange", "green", "purple", "pink", "teal", "indigo", "red", "gray"];
-function datosPadelValidos(j) { return !!(j && typeof j === "object" && Array.isArray(j.clubes)); }
-function esFecha(f) { return typeof f === "string" && /^\d{4}-\d{2}-\d{2}$/.test(f) && isFinite(Date.parse(f + "T12:00:00Z")); }
-function esHora(h) { return typeof h === "string" && /^\d{2}:\d{2}$/.test(h); }
-function sumarDias(f, n) { return new Date(Date.parse(f + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
-function dowDe(f) { return new Date(f + "T12:00:00Z").getUTCDay(); }
-function fechaCorta(f) { var p = f.split("-"); return +p[2] + " " + (MES_C[+p[1] - 1] || ""); }
-function diaC(f) { return DOW_C[dowDe(f)] + " " + fechaCorta(f); }
-function horas(n) { return NF1.format(num(n)) + " h"; }
-function clubesPadel() { return arr((S.padel.data || {}).clubes).filter(function (c) { return c && typeof c === "object"; }); }
-/* Identificador estable del club (su id de easycancha); el índice solo si el id no sirve */
-function idClub(c, i) { var id = c && c.id; return (typeof id === "number" || typeof id === "string") && /^[\w-]{1,20}$/.test(String(id)) ? String(id) : "i" + i; }
-function nombreClub(c, i) { return String((c && c.nombre) || "Club " + (i + 1)); }
-function nombreCorto(c, i) { var n = nombreClub(c, i).replace(/\s+barranquilla\s*$/i, "").trim(); return n || nombreClub(c, i); }
-function colorClubI(i) { return COLOR_CLUB[Math.max(0, i) % COLOR_CLUB.length]; }
-/* Club elegido; null = vista "Todos" (solo existe cuando hay más de un club) */
-function clubPadel() {
-  var cs = clubesPadel(), sel = S.ui.padel.club;
-  if (cs.length === 1) return cs[0];
-  if (!cs.length || sel === "todos") return null;
-  for (var i = 0; i < cs.length; i++) if (idClub(cs[i], i) === sel) return cs[i];
-  return null; // el club guardado ya no viene en los datos: se ve "Todos"
+/* ═══════════ Publicidad: pauta de Meta y TikTok (foto diaria a la 1 p. m.) ═══════════
+   Lee /api/dashboard/publicidad, que arma el Worker letos-mcp (src/publicidad) todos los días desde la 1 p. m.
+   Cuentas: Meta Girlz Only Colombia, Meta Blondz Only US, TikTok Girlz Only Colombia y TikTok Blondz Only US.
+   Tiene su propia carga, copia local y errores (como tenía Casa Padel): si falla no toca las otras pestañas. */
+var PUB_ORDEN = ["meta_girlz", "tt_girlz", "meta_blondz_us", "tt_blondz_us"];
+var PUB_COLOR = { meta_girlz: "blue", tt_girlz: "pink", meta_blondz_us: "indigo", tt_blondz_us: "teal" };
+var PUB_CORTO = { meta_girlz: "Meta · Girlz CO", tt_girlz: "TikTok · Girlz CO", meta_blondz_us: "Meta · Blondz US", tt_blondz_us: "TikTok · Blondz US" };
+var PUB_ORDENES = [["gasto", "Más gasto"], ["retorno", "Mejor retorno"], ["resultado", "Más resultados"], ["costo", "Menor costo"], ["ctr", "Mejor CTR"]];
+var NF2 = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function pubValida(j) { return !!(j && typeof j === "object" && Array.isArray(j.cuentas)); }
+function PD() { return S.pub.data || {}; }
+function ctasPub() {
+  return arr(PD().cuentas).filter(function (c) { return c && typeof c === "object" && c.id; })
+    .sort(function (a, b) { return PUB_ORDEN.indexOf(a.id) - PUB_ORDEN.indexOf(b.id); });
 }
-function hoyPadel() { var h = (S.padel.data || {}).hoy; return esFecha(h) ? h : new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10); }
-/* Canchas del club como texto ("1".."N"), más cualquier otra que aparezca en los datos */
-function canchasDe(c) {
-  var n = Math.floor(num(c.canchas)), m = {};
-  for (var i = 1; i <= Math.min(n, 30); i++) m[i] = 1;
-  arr(c.dias).forEach(function (d) { if (d && d.porCancha && typeof d.porCancha === "object") Object.keys(d.porCancha).forEach(function (k) { if (/^\d{1,3}$/.test(k)) m[+k] = 1; }); });
-  return Object.keys(m).map(Number).sort(function (a, b) { return a - b; }).map(String);
-}
-/* Días válidos, sin repetir, en orden ascendente */
-function diasPadel(c) {
-  var vistos = {}, out = [];
-  arr(c.dias).forEach(function (d) { if (d && esFecha(d.f) && !vistos[d.f]) { vistos[d.f] = 1; out.push(d); } });
-  return out.sort(function (a, b) { return a.f < b.f ? -1 : a.f > b.f ? 1 : 0; });
-}
-function sumaDias(lista) {
-  var r = { h: 0, ab: 0, ing: 0, sd: 0, n: lista.length };
-  lista.forEach(function (d) { r.h += num(d.horasArrendadas); r.ab += num(d.horasAbiertas); r.ing += num(d.ingresoEst); r.sd += Math.max(0, num(d.horasSinDato)); });
-  r.oc = r.ab > 0 ? r.h / r.ab : null;
-  return r;
-}
-/* Color de ocupación (0..1) sobre la escala azul; el color del texto por tramo de alfa lo fija el tema (--oc1..3) */
-function estiloOcup(v) {
-  v = Math.max(0, Math.min(1, num(v)));
-  if (v <= 0) return "background:var(--fill);color:var(--text2)";
-  var a = 0.1 + 0.9 * v;
-  return "background:rgba(var(--blueRGB)," + a.toFixed(3) + ");color:var(" + (a < 0.85 ? "--oc1" : a < 0.9 ? "--oc2" : "--oc3") + ")";
-}
-/* Con 6 clubes la lectura es una vez por hora y el JSON se publica de nuevo a más tardar ~60 min después
-   (más 5 min de revalidación del navegador y el desfase del cron): puede llegar con casi 2 h sin que nada
-   esté mal. Recién pasado esto se marca vieja. */
-var LECTURA_VIEJA_MS = 150 * 60000;
-function lecturaPadel(c) {
-  var t = c ? Date.parse(c.ultimaLectura || "") || 0 : 0;
-  return { t: t, viejo: !t || Date.now() - t > LECTURA_VIEJA_MS };
-}
-/* Vista "Todos": la lectura más reciente, los clubes atrasados y los que todavía no tienen ninguna lectura
-   (club recién agregado: no es un atraso). viejo = la más reciente es vieja o algún club va atrasado; es la
-   misma regla para el punto del indicador de arriba y el de la cabecera. */
-function lecturaTodos() {
-  var t = 0, viejos = [], sinLect = [];
-  clubesPadel().forEach(function (c, i) { var l = lecturaPadel(c); if (l.t > t) t = l.t; if (!l.t) sinLect.push(nombreCorto(c, i)); else if (l.viejo) viejos.push(nombreCorto(c, i)); });
-  return { t: t, viejo: !t || Date.now() - t > LECTURA_VIEJA_MS || viejos.length > 0, viejos: viejos, sinLect: sinLect };
-}
-function textoLecturaPadel(c) {
-  if (!c) {
-    var lt = lecturaTodos();
-    var tx = lt.t ? "Última lectura " + hace(lt.t) : "Sin lecturas todavía";
-    if (lt.t && lt.viejos.length) tx += " · " + (lt.viejos.length === 1 ? "lectura atrasada en " + lt.viejos[0] : lt.viejos.length + " clubes con la lectura atrasada");
-    if (lt.t && lt.sinLect.length) tx += " · " + (lt.sinLect.length === 1 ? lt.sinLect[0] + " sin lecturas todavía" : lt.sinLect.length + " clubes sin lecturas todavía");
-    return '<span class="punto' + (lt.viejo ? " viejo" : "") + '"></span><span>' + esc(tx) + "</span>";
+function ctaPub(id) { return ctasPub().filter(function (c) { return c.id === id; })[0] || null; }
+function ctaSel() { var c = S.ui.pub.cta !== "todas" ? ctaPub(S.ui.pub.cta) : null; return c && !c.error ? c : null; }
+function ctasOk() { return ctasPub().filter(function (c) { return !c.error; }); }
+function per30() { return S.ui.pub.per === "30"; }
+/* Cuenta que empezó después del inicio de la semana anterior (Meta Colombia, cuenta nueva desde el 5-nov): no se compara */
+function prevMala(c) { return !!(c && c.inicio && c.inicio > (PD().desdePrev7 || "")); }
+function sinComp(c) { return per30() || prevMala(c); }
+function notaInicio(c) { return prevMala(c) || (c && c.inicio && c.inicio > (PD().desde || "")) ? "Cuenta nueva desde el " + pubFecha(c.inicio) + ": antes la pauta iba en la cuenta de CBM, que ya no se puede leer." : ""; }
+function totC(c) { return (per30() ? c.tot30 : c.tot7) || {}; }
+function mAd(a) { return (per30() ? a.m30 : a.m7) || {}; }
+function textoPer() { return per30() ? "últimos 30 días" : "últimos 7 días"; }
+function usd(v) { v = num(v); var a = Math.abs(v); return (v < 0 ? "−" : "") + "US$" + (a >= 1000 ? NF0.format(a) : NF2.format(a)); }
+function plata(v, mon) { return mon === "USD" ? usd(v) : money(v); }
+function plataA(v, mon) { var a = Math.abs(num(v)); return mon === "USD" ? (a >= 1e4 ? "US$" + NF1.format(num(v) / 1e3) + " mil" : a >= 100 ? "US$" + NF0.format(num(v)) : usd(v)) : moneyA(v); }
+function veces(x) { return isFinite(x) && x > 0 ? NF1f.format(x) + "x" : "—"; }
+function trmPub() { return num(PD().trm) || 4000; }
+function enCop(v, mon) { return mon === "USD" ? num(v) * trmPub() : num(v); }
+function div0(a, b) { return num(b) ? num(a) / num(b) : 0; }
+function pubFecha(f) { var p = String(f || "").split("-"); return p.length === 3 ? +p[2] + " " + (MES_C[+p[1] - 1] || "") : String(f || ""); }
+function diario30(c) { var dd = arr(c.diario), desde = PD().desde || ""; return dd.filter(function (x) { return x && x.d >= desde; }); }
+/* Resultado principal según el destino: la web (compras; si no, conversaciones) o Amazon (clics; si no, vistas) */
+function resultado(m, destino) {
+  if (destino === "web") {
+    if (num(m.compras) > 0) return { n: num(m.compras), t: "compras", u: "compra" };
+    if (num(m.conv) > 0) return { n: num(m.conv), t: "conversaciones", u: "conversación" };
+    if (num(m.clics) > 0) return { n: num(m.clics), t: "clics", u: "clic" };
+  } else {
+    if (num(m.clics) > 0) return { n: num(m.clics), t: "clics a Amazon", u: "clic" };
   }
-  var l = lecturaPadel(c);
-  return '<span class="punto' + (l.viejo ? " viejo" : "") + '"></span><span>' + esc((l.t ? "Última lectura " + hace(l.t) : "Sin lecturas todavía") + (esFecha(c.desde) ? " · historial desde " + fechaC(c.desde) : "")) + "</span>";
+  if (num(m.vistas) > 0) return { n: num(m.vistas), t: "reproducciones", u: "mil vistas", mil: true };
+  return { n: 0, t: "resultados", u: "resultado" };
 }
-/* Parte del día sin ninguna lectura previa (p. ej. el día en que empezó a leerse o una caída de easycancha) */
-function sinDatoPadel(d) { return num(d && d.horasSinDato) > 0; }
-function anticipacion(h) {
-  h = num(h);
-  if (h < 0) return "después de empezar el turno";
-  if (h < 1) return "menos de 1 h antes";
-  if (h < 48) return NF0.format(Math.round(h)) + " h antes";
-  return NF1.format(h / 24) + " días antes";
+function costoRes(m, r) { return r.n ? num(m.gasto) / (r.mil ? r.n / 1000 : r.n) : 0; }
+function estadoTxt(e) {
+  e = String(e || "");
+  if (e === "ACTIVE") return ["on", "Activo"];
+  if (/PAUSED|DISABLE|ARCHIVED|DELETED/.test(e)) return ["off", "Pausado"];
+  if (/IN_PROCESS|REVIEW|PENDING/.test(e)) return ["rev", "En revisión"];
+  if (/ISSUES|DISAPPROVED|REJECT/.test(e)) return ["mal", "Con problemas"];
+  return ["off", e ? e.toLowerCase().replace(/_/g, " ") : "—"];
 }
-/* Horas de inicio desde las 17:00 que aparecen en los datos (cada club publica las suyas) */
-function horasNoche(lista) {
-  var m = {};
-  lista.forEach(function (d) { if (d.porHora && typeof d.porHora === "object") Object.keys(d.porHora).forEach(function (k) { if (esHora(k) && k >= NOCHE_DESDE) m[k] = 1; }); });
-  return Object.keys(m).sort();
+function imgPub(a) { return a && a.img ? API + "/publicidad/img/" + encodeURIComponent(a.img) : ""; }
+function puntoCta(id) { return '<i class="pdot bg-' + (PUB_COLOR[id] || "gray") + '"></i>'; }
+var ICO_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+var ICO_SYNC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+
+/* Mini línea de tendencia (sin interacción) */
+function spark(vals, color) {
+  var n = vals.length, max = Math.max.apply(null, vals.concat([0]));
+  if (n < 2 || !max) return '<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"></svg>';
+  var pts = vals.map(function (v, i) { return (i * 100 / (n - 1)).toFixed(2) + " " + (26 - num(v) / max * 24).toFixed(2); });
+  return '<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">' +
+    '<path d="M' + pts.join("L") + "L100 28L0 28Z\" fill=\"var(--" + color + ')" opacity=".12"/>' +
+    '<path d="M' + pts.join("L") + '" fill="none" stroke="var(--' + color + ')" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
 }
-/* Sumar arrendadas de varias horas de inicio solo tiene sentido si los turnos no se traslapan (un inicio cada
-   90 min o más, como la noche de 1125 entre semana). Con inicios cada 30 min una misma reserva aparece en
-   2–4 horas seguidas, así que ese total no se muestra. */
-var TURNO_SIN_TRASLAPE_MIN = 90;
-function sinTraslape(hs) {
-  var ms = hs.map(function (k) { return +k.slice(0, 2) * 60 + +k.slice(3, 5); }).sort(function (a, b) { return a - b; });
-  for (var i = 1; i < ms.length; i++) if (ms[i] - ms[i - 1] < TURNO_SIN_TRASLAPE_MIN) return false;
-  return true;
+
+function estadoPubHTML(titulo, msg, reintentar) {
+  return '<section class="card"><div class="vacio" style="padding:36px 12px"><b style="display:block;font-size:17px;color:var(--text);margin-bottom:6px">' + esc(titulo) + "</b>" + esc(msg || "") +
+    (reintentar ? '<div style="margin-top:14px"><button class="btn prim" data-act="pub-reintentar">Reintentar</button></div>' : "") + "</div></section>";
 }
-/* ─────────── Turnos fijos de 90 min (decisión de Mau, 12-oct-2026) ───────────
-   Todo el día solo cuentan los turnos fijos de 90 min de cada club: el API los manda en club.turnos (todos los del día,
-   p. ej. 06:30 … 21:30) y club.noche = {desde, turnos} (los de la noche, que se usan tal cual: La Jaula tiene solo
-   16:00 … 22:00, todos de noche), y porHora ya solo trae esas horas. Sin estos campos (datos de antes del cambio) se usa
-   la lógica anterior: las horas de inicio que vengan en porHora (la noche, desde las 17:00). */
-function horasValidas(xs) {
-  var out = [], vistos = {};
-  arr(xs).forEach(function (k) { if (esHora(k) && !vistos[k]) { vistos[k] = 1; out.push(k); } });
-  return out.sort();
+function cabeceraPub() {
+  var d = PD(), sub = "Meta y TikTok · Girlz Only Colombia y Blondz Only US";
+  if (d.hasta) sub += " · días cerrados hasta el " + fechaC(d.hasta) + " · se actualiza todos los días a la 1 p. m.";
+  var h = '<div class="cab"><div><h1>Publicidad</h1><p>' + esc(sub) + "</p></div><div class=\"cab-ctl\">";
+  h += '<div class="seg" role="group" aria-label="Período"><button data-act="pub-per" data-v="7" aria-pressed="' + !per30() + '">7 días</button><button data-act="pub-per" data-v="30" aria-pressed="' + per30() + '">30 días</button></div>';
+  if (!S.dev) h += '<button class="btn" data-act="pub-sync"' + (S.pub.leyendo ? ' disabled aria-disabled="true"' : "") + ">" + ICO_SYNC + (S.pub.leyendo ? "Leyendo…" : "Leer ahora") + "</button>";
+  return h + "</div></div>";
 }
-function turnosClub(c) { var t = horasValidas(c && c.turnos); return t.length ? t : null; }
-function nocheClub(c) {
-  var n = c && c.noche && typeof c.noche === "object" ? c.noche : null, ts = horasValidas(n && n.turnos);
-  if (!ts.length) {
-    // Sin `noche` pero con los turnos del día: la noche son los turnos desde las 17:00
-    var t = turnosClub(c); ts = t ? t.filter(function (k) { return k >= NOCHE_DESDE; }) : [];
-    return ts.length ? { desde: ts[0], turnos: ts } : null;
-  }
-  return { desde: esHora(n.desde) && n.desde <= ts[0] ? n.desde : ts[0], turnos: ts };
-}
-/* Todas las horas de un club: sus turnos fijos del día; sin ellos, las horas de los datos de `lista`
-   (con la noche reducida a sus turnos fijos si el club trae `noche`) */
-function horasDiaClub(c, lista) {
-  var t = turnosClub(c); if (t) return t.slice();
-  var n = nocheClub(c), m = {};
-  lista.forEach(function (d) { if (d && d.porHora && typeof d.porHora === "object") Object.keys(d.porHora).forEach(function (k) { if (esHora(k) && (!n || k < n.desde)) m[k] = 1; }); });
-  if (n) n.turnos.forEach(function (k) { m[k] = 1; });
-  return Object.keys(m).sort();
-}
-function listaY(xs) { return xs.length > 1 ? xs.slice(0, -1).join(", ") + " y " + xs[xs.length - 1] : xs.join(""); }
-/* "de 06:30 a 21:30, con la noche en 17:00, 18:30, 20:00 y 21:30"; si todos sus turnos son de noche (La Jaula),
-   "solo 16:00, 17:30, 19:00, 20:30 y 22:00" */
-function textoTurnos(c) {
-  var t = turnosClub(c), n = nocheClub(c), s = "";
-  if (t && n && t.join() === n.turnos.join()) return "solo " + listaY(t);
-  if (t) s = t.length > 1 ? "de " + t[0] + " a " + t[t.length - 1] : "a las " + t[0];
-  if (n) s += (s ? ", con la noche en " : "en la noche: ") + listaY(n.turnos);
-  return s;
-}
-/* Método de la vista Todos: el horario de turnos más común y los clubes que lo tienen distinto (p. ej. La Jaula) */
-function textoTurnosTodos(cs) {
-  var grupos = {}, orden = [];
-  cs.forEach(function (c, i) {
-    var t = turnosClub(c), n = nocheClub(c); if (!t && !n) return;
-    var k = (t || []).join(",") + "|" + (n ? n.turnos.join(",") : "");
-    if (!propia(grupos, k)) { grupos[k] = { c: c, nombres: [] }; orden.push(k); }
-    grupos[k].nombres.push(nombreCorto(c, i));
+function selectorPub() {
+  var h = '<div class="pills pub-sel" role="group" aria-label="Cuenta">';
+  h += '<button class="pill" data-act="pub-cta" data-v="todas" aria-pressed="' + (S.ui.pub.cta === "todas") + '">Todas</button>';
+  ctasPub().forEach(function (c) {
+    h += '<button class="pill" data-act="pub-cta" data-v="' + esc(c.id) + '" aria-pressed="' + (S.ui.pub.cta === c.id) + '">' + puntoCta(c.id) + esc(PUB_CORTO[c.id] || c.nombre) +
+      (c.error ? ' <span class="rojo" title="No se pudo leer">!</span>' : "") + "</button>";
   });
-  if (!orden.length) return "";
-  var mayor = orden.reduce(function (a, k) { return grupos[k].nombres.length > grupos[a].nombres.length ? k : a; }, orden[0]);
-  if (orden.length === 1) return "Horario: " + textoTurnos(grupos[mayor].c) + ".";
-  return orden.filter(function (k) { return k !== mayor; }).map(function (k) { return listaY(grupos[k].nombres) + ": " + textoTurnos(grupos[k].c) + "."; }).join(" ") +
-    " Los demás: " + textoTurnos(grupos[mayor].c) + ".";
-}
-/* Canchas libres de una hora de inicio. El API manda una lista [1, 4] (PADEL_SPEC: canchas libres con cualquier
-   duración, sin minutos), igual en los días viejos del club 1125 (v1) que en los nuevos. Por si algún día llega
-   {cancha: minutos} también se lee, sin romper. → [{c:"1", d:minutos|null}] */
-function libresDe(x) {
-  var l = x && x.libres, out = [], vistos = {};
-  function poner(k, d) { var c = Math.round(num(k)); if (c >= 1 && c <= 999 && !vistos[c]) { vistos[c] = 1; out.push({ c: String(c), d: d }); } }
-  if (Array.isArray(l)) l.forEach(function (v) { if (/^\d{1,3}$/.test(String(v))) poner(v, null); });
-  else if (l && typeof l === "object") Object.keys(l).forEach(function (k) { if (/^\d{1,3}$/.test(k)) poner(k, num(l[k]) > 0 ? Math.round(num(l[k])) : null); });
-  return out.sort(function (a, b) { return a.c - b.c; });
-}
-function arrendadasDe(x, N) {
-  var a = x && x.arrendadas != null && isFinite(Number(x.arrendadas)) ? Number(x.arrendadas) : N - libresDe(x).length;
-  return Math.max(0, Math.min(N, Math.round(a)));
-}
-/* Precio publicado de la franja: v2 trae precioHora (por hora); v1 trae precio (por 90 min) */
-function textoPrecio(x) {
-  if (num(x.precioHora) > 0) return money(x.precioHora) + " / hora";
-  if (num(x.precio) > 0) return money(x.precio) + " / 90 min";
-  return "";
-}
-/* extra = HTML ya escapado que va a la derecha de la cabecera (el campo "Consultar una fecha") */
-function cabeceraPadel(c, extra) {
-  var h = '<div class="cab"><div><h1>Casa Padel</h1>';
-  if (c) {
-    h += "<p>" + esc("Ocupación de la competencia en easycancha · " + nombreClub(c, clubesPadel().indexOf(c)) + (c.ciudad ? " (" + c.ciudad + ")" : "") + " · " + fmtN(canchasDe(c).length) + " canchas") + "</p>" +
-      '<p class="p-lect" id="p-lect">' + textoLecturaPadel(c) + "</p>";
-  } else h += "<p>Ocupación de la competencia en easycancha</p>";
-  return h + "</div>" + (extra || "") + "</div>";
-}
-function cabeceraTodos(cs, extra) {
-  var nC = 0, ciudades = {};
-  cs.forEach(function (c) { nC += canchasDe(c).length; if (c.ciudad) ciudades[String(c.ciudad)] = 1; });
-  var cds = Object.keys(ciudades);
-  return '<div class="cab"><div><h1>Casa Padel</h1><p>' + esc("Ocupación de la competencia en easycancha · " + fmtN(cs.length) + " clubes · " + fmtN(nC) + " canchas" + (cds.length === 1 ? " · " + cds[0] : "")) +
-    '</p><p class="p-lect" id="p-lect">' + textoLecturaPadel(null) + "</p></div>" + (extra || "") + "</div>";
-}
-/* Selector de club: "Todos" + un botón por club (con su color). En el celular se desliza de lado. */
-function selectorPadel() {
-  var cs = clubesPadel(); if (cs.length < 2) return "";
-  var c = clubPadel();
-  var h = '<div class="p-sel" id="p-sel" role="group" aria-label="Club"><button class="pill" data-act="padel-club" data-v="todos" aria-pressed="' + (!c) + '">Todos <span class="c">' + fmtN(cs.length) + "</span></button>";
-  cs.forEach(function (x, i) {
-    h += '<button class="pill" data-act="padel-club" data-v="' + esc(idClub(x, i)) + '" aria-pressed="' + (c === x) + '"><span class="sw bg-' + colorClubI(i) + '" aria-hidden="true"></span>' + esc(nombreCorto(x, i)) + "</button>";
-  });
-  // Cada redibujo arma el carrusel desde cero (scrollLeft 0): se vuelve a centrar el club elegido para que siga a la vista
-  S.charts.push(centrarSelectorPadel);
   return h + "</div>";
 }
-function centrarSelectorPadel() {
-  var ps = $("p-sel"), on = ps && ps.querySelector('[aria-pressed="true"]');
-  if (on && ps.scrollWidth > ps.clientWidth) ps.scrollLeft = Math.max(0, on.offsetLeft - ps.offsetLeft - ps.clientWidth / 2 + on.offsetWidth / 2);
-}
-function estadoPadelHTML(titulo, msg) {
-  return '<section class="card"><div class="vacio"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">' + esc(titulo) + "</div><div>" + esc(msg) +
-    '</div><div style="margin-top:14px"><button class="btn prim" data-act="padel-reintentar">Reintentar</button></div></div></section>';
-}
-function vPadel() {
-  var P = S.padel;
-  if (!P.data) {
-    // Mientras busca (también al tocar Reintentar) se ve el esqueleto, no el mensaje anterior
-    if (P.vacio && !P.cargando) return cabeceraPadel(null) + estadoPadelHTML("Todavía no hay datos de Casa Padel", P.vacio);
-    if (P.error && !P.cargando) return cabeceraPadel(null) + estadoPadelHTML("No se pudieron cargar los datos de Casa Padel", P.error + " Las demás pestañas siguen funcionando.");
-    return cabeceraPadel(null) + '<div class="grid kpis k3">' + [1, 2, 3].map(function () { return '<div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:80%"></div></div>'; }).join("") + "</div>";
+
+function vPublicidad() {
+  var Pu = S.pub, h = cabeceraPub();
+  if (!pubValida(Pu.data)) {
+    if (Pu.cargando) return h + '<div class="grid kpis">' + [1, 2, 3, 4].map(function () { return '<div class="kpi"><div class="skel" style="width:60%"></div><div class="skel" style="height:26px;width:80%"></div></div>'; }).join("") + "</div>";
+    if (Pu.vacio) return h + estadoPubHTML("Todavía no hay datos de publicidad", Pu.vacio, true);
+    return h + estadoPubHTML("No se pudieron cargar los datos de publicidad", Pu.error || "Sin datos.", true);
   }
-  var cs = clubesPadel(), c = clubPadel(), u = S.ui.padel;
-  var h = c || !cs.length ? cabeceraPadel(c, cs.length ? formDiaPadel() : "") : cabeceraTodos(cs, formDiaPadel());
-  h += selectorPadel();
-  if (P.error) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Mostrando la última copia guardada de Casa Padel</b><p>' + esc(P.error) +
-    '</p></div><button class="btn" data-act="padel-reintentar" style="margin-left:auto">Reintentar</button></div>';
-  if (P.data.version !== 1) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Versión de datos de Casa Padel no reconocida</b><p>Recarga la página; si sigue igual, avisa a soporte.</p></div></div>';
-  if (!cs.length) return h + '<section class="card"><div class="vacio">Todavía no hay clubes configurados para seguir.</div></section>';
-  // Fecha consultada: su panel reemplaza la vista normal hasta tocar "Cerrar" (el selector sigue eligiendo el club)
-  if (P.dia.fecha) return h + vPadelDia(c, cs);
-  if (!c) return h + vPadelTodos(cs);
-
-  var hoy = hoyPadel(), ayer = sumarDias(hoy, -1), dias = diasPadel(c), canchas = canchasDe(c), N = canchas.length || 4;
-  var porF = {}; dias.forEach(function (d) { porF[d.f] = d; });
-  var cerrados = dias.filter(function (d) { return d.f < hoy; });
-  function ventana(n, fin) { var ini = sumarDias(fin, -n); return cerrados.filter(function (d) { return d.f >= ini && d.f < fin; }); }
-  var dHoy = porF[hoy], dAyer = porF[ayer];
-  var s7 = sumaDias(ventana(7, hoy)), s30 = sumaDias(ventana(30, hoy)), s30p = sumaDias(ventana(30, sumarDias(hoy, -30)));
-  function ocTxt(d) {
-    var ab = num(d.horasAbiertas);
-    return (ab > 0 ? pct(num(d.horasArrendadas) / ab) + " de " + horas(ab) + " abiertas" : sinDatoPadel(d) ? "sin lecturas" : "club cerrado") +
-      (sinDatoPadel(d) && ab > 0 ? " · sin lectura en parte del día" : "");
-  }
-
-  h += '<div class="grid kpis k3">' +
-    kpi("Hoy (en curso)", dHoy ? horas(dHoy.horasArrendadas) : "—", dHoy ? esc(ocTxt(dHoy) + (dHoy.festivo ? " · festivo" : "")) : "sin lectura de hoy", "azul") +
-    kpi("Ayer", dAyer ? horas(dAyer.horasArrendadas) : "—", dAyer ? esc(ocTxt(dAyer)) : "sin datos", "") +
-    kpi("Últimos 7 días", s7.n ? horas(s7.h) : "—", s7.n ? esc("prom. " + horas(s7.h / s7.n) + "/día · hasta ayer") : "sin días cerrados", "") +
-    kpi("Últimos 30 días", s30.n ? horas(s30.h) : "—", s30.n ? esc("prom. " + horas(s30.h / s30.n) + "/día" + (s30.n < 30 ? " · " + s30.n + " días con datos" : "")) : "sin días cerrados", "") +
-    kpi("Ocupación 30 días", s30.oc != null ? pct(s30.oc) : "—", s30p.n >= 7 && s30p.oc != null ? esc("vs " + pct(s30p.oc) + " los 30 días anteriores") : "de las horas abiertas", "naranja") +
-    kpi("Ingreso estimado 30 días", s30.n ? moneyA(s30.ing) : "—", s30.n ? esc("≈ " + moneyA(s30.ing / s30.n) + "/día · precio publicado") : "", "verde") + "</div>";
-
-  // Gráfico diario apilado por cancha (los colores y el apilado siguen las canchas del club: 3, 4 o 5)
-  var rango = { "7": 7, "30": 30, "90": 90 }[u.rango] || 30;
-  var enRango = dias.filter(function (d) { return d.f <= hoy && d.f > sumarDias(hoy, -rango); });
-  h += '<section class="card"><div class="card-cab"><div><h2>Horas arrendadas por día</h2><div class="sub">' +
-    esc("Apiladas por cancha · " + (enRango.length < rango ? enRango.length + " días con datos" : "últimos " + rango + " días") + " · barra clara = hoy (en curso) · línea = promedio") + "</div></div>" + segRango(rango) +
-    '</div><div class="graf" id="g-padel" style="min-height:230px"></div><div class="leyenda">' +
-    canchas.map(function (k, i) { return '<span><i class="bg-' + COLOR_CANCHA[i % COLOR_CANCHA.length] + '"></i>Cancha ' + esc(k) + "</span>"; }).join("") + "</div></section>";
-
-  h += zTurnos(c, dias, hoy, canchas, N);
-  h += '<div class="grid g2">' + zHeatmap(c) + zEventos(c) + "</div>";
-  // Turnos fijos de 90 min: con `turnos` reemplazan la regla de "el turno más largo desde esa hora"; con solo `noche`, se suman a ella
-  var tFijos = turnosClub(c), nFijos = nocheClub(c);
-  var liLibre = "<li>Una cancha cuenta como libre mientras dure el turno más largo que se puede reservar desde esa hora (30, 60 o 90 min según el club). Los huecos más cortos que la reserva mínima del club no se ven en easycancha, así que cuentan como ocupados.</li>";
-  h += '<section class="card metodo"><h2>Cómo se calcula</h2><ul>' +
-    "<li>Es una <b>estimación</b> hecha con la disponibilidad pública de easycancha, leída varias veces al día (hoy en cada lectura y los próximos días por turnos).</li>" +
-    "<li>Una cancha que deja de aparecer libre cuenta como arrendada: si a una hora salen 3 canchas libres en un club de 4, hay 1 arrendada. Las reservas hechas por fuera de la app (en el club, por WhatsApp) también salen como ocupadas porque bloquean la cancha.</li>" +
-    (tFijos ? "<li>Solo cuentan los <b>turnos fijos de 90 min</b> del club: " + esc(listaY(tFijos)) + ". Las horas de inicio intermedias no cuentan, y una cancha libre por menos de 90 min cuenta como arrendada en ese turno.</li>"
-      : liLibre + (nFijos ? "<li>En la noche solo cuentan los <b>turnos fijos de 90 min</b> del club: " + esc(listaY(nFijos.turnos)) + ". Las horas de inicio intermedias de la noche no cuentan.</li>" : "")) +
-    "<li>Días pasados: estado final con la última lectura antes de que empiece cada media hora. Hoy y los próximos días: la última lectura (lo reservado hasta ahora).</li>" +
-    "<li>Ingreso estimado = horas arrendadas × precio por hora publicado en esa franja. No descuenta promociones ni membresías.</li></ul></section>";
-
-  S.charts.push(function () {
-    var fs = enRango.map(function (d) { return d.f; });
-    var series = canchas.map(function (k, i) { return { nombre: "Cancha " + k, color: COLOR_CANCHA[i % COLOR_CANCHA.length], v: enRango.map(function (d) { return num(d.porCancha && d.porCancha[k]); }) }; });
-    var cer = enRango.filter(function (d) { return d.f < hoy; }), prom = cer.length > 1 ? sumaDias(cer).h / cer.length : 0;
-    graficoBarras($("g-padel"), {
-      labels: fs, h: 230, modo: "apilado", tipo: "n", series: series, promedio: prom, aria: "Horas arrendadas por día y cancha",
-      parcial: function (i) { return fs[i] === hoy; },
-      xLab: xLabDias(fs),
-      tip: function (i) {
-        var d = enRango[i];
-        return "<b>" + esc(diaC(d.f) + (d.f === hoy ? " (en curso)" : "") + (d.festivo ? " · festivo" : "")) + "</b>" +
-          series.map(function (s) { return s.v[i] ? filaTip(s.color, s.nombre, horas(s.v[i])) : ""; }).join("") +
-          filaTip(null, "Total", horas(d.horasArrendadas)) + filaTip(null, "Ocupación", num(d.horasAbiertas) > 0 ? pct(num(d.horasArrendadas) / num(d.horasAbiertas)) : "—") +
-          filaTip(null, "Ingreso est.", moneyA(d.ingresoEst)) + (prom ? filaTip(null, "Promedio", horas(prom)) : "") +
-          (sinDatoPadel(d) ? filaTip(null, "Sin lectura", horas(d.horasSinDato) + " de cancha") : "");
-      }
-    });
+  h += selectorPub();
+  ctasPub().forEach(function (c) {
+    if (c.error) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>No se pudo leer ' + esc(c.nombre) + "</b><p>" + esc(c.error) + " Lo demás se muestra con la lectura de hoy.</p></div></div>";
   });
+  var sel = ctaSel();
+  if (S.ui.pub.cta !== "todas" && !sel) h += estadoPubHTML("Sin datos de esta cuenta", "La lectura de hoy no la pudo traer.", false);
+  else h += sel ? vPubCuenta(sel) : vPubTodas();
   return h;
 }
-function segRango(rango) {
-  return '<div class="seg" role="group" aria-label="Días del gráfico">' + [["7", "7 d"], ["30", "30 d"], ["90", "90 d"]].map(function (p) {
-    return '<button data-act="padel-rango" data-v="' + p[0] + '" aria-pressed="' + (String(rango) === p[0]) + '">' + p[1] + "</button>";
-  }).join("") + "</div>";
-}
-/* Etiquetas del eje X para una lista de fechas */
-function xLabDias(fs) {
-  return function (i, cada) {
-    var f = fs[i], dd = +f.slice(8), mes = MES_C[+f.slice(5, 7) - 1];
-    if (fs.length <= 10) return cada === 1 ? DOW_C[dowDe(f)] + " " + dd : String(dd);
-    if (fs.length <= 31) {
-      if (i % cada !== 0) return null;
-      // El mes se escribe en la primera etiqueta y cada vez que cambia (así "3" no se confunde de mes)
-      var antes = i >= cada ? fs[i - cada].slice(0, 7) : null;
-      return dd === 1 ? mes : antes === f.slice(0, 7) ? String(dd) : dd + " " + mes;
-    }
-    return dd === 1 ? mes : (dd === 15 && cada < 12 ? "15" : null);
-  };
-}
 
-/* ─────────── Vista "Todos": ranking y comparación de clubes ─────────── */
-function resumenClubPadel(c, i, hoy) {
-  var dias = diasPadel(c), cer = dias.filter(function (d) { return d.f < hoy; }), ayer = sumarDias(hoy, -1), dA = null;
-  dias.forEach(function (d) { if (d.f === ayer) dA = d; });
-  function ventana(n) { var ini = sumarDias(hoy, -n); return cer.filter(function (d) { return d.f >= ini; }); }
-  var s7 = sumaDias(ventana(7)), s30 = sumaDias(ventana(30)), l = lecturaPadel(c);
-  return {
-    c: c, i: i, id: idClub(c, i), nombre: nombreClub(c, i), corto: nombreCorto(c, i), color: colorClubI(i), N: canchasDe(c).length, dias: dias,
-    ayer: dA ? num(dA.horasArrendadas) : null, ayerAb: dA ? num(dA.horasAbiertas) : 0,
-    h7: s7.n ? s7.h : null, ab7: s7.ab, n7: s7.n, sd7: s7.sd, h30: s30.n ? s30.h : null, ab30: s30.ab, n30: s30.n, sd30: s30.sd,
-    oc7: s7.n ? s7.oc : null, oc30: s30.n ? s30.oc : null, ing30: s30.n ? s30.ing : null,
-    lt: l.t || null, viejo: l.viejo
-  };
-}
-function vPadelTodos(cs) {
-  var hoy = hoyPadel(), u = S.ui.padel;
-  var rs = cs.map(function (c, i) { return resumenClubPadel(c, i, hoy); });
-  // Totales de los clubes con datos (la ocupación se pondera por horas abiertas)
-  // El "/día" del ingreso es la suma del promedio diario de cada club (cada uno con sus propios días con datos)
-  var t = { ayer: 0, ayerAb: 0, nAyer: 0, h7: 0, ab7: 0, n7: 0, h30: 0, ab30: 0, ing30: 0, n30: 0, ingDia: 0, cob: {} };
-  rs.forEach(function (r) {
-    if (r.ayer != null) { t.ayer += r.ayer; t.ayerAb += r.ayerAb; t.nAyer++; }
-    if (r.h7 != null) { t.h7 += r.h7; t.ab7 += r.ab7; t.n7++; }
-    if (r.h30 != null) { t.h30 += r.h30; t.ab30 += r.ab30; t.ing30 += r.ing30; t.n30++; t.ingDia += r.ing30 / r.n30; t.cob[r.n30] = 1; }
+/* ─────────── Todas las cuentas ─────────── */
+function vPubTodas() {
+  var d = PD(), cs = ctasOk(), t = d.tienda && !d.tienda.error ? d.tienda : null;
+  var gasto = 0, gPrev = 0, gCo = 0, gUs = 0, gCoP = 0;
+  cs.forEach(function (c) {
+    var m = totC(c); gasto += enCop(m.gasto, c.moneda); gPrev += enCop((c.totPrev7 || {}).gasto, c.moneda);
+    if (c.moneda === "USD") gUs += num(m.gasto); else { gCo += num(m.gasto); gCoP += num((c.totPrev7 || {}).gasto); }
   });
-  function deClubes(n) { return n === cs.length ? (n === 1 ? "1 club" : "los " + n + " clubes") : n + " de " + cs.length + " clubes con datos"; }
-  var h = '<div class="grid kpis">' +
-    kpi("Ayer", t.nAyer ? horas(t.ayer) : "—", t.nAyer ? esc((t.ayerAb > 0 ? pct(t.ayer / t.ayerAb) + " ocupado · " : "") + deClubes(t.nAyer)) : "sin datos", "azul") +
-    kpi("Últimos 7 días", t.n7 ? horas(t.h7) : "—", t.n7 ? esc((t.ab7 > 0 ? pct(t.h7 / t.ab7) + " ocupado · " : "") + deClubes(t.n7)) : "sin días cerrados", "") +
-    kpi("Ocupación 30 días", t.n30 && t.ab30 > 0 ? pct(t.h30 / t.ab30) : "—", t.n30 ? esc(horas(t.h30) + " de " + horas(t.ab30) + " abiertas") : "sin días cerrados", "naranja") +
-    kpi("Ingreso estimado 30 días", t.n30 ? moneyA(t.ing30) : "—", t.n30 ? esc("≈ " + moneyA(t.ingDia) + "/día · " + deClubes(t.n30) + (Object.keys(t.cob).length > 1 ? " (con distintos días de datos)" : "")) : "", "verde") + "</div>";
-  h += zRanking(rs);
-  h += '<div class="grid g2">' + zComparada(rs) + zOcupDiaria(rs, hoy, u) + "</div>";
-  h += zNocheTodos(rs, hoy, u);
-  h += zCanchasDia(rs, hoy, u);
-  var tTodos = textoTurnosTodos(cs), diaFijo = cs.every(function (c) { return turnosClub(c); });
-  h += '<section class="card metodo"><h2>Cómo se compara</h2><ul>' +
-    "<li>Los clubes tienen distinto número de canchas (3, 4 o 5) y distinto horario, así que la cifra para compararlos es la <b>ocupación</b>: horas arrendadas ÷ horas abiertas de todas sus canchas.</li>" +
-    "<li>Las horas y el ingreso son <b>estimaciones</b> con la disponibilidad pública de easycancha: una cancha que no aparece libre cuenta como arrendada (también si la reservaron en el club o por WhatsApp).</li>" +
-    (tTodos ? "<li>" + (diaFijo ? "Solo" : "En la noche solo") + " cuentan los <b>turnos fijos de 90 min</b> de cada club; las horas de inicio intermedias no cuentan. " + esc(tTodos) + "</li>" : "") +
-    "<li>7 y 30 días = días ya cerrados hasta ayer. Ingreso estimado = horas arrendadas × precio por hora publicado en cada franja; no descuenta promociones ni membresías.</li>" +
-    "<li>Toca un club para ver su detalle: horas por cancha, sus turnos día por día, mapa de calor y reservas detectadas.</li></ul></section>";
-  return h;
-}
-var COLS_RANK = [
-  ["nombre", "Club", 0, ""], ["N", "Canchas", 1, "m-no"], ["ayer", "Horas ayer", 1, "m-no"], ["h7", "Horas 7 d", 1, "m-no"], ["h30", "Horas 30 d", 1, "m-no"],
-  ["oc7", "Ocup. 7 d", 1, "m-no"], ["oc30", "Ocup. 30 d", 1, ""], ["ing30", "Ingreso 30 d", 1, ""], ["lt", "Última lectura", 1, "m-no"]
-];
-function ordenRanking(rs) {
-  var o = S.ui.padel.orden;
-  return rs.slice().sort(function (a, b) {
-    if (o.k === "nombre") return o.dir * a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" });
-    var x = a[o.k], y = b[o.k];
-    if (x == null && y == null) return a.i - b.i;
-    if (x == null) return 1; // sin dato siempre al final
-    if (y == null) return -1;
-    return o.dir * (x - y) || a.i - b.i;
-  });
-}
-function zRanking(rs) {
-  var o = S.ui.padel.orden, filas = ordenRanking(rs);
-  var h = '<section class="card"><div class="card-cab"><div><h2>Ranking de clubes</h2><div class="sub">Ordenado por ' +
-    esc((COLS_RANK.filter(function (c) { return c[0] === o.k; })[0] || COLS_RANK[6])[1].toLowerCase()) + " · días ya cerrados hasta ayer · toca un club para ver su detalle</div></div></div>";
-  h += '<div class="tw"><table class="rk"><thead><tr><th scope="col"><span class="sr">Puesto</span></th>';
-  COLS_RANK.forEach(function (c) {
-    var on = o.k === c[0], cls = [c[2] ? "d" : "", c[3]].join(" ").trim();
-    h += "<th scope=\"col\"" + (cls ? ' class="' + cls + '"' : "") + (on ? ' aria-sort="' + (o.dir > 0 ? "ascending" : "descending") + '"' : "") +
-      '><button data-act="padel-orden" data-k="' + c[0] + '">' + esc(c[1]) + (on ? '<span aria-hidden="true">' + (o.dir > 0 ? "↑" : "↓") + "</span>" : "") + "</button></th>";
-  });
-  h += "</tr></thead><tbody>";
-  // Días con datos cuando no completan la ventana y «parcial» si alguno tuvo horas sin lectura: así no se comparan
-  // horas o ingreso de clubes con distinta cobertura sin avisarlo
-  function cob(n, ventana, sd) { var p = []; if (n < ventana) p.push(fmtN(n) + " d"); if (sd > 0) p.push("parcial"); return p.join(" · "); }
-  function celdaH(v, n, ventana, sd) { var x = cob(n, ventana, sd); return v != null ? esc(horas(v)) + (x ? '<small class="rk-c">' + esc(x) + "</small>" : "") : "—"; }
-  filas.forEach(function (r, k) {
-    var lect = r.lt ? hace(r.lt) : "sin lecturas", c30 = cob(r.n30, 30, r.sd30);
-    h += '<tr><td class="idx">' + (k + 1) + "</td>" +
-      '<td><button class="rk-n" data-act="padel-club" data-v="' + esc(r.id) + '"><span class="sw bg-' + r.color + '" aria-hidden="true"></span><span><span class="m-no">' + esc(r.nombre) + '</span><span class="solo-m">' + esc(r.corto) + "</span></span></button>" +
-      // En el celular las columnas secundarias se esconden: canchas, horas de 30 días y lectura van debajo del nombre
-      '<div class="n2 solo-m">' + esc(fmtN(r.N) + " canchas · " + (r.h30 != null ? horas(r.h30) + " en 30 d" + (c30 ? " (" + c30 + ")" : "") + " · " : "")) + '<span data-lect="' + esc(r.id) + '"' + (r.viejo ? ' class="naranja"' : "") + ">" + esc(lect) + "</span></div></td>" +
-      '<td class="d m-no">' + fmtN(r.N) + "</td>" +
-      '<td class="d m-no">' + (r.ayer != null ? esc(horas(r.ayer)) : "—") + "</td>" +
-      '<td class="d m-no">' + celdaH(r.h7, r.n7, 7, r.sd7) + "</td>" +
-      '<td class="d m-no">' + celdaH(r.h30, r.n30, 30, r.sd30) + "</td>" +
-      '<td class="d m-no">' + (r.oc7 != null ? esc(pct(r.oc7)) : "—") + "</td>" +
-      '<td class="d">' + (r.oc30 != null ? "<b>" + esc(pct(r.oc30)) + '</b><div class="minibar" aria-hidden="true"><span class="bg-' + r.color + '" style="width:' + (Math.max(0, Math.min(1, r.oc30)) * 100).toFixed(1) + '%"></span></div>' : "—") + "</td>" +
-      '<td class="d">' + (r.ing30 != null ? esc(moneyA(r.ing30)) + (c30 ? '<small class="rk-c">' + esc(c30) + "</small>" : "") : "—") + "</td>" +
-      '<td class="d m-no"><span data-lect="' + esc(r.id) + '"' + (r.viejo ? ' class="naranja"' : "") + ">" + esc(lect) + "</span></td></tr>";
-  });
-  h += "</tbody></table></div>";
-  return h + '<p class="pie">Ocupación = horas arrendadas ÷ horas abiertas (todas las canchas). En naranja, una lectura de easycancha con más de 2½ h de atraso. «—» = todavía sin días cerrados. «29 d» = días con datos cuando son menos que la ventana (7 o 30); «parcial» = hubo horas sin lectura (no cuentan como abiertas): esas horas e ingreso no son comparables uno a uno.</p></section>';
-}
-/* Barras horizontales: ocupación 30 días (barra) y 7 días (marca), escala 0–100 % */
-function zComparada(rs) {
-  var filas = rs.slice().sort(function (a, b) { return (b.oc30 == null ? -1 : b.oc30) - (a.oc30 == null ? -1 : a.oc30) || a.i - b.i; });
-  var h = '<section class="card"><div class="card-cab"><div><h2>Ocupación comparada</h2><div class="sub">Barra = últimos 30 días · marca = últimos 7 días · escala de 0 a 100 %</div></div></div><ul class="cmp">';
-  filas.forEach(function (r) {
-    var w30 = r.oc30 != null ? Math.max(0, Math.min(1, r.oc30)) * 100 : 0, w7 = r.oc7 != null ? Math.max(0, Math.min(1, r.oc7)) * 100 : null;
-    var et = r.nombre + ": " + (r.oc30 != null ? "30 días " + pct(r.oc30) : "sin datos de 30 días") + (r.oc7 != null ? ", 7 días " + pct(r.oc7) : "");
-    h += '<li><button class="cmp-n" data-act="padel-club" data-v="' + esc(r.id) + '"><span class="sw bg-' + r.color + '" aria-hidden="true"></span><span>' + esc(r.corto) + "</span></button>" +
-      '<span class="cmp-v">' + (r.oc30 != null ? esc(pct(r.oc30)) : "—") + (r.oc7 != null ? "<small>" + esc("7 d " + pct(r.oc7)) + "</small>" : "") + "</span>" +
-      '<div class="cmp-b" role="img" aria-label="' + esc(et) + '">' + (r.oc30 != null ? '<span class="bg-' + r.color + '" style="width:' + w30.toFixed(1) + '%"></span>' : "") +
-      (w7 != null ? '<i style="left:' + w7.toFixed(1) + '%"></i>' : "") + "</div></li>";
-  });
-  return h + '</ul><div class="cmp-eje" aria-hidden="true"><span>0 %</span><span>50 %</span><span>100 %</span></div></section>';
-}
-/* Ocupación diaria de cada club (líneas), días ya cerrados */
-function zOcupDiaria(rs, hoy, u) {
-  var rango = { "7": 7, "30": 30, "90": 90 }[u.rango] || 30, ini = sumarDias(hoy, -rango), fs = [];
-  for (var f = ini; f < hoy; f = sumarDias(f, 1)) fs.push(f);
-  var series = rs.map(function (r) {
-    var m = {}; r.dias.forEach(function (d) { if (d.f >= ini && d.f < hoy && num(d.horasAbiertas) > 0) m[d.f] = num(d.horasArrendadas) / num(d.horasAbiertas); });
-    return { nombre: r.corto, color: r.color, grosor: 2, v: fs.map(function (x) { return propia(m, x) ? Math.max(0, Math.min(1, m[x])) : null; }) };
-  });
-  var h = '<section class="card"><div class="card-cab"><div><h2>Ocupación por día</h2><div class="sub">' + esc("% de las horas abiertas de cada club · últimos " + rango + " días cerrados") + "</div></div>" + segRango(rango) +
-    '</div><div class="graf" id="g-padel-cmp" style="min-height:220px"></div><div class="leyenda">' +
-    rs.map(function (r) { return '<span><i class="bg-' + r.color + '"></i>' + esc(r.corto) + "</span>"; }).join("") + "</div></section>";
-  S.charts.push(function () {
-    graficoLineas($("g-padel-cmp"), {
-      labels: fs, h: 220, tipo: "%", series: series, idG: "pc", aria: "Ocupación diaria por club", xLab: xLabDias(fs),
-      tip: function (i) {
-        var orden = series.map(function (s, j) { return j; }).filter(function (j) { return series[j].v[i] != null; })
-          .sort(function (a, b) { return series[b].v[i] - series[a].v[i]; });
-        return "<b>" + esc(diaC(fs[i])) + "</b>" + (orden.length ? orden.map(function (j) { return filaTip(series[j].color, series[j].nombre, pct(series[j].v[i])); }).join("") : filaTip(null, "Sin datos", "—"));
-      }
-    });
-  });
-  return h;
-}
-/* Turnos de hoy (o mañana) en todos los clubes: arrendadas / canchas de cada club en cada turno.
-   "Todo el día" = los turnos fijos del día de cada club (La Jaula solo de noche); "Noche" = sus turnos de la noche.
-   Un turno fijo sin dato sale "cerrado" (fuera del horario de ese día) o "—" (sin lectura); sin turnos fijos, las horas de los datos. */
-function zNocheTodos(rs, hoy, u) {
-  var f = u.nocheF === "1" ? sumarDias(hoy, 1) : hoy, todas = !!u.todas;
-  var fijos = rs.length > 0 && rs.every(function (r) { return nocheClub(r.c); });
-  var fest = rs.some(function (r) { return r.dias.some(function (x) { return x.f === f && x.festivo === true; }); });
-  var seg = '<div class="seg" role="group" aria-label="Fecha">' + [["0", "Hoy"], ["1", "Mañana"]].map(function (p) {
-    return '<button data-act="padel-noche" data-v="' + p[0] + '" aria-pressed="' + ((u.nocheF === "1" ? "1" : "0") === p[0]) + '">' + p[1] + "</button>";
-  }).join("") + "</div>";
-  var que = fijos ? "turno fijo de 90 min " + (todas ? "de cada club" : "de la noche de cada club")
-    : "hora de inicio " + (todas ? "que publica cada club" : "desde las 17:00 que publica cada club");
-  var h = '<section class="card"><div class="card-cab"><div><h2>' + (todas ? "Turnos del día" : "Turnos de la noche") + '</h2><div class="sub">' +
-    esc(diaC(f) + (f === hoy ? " (en curso)" : " (reservado hasta ahora)") + (fest ? " · festivo" : "") + " · canchas arrendadas en cada " + que) + "</div></div>" +
-    '<div class="cab-ctl">' + seg + segHoras(u) + "</div></div>";
-  h += '<div class="nt">';
-  rs.forEach(function (r) {
-    var d = null; r.dias.forEach(function (x) { if (x.f === f) d = x; });
-    var canchas = canchasDe(r.c), N = canchas.length || 1, noche = nocheClub(r.c);
-    var hs = !d ? [] : todas ? horasDiaClub(r.c, [d]) : noche ? noche.turnos.slice() : horasNoche([d]), ph = d && d.porHora && typeof d.porHora === "object" ? d.porHora : {};
-    // Total "x de y" solo si las horas de inicio no se traslapan (si no, una reserva se contaría 2–4 veces);
-    // los turnos fijos nunca se traslapan
-    var ks = hs.filter(function (k) { return ph[k] && typeof ph[k] === "object"; }), sa = 0;
-    ks.forEach(function (k) { sa += arrendadasDe(ph[k], N); });
-    var tot = ks.length && sinTraslape(ks) ? " · " + fmtN(sa) + " de " + fmtN(ks.length * N) : "";
-    h += '<div class="nt-f"><div class="nt-cab"><button class="cmp-n" data-act="padel-club" data-v="' + esc(r.id) + '"><span class="sw bg-' + r.color + '" aria-hidden="true"></span><span>' + esc(r.corto) + "</span></button>" +
-      '<span class="nt-tot">' + esc(fmtN(r.N) + " canchas" + tot) + "</span></div>";
-    if (!d) h += '<div class="nt-v">Sin lecturas para esta fecha.</div>';
-    else if (!hs.length) h += '<div class="nt-v">' + (todas ? "Sin turnos ese día (club cerrado)." : "Sin turnos desde las 17:00 (club cerrado en la noche).") + "</div>";
-    else {
-      h += '<div class="nt-cs">';
-      hs.forEach(function (k) { h += '<span class="nt-c"><span class="nt-h">' + esc(k) + "</span>" + botonTurno(ph[k], canchas, N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(d, k)) + "</span>"; });
-      h += "</div>";
-    }
-    h += "</div>";
+  var tv = t ? (per30() ? t.tot30 : t.tot7) || {} : null, tp = t ? t.prev7 || {} : null;
+  var co = cs.filter(function (c) { return c.destino === "web"; }), us = cs.filter(function (c) { return c.destino === "amazon"; });
+  var comp = 0, val = 0, clUs = 0, gUsCl = 0;
+  co.forEach(function (c) { var m = totC(c); comp += num(m.compras); val += num(m.valor); });
+  us.forEach(function (c) { var m = totC(c); clUs += num(m.clics); if (num(m.clics)) gUsCl += num(m.gasto); });
+
+  var h = '<section class="card"><div class="heroe"><div>' +
+    '<div class="l">Gasto en publicidad · ' + esc(textoPer()) + "</div>" +
+    '<div class="big">' + esc(moneyA(gasto)) + "</div>" +
+    '<div class="chips">' + (per30() || cs.some(prevMala) ? '<span class="chip">' + esc(cs.length + " cuentas") + "</span>" : chipVar(variacion(gasto, gPrev), "vs los 7 días anteriores")) + "</div>" +
+    '<div class="nota">Colombia ' + esc(money(gCo)) + " · EE. UU. " + esc(usd(gUs)) + " (a " + esc(NF0.format(trmPub())) + " pesos por dólar)" +
+    (tv ? "<br>Tienda Girlz Only: <b>" + esc(moneyA(tv.ventas)) + "</b> en " + esc(fmtN(tv.pedidos)) + " pedidos" : "") + "</div>" +
+    '</div><div><div class="graf" id="g-pub-gasto" style="min-height:190px"></div><div class="leyenda">' +
+    cs.map(function (c) { return '<span><i class="bg-' + PUB_COLOR[c.id] + '"></i>' + esc(PUB_CORTO[c.id] || c.nombre) + "</span>"; }).join("") +
+    "<span>gasto diario en pesos</span></div></div></div></section>";
+
+  var mer = gCo ? div0(tv && tv.ventas, gCo) : 0, merP = gCoP && tp && !co.some(prevMala) ? div0(tp.ventas, gCoP) : 0;
+  h += '<div class="grid kpis">' +
+    kpi("Vendido en la tienda", tv ? moneyA(tv.ventas) : "—", tv ? esc(fmtN(tv.pedidos) + " pedidos en Shopify") + (per30() ? "" : " · " + chipMini(variacion(tv.ventas, tp.ventas))) : esc(d.tienda && d.tienda.error ? "No se pudo leer Shopify" : "Sin datos"), "verde") +
+    kpi("Retorno real en Colombia", mer ? veces(mer) : "—", esc("Ventas de la tienda ÷ pauta de Colombia") + (merP && !per30() ? " · antes " + esc(veces(merP)) : ""), mer >= 4 ? "verde" : mer && mer < 2.5 ? "rojo" : "") +
+    kpi("Compras que reporta la pauta", fmtN(comp), esc(moneyA(val) + " · retorno " + veces(div0(val, co.reduce(function (s, c) { return s + num(totC(c).gasto); }, 0))) + " (Meta + TikTok CO)"), "azul") +
+    kpi("Clics a Amazon (EE. UU.)", fmtN(clUs), esc(clUs ? usd(div0(gUsCl, clUs)) + " por clic · Meta + TikTok" : "Sin clics"), "") +
+    "</div>";
+
+  h += anaHTML(null);
+
+  h += '<div class="grid g2 ctas">';
+  cs.forEach(function (c) { h += tarjetaCta(c); });
+  ctasPub().filter(function (c) { return c.error; }).forEach(function (c) {
+    h += '<section class="card cta"><div class="cta-cab">' + puntoCta(c.id) + "<b>" + esc(c.nombre) + '</b></div><div class="vacio">No se pudo leer hoy.</div></section>';
   });
   h += "</div>";
-  return h + '<p class="pie">' + (fijos
-    ? "Cada número es arrendadas / canchas del club en ese turno (la hora va encima). Toca uno para ver qué canchas estaban libres y el precio publicado. " +
-      (todas ? "Solo cuentan los turnos fijos de 90 min de cada club" : "En la noche solo cuentan los turnos fijos de 90 min de cada club") +
-      "; las horas de inicio intermedias no cuentan. Como no se traslapan, «x de y» suma las canchas arrendadas de las posibles. " +
-      "Un turno que falta entre turnos publicados cuenta lleno; «cerrado» = el club no publicó ese turno ese día, antes de su primer turno o después del último (p. ej. en festivos cierran más temprano); «—» = sin lectura."
-    : "Cada número es arrendadas / canchas del club en esa hora de inicio. Toca uno para ver qué canchas estaban libres y el precio publicado. El total «x de y» solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas.") + "</p></section>";
-}
-/* Canchas arrendadas en un día: suma de las arrendadas en los turnos fijos del club (lo que muestra "Turnos del día").
-   Sin porHora (días de hace más de 60) o sin turnos fijos: horas ÷ 1,5 (cada turno es de 90 min; con turnos fijos da igual). */
-function contarDia(c, N, d) {
-  if (!d) return null;
-  var t = turnosClub(c), ph = d.porHora && typeof d.porHora === "object" ? d.porHora : null;
-  if (t && ph) {
-    var ks = t.filter(function (k) { return ph[k] && typeof ph[k] === "object"; }), a = 0;
-    ks.forEach(function (k) { a += arrendadasDe(ph[k], N); });
-    return { a: a, pos: ks.length * N };
+
+  if (t) {
+    h += cardGraf("g-pub-tienda", "Tienda vs pauta en Colombia", "Ventas diarias en Shopify (Girlz Only) y gasto diario de Meta + TikTok Colombia · 30 días",
+      (co.some(function (c) { return notaInicio(c); }) ? '<p class="sub" style="width:100%;margin-top:-6px">' + esc(co.filter(function (c) { return notaInicio(c); }).map(function (c) { return PUB_CORTO[c.id] + ": " + notaInicio(c); }).join(" ")) + "</p>" : "") +
+      '<div class="leyenda" style="margin:0"><span><i class="bg-green"></i>Ventas tienda</span><span><i class="bg-blue"></i>Pauta Colombia</span><span><i class="bg-purple"></i>Con UTM de la pauta</span></div>', 220);
   }
-  return { a: Math.round(num(d.horasArrendadas) / 1.5), pos: Math.round(num(d.horasAbiertas) / 1.5) };
-}
-/* Canchas arrendadas por día (estimado): una columna por club y el total, lo más reciente arriba; abajo el promedio
-   por día de los días cerrados (últimos 30) y el estimado al mes (promedio × 30). */
-function zCanchasDia(rs, hoy, u) {
-  var m = {};
-  rs.forEach(function (r) { r.dias.forEach(function (d) { if (esFecha(d.f)) m[d.f] = 1; }); });
-  var fs = Object.keys(m).sort().reverse(), vis = fs.slice(0, u.cdN || 14), ini30 = sumarDias(hoy, -30);
-  // Promedio de cada club: días cerrados con lecturas en los últimos 30 (un día con el club cerrado cuenta 0)
-  var prom = rs.map(function (r) {
-    var s = 0, n = 0;
-    r.dias.forEach(function (d) { if (d.f < hoy && d.f >= ini30) { var x = contarDia(r.c, r.N, d); if (x) { s += x.a; n++; } } });
-    return n ? { v: s / n, n: n } : null;
-  });
-  var nP = 0, totP = 0;
-  prom.forEach(function (p) { if (p) { nP++; totP += p.v; } });
-  var h = '<section class="card"><div class="card-cab"><div><h2>Canchas arrendadas por día</h2><div class="sub">' +
-    esc("Turnos de 90 min arrendados en cada club (1 cancha en 1 turno = 1) · lo más reciente arriba · hoy y los próximos días = lo reservado hasta ahora") + "</div></div></div>";
-  h += '<div class="resumen-f">' + esc(nP
-    ? "Estimado: " + NF1.format(totP) + " canchas por día entre " + (nP === rs.length ? "los " + nP + " clubes" : nP + " de " + rs.length + " clubes") + " (≈ " + fmtN(totP * 30) + " al mes) · promedio de los días cerrados, últimos 30"
-    : "Todavía no hay días cerrados: el promedio por día y el estimado al mes salen desde mañana.") + "</div>";
-  if (!vis.length) return h + '<div class="vacio">Todavía no hay días con lecturas.</div></section>';
-  h += '<div class="tw"><table class="turnos cd"><thead><tr><th scope="col">Día</th>';
-  rs.forEach(function (r) { h += '<th scope="col"><span class="cd-club"><span class="sw bg-' + r.color + '" aria-hidden="true"></span><span>' + esc(r.corto) + "</span></span></th>"; });
-  h += '<th scope="col" class="tot">Total</th></tr></thead><tbody>';
-  vis.forEach(function (f) {
-    var tags = f === hoy ? '<span class="tag">hoy</span> ' : f > hoy ? '<span class="tag">próximo</span> ' : "";
-    var fest = false, tot = 0, totPos = 0, nC = 0;
-    var celdas = rs.map(function (r) {
-      var d = null; r.dias.forEach(function (x) { if (x.f === f) d = x; });
-      if (d && d.festivo === true) fest = true;
-      var x = contarDia(r.c, r.N, d), et = r.nombre + " · " + diaC(f);
-      if (!x) return "<td>" + botonTip("ocup nada", "", et, [["Sin dato", "sin lecturas ese día"]], '<span aria-hidden="true">—</span>') + "</td>";
-      if (!x.pos) return "<td>" + botonTip("ocup nada cerr", "", et, [["Cerrado", "el club no publicó turnos ese día"]], "cerrado") + "</td>";
-      tot += x.a; totPos += x.pos; nC++;
-      return "<td>" + botonTip("cd-n", "", et, [["Arrendadas", fmtN(x.a) + " de " + fmtN(x.pos) + " posibles"], ["Ocupación", pct(x.a / x.pos)], ["Horas", horas(x.a * 1.5)]], esc(fmtN(x.a))) + "</td>";
+  h += galeriaHTML(null);
+  h += campanasHTML(null);
+
+  S.charts.push(function () {
+    var el = $("g-pub-gasto"); if (!el) return;
+    var dias = cs.length ? diario30(cs[0]).map(function (x) { return x.d; }) : [];
+    var series = cs.map(function (c) {
+      var mp = {}; diario30(c).forEach(function (x) { mp[x.d] = x; });
+      return { nombre: PUB_CORTO[c.id], color: PUB_COLOR[c.id], v: dias.map(function (f) { return enCop((mp[f] || {}).gasto, c.moneda); }), c: c, mp: mp };
     });
-    if (fest) tags += '<span class="tag">festivo</span> ';
-    h += "<tr" + (f === hoy ? ' class="hoy"' : "") + '><td><div class="p-dia">' + esc(diaC(f)) + "</div>" + (tags ? '<div class="n2">' + tags + "</div>" : "") + "</td>" + celdas.join("") +
-      '<td class="tot">' + (nC ? botonTip("cd-n cd-t", "", "Total · " + diaC(f), [["Arrendadas", fmtN(tot) + " de " + fmtN(totPos) + " posibles"], ["Ocupación", pct(tot / totPos)], ["Clubes con datos", nC + " de " + rs.length]], esc(fmtN(tot))) : '<span style="color:var(--text3)">—</span>') + "</td></tr>";
+    graficoBarras(el, {
+      labels: dias, series: series, modo: "apilado", h: 190, tipo: "$", aria: "Gasto diario por cuenta",
+      xLab: function (i, cada) { return i % cada === 0 ? pubFecha(dias[i]) : null; },
+      tip: function (i) {
+        var tot = 0, fil = "";
+        series.forEach(function (s) { var x = s.mp[dias[i]] || {}; tot += s.v[i]; fil += filaTip(s.color, s.nombre, plata(x.gasto, s.c.moneda)); });
+        return "<b>" + esc(pubFecha(dias[i])) + "</b>" + fil + filaTip(null, "Total en pesos", money(tot));
+      }
+    });
   });
-  h += "</tbody>";
-  if (nP) {
-    h += '<tfoot><tr><th scope="row">Promedio/día</th>';
-    prom.forEach(function (p) { h += "<td>" + (p ? esc(NF1.format(p.v)) : "—") + "</td>"; });
-    h += '<td class="tot"><b>' + esc(NF1.format(totP)) + "</b></td></tr>";
-    h += '<tr><th scope="row">Estimado al mes</th>';
-    prom.forEach(function (p) { h += "<td>" + (p ? esc(fmtN(p.v * 30)) : "—") + "</td>"; });
-    h += '<td class="tot"><b>' + esc(fmtN(totP * 30)) + "</b></td></tr></tfoot>";
-  }
-  h += "</table></div>";
-  if (fs.length > vis.length) h += '<div class="mas"><button class="btn" data-act="padel-cd-mas">Ver ' + fmtN(Math.min(14, fs.length - vis.length)) + ' días más <span style="color:var(--text2)">(' + fmtN(fs.length - vis.length) + " restantes)</span></button></div>";
-  return h + '<p class="pie">Cada cifra = canchas arrendadas ese día en los turnos fijos de 90 min del club (las mismas de «Turnos del día»); tócala para ver de cuántas posibles, la ocupación y las horas. «Total» suma los clubes con datos. ' +
-    "El promedio y el estimado al mes (promedio × 30) usan solo días cerrados de los últimos 30; un día con el club cerrado cuenta 0. " +
-    "Es un estimado con la disponibilidad pública de easycancha: una cancha que no aparece libre cuenta como arrendada (también si la reservaron en el club o por WhatsApp).</p></section>";
+  if (t) S.charts.push(function () {
+    var el = $("g-pub-tienda"); if (!el) return;
+    var dias = co.length ? diario30(co[0]).map(function (x) { return x.d; }) : [];
+    var td = {}; arr(t.diario).forEach(function (x) { td[x.d] = x; });
+    var gd = {}; co.forEach(function (c) { diario30(c).forEach(function (x) { gd[x.d] = (gd[x.d] || 0) + num(x.gasto); }); });
+    graficoLineas(el, {
+      labels: dias, idG: "pt", h: 220, tipo: "$", aria: "Ventas de la tienda y gasto en pauta",
+      series: [
+        { nombre: "Ventas tienda", color: "green", area: true, v: dias.map(function (f) { return num((td[f] || {}).ventas); }) },
+        { nombre: "Con UTM de la pauta", color: "purple", guion: true, v: dias.map(function (f) { var x = td[f] || {}; return num(x.metaV) + num(x.ttV); }) },
+        { nombre: "Pauta Colombia", color: "blue", grosor: 2.5, v: dias.map(function (f) { return num(gd[f]); }) }
+      ],
+      xLab: function (i, cada) { return i % cada === 0 ? pubFecha(dias[i]) : null; },
+      tip: function (i) {
+        var x = td[dias[i]] || {}, g = num(gd[dias[i]]);
+        return "<b>" + esc(pubFecha(dias[i])) + "</b>" + filaTip("green", "Ventas tienda", money(x.ventas) + " · " + fmtN(x.pedidos) + " ped.") +
+          filaTip("purple", "Con UTM de Meta", money(x.metaV) + " · " + fmtN(x.metaP)) + filaTip("purple", "Con UTM de TikTok", money(x.ttV) + " · " + fmtN(x.ttP)) +
+          filaTip("blue", "Pauta Colombia", money(g)) + filaTip(null, "Ventas ÷ pauta", veces(div0(x.ventas, g)));
+      }
+    });
+  });
+  return h;
 }
-/* Selector Todo el día / Noche (tabla general, tabla del club y consulta de una fecha) */
-function segHoras(u) {
-  return '<div class="seg" role="group" aria-label="Turnos">' + [["1", "Todo el día"], ["0", "Noche"]].map(function (p) {
-    return '<button data-act="padel-horas" data-v="' + p[0] + '" aria-pressed="' + ((u.todas ? "1" : "0") === p[0]) + '">' + p[1] + "</button>";
-  }).join("") + "</div>";
+function chipMini(v) { return v == null ? "" : '<span class="' + (v >= 0 ? "verde" : "rojo") + '">' + (v >= 0 ? "▲ " : "▼ ") + esc(pct(Math.abs(v))) + "</span>"; }
+
+function tarjetaCta(c) {
+  var m = totC(c), p = c.totPrev7 || {}, r = resultado(m, c.destino), mon = c.moneda;
+  var activas = arr(c.campanas).filter(function (x) { return x.estado === "ACTIVE"; });
+  var pres = activas.reduce(function (s, x) { return s + num(x.presupuesto); }, 0);
+  var kp = c.destino === "web"
+    ? [["Retorno", veces(div0(m.valor, m.gasto))], ["Compras", fmtN(m.compras)], ["Costo/compra", m.compras ? plataA(div0(m.gasto, m.compras), mon) : "—"]]
+    : [["Clics", fmtN(m.clics)], ["Costo/clic", m.clics ? plata(div0(m.gasto, m.clics), mon) : "—"], ["CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—"]];
+  if (c.destino === "web" && !num(m.compras) && num(m.conv)) kp[1] = ["Conversaciones", fmtN(m.conv)];
+  return '<button class="card cta" data-act="pub-cta" data-v="' + esc(c.id) + '" aria-label="Ver ' + esc(c.nombre) + '">' +
+    '<div class="cta-cab">' + puntoCta(c.id) + "<b>" + esc(PUB_CORTO[c.id] || c.nombre) + '</b><span class="cta-pais">' + esc(c.destino === "web" ? "venta web" : "tráfico a Amazon") + "</span></div>" +
+    '<div class="cta-g"><div><div class="cta-v">' + esc(plataA(m.gasto, mon)) + '</div><div class="cta-s">gastado · ' + esc(textoPer()) +
+    (sinComp(c) ? "" : " " + chipMini(variacion(m.gasto, p.gasto))) + "</div></div>" + spark(diario30(c).map(function (x) { return num(x.gasto); }), PUB_COLOR[c.id]) + "</div>" +
+    '<div class="cta-k">' + kp.map(function (k) { return "<div><span>" + esc(k[0]) + "</span><b>" + esc(k[1]) + "</b></div>"; }).join("") + "</div>" +
+    '<div class="cta-p">' + esc(activas.length + (activas.length === 1 ? " campaña activa" : " campañas activas") + (pres ? " · " + plataA(pres, mon) + "/día" : "") +
+      " · ayer " + plataA((c.ayer || {}).gasto, mon) + (c.inicio && c.inicio > (PD().desde || "") ? " · desde el " + pubFecha(c.inicio) : "")) + "</div></button>";
 }
 
-/* Tabla de turnos fecha × hora de inicio: arrendadas / canchas, como lo cuenta Mau */
-/* Detalle de una celda: botón con data-tip (se abre al tocar, con teclado o al pasar el mouse) y aria-label con el mismo texto */
-function botonTip(cls, estilo, etiqueta, filas, contenido) {
-  var html = "<b>" + esc(etiqueta) + "</b>" + filas.map(function (f) { return filaTip(null, f[0], f[1]); }).join("");
-  var txt = etiqueta + ": " + filas.map(function (f) { return f[0] + " " + f[1]; }).join(" · ");
-  return '<button type="button"' + (cls ? ' class="' + cls + '"' : "") + (estilo ? ' style="' + estilo + '"' : "") + ' data-act="padel-tip" data-tip="' + esc(html) + '" aria-label="' + esc(txt) + '">' + contenido + "</button>";
-}
-/* Turno que el club no abrió ese día: sin dato y antes del primer turno o después del último que publicó.
-   El turno que falta ENTRE turnos vistos ya viene lleno (N/N) en porHora; en los extremos el modelo lo toma
-   como club cerrado (p. ej. festivos: cierran más temprano). */
-function turnoCerrado(d, k) {
-  var ph = d && d.porHora && typeof d.porHora === "object" ? d.porHora : null;
-  if (!ph || (ph[k] && typeof ph[k] === "object")) return false;
-  var ks = Object.keys(ph).filter(esHora).sort();
-  return !ks.length || k < ks[0] || k > ks[ks.length - 1];
-}
-function botonTurno(x, canchas, N, etiqueta, cerrado) {
-  if ((!x || typeof x !== "object") && cerrado) return botonTip("ocup nada cerr", "", etiqueta, [["Cerrado", "el club no publicó este turno en easycancha ese día"]], "cerrado");
-  if (!x || typeof x !== "object") return botonTip("ocup nada", "", etiqueta, [["Sin dato", "no hubo lectura de easycancha para este turno"]], '<span aria-hidden="true">—</span>');
-  var a = arrendadasDe(x, N), libres = libresDe(x);
-  var ls_ = libres.map(function (l) { return l.c; });
-  var arrend = canchas.filter(function (k) { return ls_.indexOf(k) < 0; });
-  // Hoy el API no manda la duración; si llegara, se aclara solo cuando no es el turno de 90 min ("3 (solo 60 min)")
-  var txtLibres = libres.map(function (l) { return l.d && l.d < 90 ? l.c + " (solo " + l.d + " min)" : l.c; }).join(", ");
-  // Se nombran las canchas ("cancha 2", "canchas 1, 3") para no confundir el número de cancha con la cantidad.
-  var nCanchas = function (n) { return n === 1 ? "cancha " : "canchas "; };
-  var filas = [["Arrendadas", a ? (arrend.length === a ? a + " · " + nCanchas(a) + arrend.join(", ") : String(a)) : "ninguna"],
-    ["Libres", libres.length ? libres.length + " · " + nCanchas(libres.length) + txtLibres : "ninguna"]];
-  var pr = textoPrecio(x); if (pr) filas.push(["Precio", pr]);
-  return botonTip("ocup", estiloOcup(a / N), etiqueta, filas, a + "/" + N);
-}
-function celdaTurno(x, canchas, N, cls, etiqueta, cerrado) {
-  return "<td" + (cls ? ' class="' + cls + '"' : "") + ">" + botonTurno(x, canchas, N, etiqueta, cerrado) + "</td>";
-}
-function zTurnos(c, dias, hoy, canchas, N) {
-  var u = S.ui.padel, turnos = turnosClub(c), noche = nocheClub(c), desdeN = noche ? noche.desde : NOCHE_DESDE;
-  var filas = dias.slice().reverse();
-  var vis = filas.slice(0, u.n);
-  var hs;
-  // Todas las horas: los turnos fijos del día del club (respaldo: las horas de los días a la vista)
-  if (u.todas) hs = horasDiaClub(c, vis);
-  else {
-    // La noche: los turnos fijos del club; sin ellos, las horas desde las 17:00 de los datos (primero las de los días a la vista)
-    hs = noche ? noche.turnos.slice() : horasNoche(vis); if (!hs.length) hs = horasNoche(dias);
+/* ─────────── Una cuenta ─────────── */
+function vPubCuenta(c) {
+  var m = totC(c), p = c.totPrev7 || {}, mon = c.moneda, web = c.destino === "web";
+  var activas = arr(c.campanas).filter(function (x) { return x.estado === "ACTIVE"; });
+  var pres = activas.reduce(function (s, x) { return s + num(x.presupuesto); }, 0);
+  var h = '<section class="card"><div class="heroe"><div>' +
+    '<div class="l">' + puntoCta(c.id) + esc(c.nombre) + " · " + esc(textoPer()) + "</div>" +
+    '<div class="big">' + esc(plata(m.gasto, mon)) + "</div>" +
+    '<div class="chips">' + (sinComp(c) ? "" : chipVar(variacion(m.gasto, p.gasto), "vs los 7 días anteriores")) +
+    '<a class="chip" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">Abrir el administrador ↗</a></div>' +
+    '<div class="nota">Ayer: ' + esc(plata((c.ayer || {}).gasto, mon)) + " · " + esc(activas.length + (activas.length === 1 ? " campaña activa" : " campañas activas")) +
+    (pres ? " · presupuesto " + esc(plata(pres, mon)) + " al día" : "") + (mon === "USD" ? "<br>≈ " + esc(moneyA(enCop(m.gasto, mon))) + " en pesos" : "") + (notaInicio(c) ? "<br>" + esc(notaInicio(c)) : "") + "</div>" +
+    '</div><div><div class="graf" id="g-pub-cta" style="min-height:190px"></div><div class="leyenda"><span><i class="bg-' + PUB_COLOR[c.id] + '"></i>Gasto diario</span>' +
+    (web ? '<span><i class="bg-green"></i>Ventas que reporta ' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>" : '<span><i class="bg-orange"></i>Clics</span>') + "</div></div></div></section>";
+
+  var r = resultado(m, c.destino);
+  var k = [];
+  if (web) {
+    k.push(kpi("Compras", fmtN(m.compras), esc(plata(m.valor, mon) + " en ventas") + (sinComp(c) ? "" : " · " + chipMini(variacion(m.compras, p.compras))), "verde"));
+    k.push(kpi("Retorno (ROAS)", veces(div0(m.valor, m.gasto)), esc(sinComp(c) ? "ventas ÷ gasto" : "antes " + veces(div0(p.valor, p.gasto))), div0(m.valor, m.gasto) >= 3 ? "verde" : div0(m.valor, m.gasto) && div0(m.valor, m.gasto) < 1.5 ? "rojo" : ""));
+    k.push(kpi("Costo por compra", m.compras ? plata(div0(m.gasto, m.compras), mon) : "—", esc(sinComp(c) || !p.compras ? "gasto ÷ compras" : "antes " + plata(div0(p.gasto, p.compras), mon)), ""));
+    k.push(m.conv ? kpi("Conversaciones", fmtN(m.conv), esc("WhatsApp y mensajes"), "azul") : kpi("Clics al enlace", fmtN(m.clics), esc(m.clics ? plata(div0(m.gasto, m.clics), mon) + " por clic" : ""), "azul"));
+  } else {
+    k.push(kpi("Clics a Amazon", fmtN(m.clics), (sinComp(c) ? "" : chipMini(variacion(m.clics, p.clics))), "azul"));
+    k.push(kpi("Costo por clic", m.clics ? plata(div0(m.gasto, m.clics), mon) : "—", esc(sinComp(c) || !p.clics ? "gasto ÷ clics" : "antes " + plata(div0(p.gasto, p.clics), mon)), ""));
+    k.push(kpi("CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—", esc(fmtN(m.imp) + " impresiones"), ""));
+    k.push(kpi("Reproducciones", fmtN(m.vistas), esc(fmtN(m.seg) + " seguidores nuevos"), ""));
   }
-  var sub = "Canchas arrendadas de " + N + " en cada " + (u.todas
-    ? (turnos ? "turno fijo de 90 min del club" : "hora de inicio que publica el club" + (noche ? " (en la noche, solo sus turnos fijos de 90 min)" : ""))
-    : (noche ? "turno fijo de 90 min de la noche" : "hora de inicio desde las 17:00 que publica el club")) + " · lo más reciente arriba (incluye lo ya reservado para los próximos días)";
-  var h = '<section class="card"><div class="card-cab"><div><h2>' + (u.todas ? "Turnos del día" : "Turnos de la noche") + '</h2><div class="sub">' +
-    esc(sub) + "</div></div>" +
-    segHoras(u) + "</div>";
-  if (!vis.length) return h + '<div class="vacio">Todavía no hay días con lecturas.</div></section>';
-  if (!hs.length) return h + '<div class="vacio">' + (u.todas ? "Todavía no hay horas de inicio en los días a la vista." : "Este club no publica turnos desde las 17:00 en los días con lecturas.") + "</div></section>";
-  // Total por fila (arrendadas de las posibles) solo en los días cuyos inicios no se traslapan; la columna sale
-  // si al menos un día lo tiene (p. ej. 1125 entre semana: 17:00 / 18:30 / 20:00 / 21:30)
-  var tots = vis.map(function (d) {
-    var ph = d.porHora && typeof d.porHora === "object" ? d.porHora : {};
-    var ks = hs.filter(function (k) { return ph[k] && typeof ph[k] === "object"; }), sa = 0;
-    if (!ks.length || !sinTraslape(ks)) return null;
-    ks.forEach(function (k) { sa += arrendadasDe(ph[k], N); });
-    return { sa: sa, sn: ks.length * N };
-  });
-  var conTot = tots.some(function (t) { return t; });
-  h += '<div class="tw"><table class="turnos' + (u.todas ? " todas" : "") + '"><thead><tr><th scope="col">Día</th>';
-  hs.forEach(function (k) { h += '<th scope="col"' + (k >= desdeN ? ' class="noche"' : "") + ">" + esc(k) + "</th>"; });
-  if (conTot) h += '<th scope="col" class="tot m-no">' + (u.todas ? "Total" : "Noche") + "</th>";
-  h += "</tr></thead><tbody>";
-  vis.forEach(function (d, iv) {
-    var ph = d.porHora && typeof d.porHora === "object" ? d.porHora : {};
-    var tt = tots[iv], sa = tt ? tt.sa : 0, sn = tt ? tt.sn : 0;
-    var tags = d.f === hoy ? '<span class="tag">hoy</span> ' : d.f > hoy ? '<span class="tag">próximo</span> ' : "";
-    if (d.festivo) tags += '<span class="tag">festivo</span> ';
-    if (sinDatoPadel(d)) tags += '<span class="tag">datos parciales</span> ';
-    h += "<tr" + (d.f === hoy ? ' class="hoy"' : "") + '><td><div class="p-dia">' + esc(diaC(d.f)) + '</div><div class="n2">' + tags +
-      '<span class="solo-m">' + (sn ? esc(fmtN(sa) + " de " + fmtN(sn)) : "") + "</span></div></td>";
-    hs.forEach(function (k) { h += celdaTurno(ph[k], canchas, N, u.todas && k >= desdeN ? "noche" : "", diaC(d.f) + " · " + k, turnoCerrado(d, k)); });
-    if (conTot) h += '<td class="tot m-no">' + (sn ? "<b>" + esc(fmtN(sa)) + '</b><span style="color:var(--text2)"> / ' + esc(fmtN(sn)) + "</span>" : '<span style="color:var(--text3)">—</span>') + "</td>";
-    h += "</tr>";
-  });
-  h += "</tbody></table></div>";
-  if (filas.length > vis.length) h += '<div class="mas"><button class="btn" data-act="padel-mas">Ver ' + fmtN(Math.min(14, filas.length - vis.length)) + ' días más <span style="color:var(--text2)">(' + fmtN(filas.length - vis.length) + " restantes)</span></button></div>";
-  h += '<div class="niveles"><span>Arrendadas:</span>';
-  for (var i = 0; i <= N && N <= 12; i++) h += '<span class="ocup" style="' + estiloOcup(i / N) + '">' + i + "/" + N + "</span>";
-  h += '<span>cerrado = el club no publicó ese turno ese día (p. ej. festivos) · — = sin lectura</span></div>';
-  // Con turnos fijos (todo el día o solo la noche) el total no se traslapa; sin ellos se explica la regla anterior
-  var nota = "El total del día (arrendadas de las posibles) solo sale cuando los turnos no se traslapan (un inicio cada 90 min): con inicios cada 30 min una misma reserva aparece en varias horas. ";
-  if (turnos || noche) {
-    nota = (turnos ? "Solo cuentan los turnos fijos de 90 min del club" : "En la noche solo cuentan los turnos fijos de 90 min del club") + "; las horas de inicio intermedias no cuentan. " +
-      (conTot ? "Como no se traslapan, el total " + (u.todas ? "del día" : "de la noche") + " suma las canchas arrendadas de las posibles. "
-        : u.todas ? "El total solo sale cuando los turnos no se traslapan: con inicios cada 30 min una misma reserva aparece en varias horas. " : "");
-  }
-  return h + '<p class="pie">Toca o pasa el mouse por una celda para ver qué canchas estaban libres y el precio publicado. ' + nota +
-    "«datos parciales» = parte del día sin ninguna lectura (no cuenta en las horas abiertas).</p></section>";
-}
-/* Mapa de calor: horas (filas) × día de la semana (columnas), así cabe en el celular.
-   El API trae bloques de 30 min ("17:00" = 17:00–17:30, ver aggregate.js); aquí cada fila es una hora de reloj
-   con el promedio de sus bloques, para no confundirla con la hora de inicio de un turno de 90 min. */
-function zHeatmap(c) {
-  var hm = c.heatmap && typeof c.heatmap === "object" ? c.heatmap : {}, porH = {};
-  ORDEN_DOW.forEach(function (dw) {
-    var x = hm[dw]; if (!x || typeof x !== "object") return;
-    Object.keys(x).forEach(function (k) {
-      var v = Number(x[k]); if (!esHora(k) || x[k] == null || !isFinite(v)) return;
-      var hh = k.slice(0, 2), s = ((porH[hh] = porH[hh] || {})[dw] = porH[hh][dw] || [0, 0]);
-      s[0] += Math.max(0, Math.min(1, v)); s[1]++;
+  h += '<div class="grid kpis">' + k.join("") + "</div>";
+  h += '<div class="grid kpis">' +
+    kpi("Impresiones", fmtN(m.imp), esc("CPM " + plata(div0(m.gasto, m.imp) * 1000, mon)), "") +
+    kpi("Clics", fmtN(m.clics), esc("CTR " + (m.imp ? pct(div0(m.clics, m.imp)) : "—")), "") +
+    kpi("Interacciones", fmtN(m.inter), esc(fmtN(m.vistas) + " reproducciones"), "") +
+    (web && num(m.compras) ? kpi("Ticket promedio", plata(div0(m.valor, m.compras), mon), esc("ventas ÷ compras que reporta " + (c.plataforma === "meta" ? "Meta" : "TikTok")), "") :
+      kpi("Costo por " + r.u, r.n ? plata(costoRes(m, r), mon) : "—", esc(fmtN(r.n) + " " + r.t), "")) + "</div>";
+  h += anaHTML(c.id);
+  h += galeriaHTML(c);
+  h += campanasHTML(c);
+  if (!web) h += '<div class="aviso info" style="margin-top:12px"><span class="ic" aria-hidden="true">i</span><div><b>Las ventas de Amazon no se ven aquí</b><p>Estas campañas mandan tráfico a Amazon: las compras se miden en Amazon Attribution, no en Meta ni en TikTok.</p></div></div>';
+
+  S.charts.push(function () {
+    var el = $("g-pub-cta"); if (!el) return;
+    var dd = diario30(c), dias = dd.map(function (x) { return x.d; });
+    var series = [{ nombre: "Gasto", color: PUB_COLOR[c.id], v: dd.map(function (x) { return num(x.gasto); }) }];
+    if (web) series.push({ nombre: "Ventas", color: "green", v: dd.map(function (x) { return num(x.valor); }) });
+    graficoBarras(el, {
+      labels: dias, series: web ? series : series, modo: web ? "agrupado" : "simple", h: 190, tipo: mon === "USD" ? "n" : "$", aria: "Gasto diario",
+      promedio: web ? null : div0(series[0].v.reduce(function (a, b) { return a + b; }, 0), dd.length),
+      xLab: function (i, cada) { return i % cada === 0 ? pubFecha(dias[i]) : null; },
+      tip: function (i) {
+        var x = dd[i] || {}, rr = resultado(x, c.destino);
+        return "<b>" + esc(pubFecha(dias[i])) + "</b>" + filaTip(PUB_COLOR[c.id], "Gasto", plata(x.gasto, mon)) +
+          (web ? filaTip("green", "Ventas reportadas", plata(x.valor, mon) + " · " + fmtN(x.compras)) + filaTip(null, "Retorno", veces(div0(x.valor, x.gasto))) : "") +
+          (num(x.conv) ? filaTip(null, "Conversaciones", fmtN(x.conv)) : "") +
+          filaTip(null, cap(rr.t), fmtN(rr.n)) + filaTip(null, "Costo por " + rr.u, rr.n ? plata(costoRes(x, rr), mon) : "—");
+      }
     });
   });
-  var hs = Object.keys(porH).sort();
-  // La noche en negrita desde la hora de reloj en que empieza la noche del club (La Jaula: 16 h); sin `noche`, 17 h
-  var nC = nocheClub(c), desdeN = nC ? nC.desde : NOCHE_DESDE, hN = +desdeN.slice(0, 2);
-  var h = '<section class="card"><div class="card-cab"><div><h2>Mapa de calor</h2><div class="sub">Ocupación promedio por día de la semana y hora · últimas 8 semanas, días ya cerrados (incluye festivos)</div></div></div>';
-  if (!hs.length) return h + '<div class="vacio">Todavía no hay días cerrados para promediar.</div></section>';
-  h += '<div class="tw"><table class="hm"><thead><tr><th scope="col"><span class="sr">Hora</span></th>';
-  ORDEN_DOW.forEach(function (dw) { h += '<th scope="col"><abbr title="' + DOW_L[dw] + '" style="text-decoration:none">' + DOW_C[dw] + "</abbr></th>"; });
-  h += "</tr></thead><tbody>";
-  hs.forEach(function (hh) {
-    var rango = hh + ":00–" + String(+hh + 1).padStart(2, "0") + ":00";
-    h += '<tr><th scope="row"' + (+hh >= hN ? ' class="noche"' : "") + "><span aria-hidden=\"true\">" + esc(+hh + " h") + '</span><span class="sr">' + esc(rango) + "</span></th>";
-    ORDEN_DOW.forEach(function (dw) {
-      var s = porH[hh][dw], et = DOW_L[dw] + " " + rango;
-      if (!s || !s[1]) { h += '<td class="nada">' + botonTip("", "", et, [["Sin turno", "club cerrado o sin datos"]], '<span aria-hidden="true">·</span>') + "</td>"; return; }
-      var v = s[0] / s[1];
-      h += '<td style="' + estiloOcup(v) + '">' + botonTip("", "", et, [["Ocupación promedio", pct(v)]], Math.round(v * 100) + '<span class="sr"> %</span>') + "</td>";
-    });
-    h += "</tr>";
-  });
-  h += '</tbody></table></div><div class="escala"><span>0 %</span><span class="g" aria-hidden="true"></span><span>100 % ocupado</span></div>';
-  return h + '<p class="pie">Cada fila es una hora de reloj (17 h = de 17:00 a 18:00), no la hora de inicio de un turno. En negrita la noche, desde las ' + esc(desdeN) + ". Toca una celda para ver el detalle.</p></section>";
+  return h;
 }
-/* Reservas detectadas entre lecturas */
-function zEventos(c) {
-  var u = S.ui.padel;
-  var evs = arr(c.eventos).filter(function (e) { return e && esFecha(e.f) && esHora(e.hora) && (e.tipo === "reserva" || e.tipo === "liberada"); });
-  evs.sort(function (a, b) { return (Date.parse(b.detectado || "") || 0) - (Date.parse(a.detectado || "") || 0); });
-  var nRes = evs.filter(function (e) { return e.tipo === "reserva"; }), nLib = evs.length - nRes.length;
-  var lista = u.ev === "reserva" ? nRes : u.ev === "liberada" ? evs.filter(function (e) { return e.tipo === "liberada"; }) : evs;
-  var h = '<section class="card"><div class="card-cab"><div><h2>Reservas detectadas</h2><div class="sub">Cambios vistos entre lecturas · más recientes primero</div></div></div>';
-  if (!evs.length) return h + '<div class="vacio">Todavía no se han detectado reservas nuevas.</div></section>';
-  h += '<div class="ctrls"><div class="pills" role="group" aria-label="Tipo de cambio">' +
-    [["todos", "Todos", evs.length], ["reserva", "Reservas", nRes.length], ["liberada", "Liberadas", nLib]].map(function (p) {
-      return '<button class="pill" data-act="padel-ev" data-v="' + p[0] + '" aria-pressed="' + (u.ev === p[0]) + '">' + p[1] + ' <span class="c">' + fmtN(p[2]) + "</span></button>";
-    }).join("") + "</div></div>";
-  var ants = nRes.map(function (e) { return num(e.anticipacionH); }).sort(function (a, b) { return a - b; });
-  if (ants.length) {
-    var med = ants.length % 2 ? ants[(ants.length - 1) / 2] : (ants[ants.length / 2 - 1] + ants[ants.length / 2]) / 2;
-    var m24 = ants.filter(function (x) { return x < 24; }).length;
-    h += '<div class="resumen-f">' + esc("Las reservas se hacen en promedio (mediana) " + anticipacion(med).replace(" antes", "") + " antes · " + pct(m24 / ants.length) + " con menos de 24 h") + "</div>";
-  }
-  if (!lista.length) return h + '<div class="vacio">Sin cambios de este tipo.</div></section>';
-  h += '<ul class="evs">';
-  lista.slice(0, u.evN).forEach(function (e) {
-    var res = e.tipo === "reserva", t = Date.parse(e.detectado || "") || 0;
-    var cancha = /^\d{1,3}$/.test(String(e.cancha)) ? "Cancha " + e.cancha : "Cancha";
-    h += '<li><span class="pt ' + (res ? "bg-green" : "bg-orange") + '" aria-hidden="true"></span><span class="q">' + esc(cancha + " · " + diaC(e.f) + " · " + e.hora) + "</span>" +
-      '<span class="cu">' + esc(t ? hace(t) : "—") + '</span><span class="d2">' + esc((res ? "Reservada " : "Liberada ") + anticipacion(e.anticipacionH) + (num(e.horas) > 0 ? " · " + horas(e.horas) : "")) + "</span></li>";
+function cap(s) { s = String(s || ""); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ─────────── Análisis («Cómo vamos») ─────────── */
+var ANA_IC = { bien: "✓", ojo: "!", mal: "↓", info: "i" };
+function anaHTML(id) {
+  var lista = arr(PD().analisis).filter(function (a) { return a && (id ? a.cuenta === id : true); });
+  if (!lista.length) return "";
+  var h = '<section class="card"><div class="card-cab"><div><h2>Cómo vamos</h2><div class="sub">Lectura automática de la foto de hoy · semana del ' + esc(pubFecha(PD().desde7)) + " al " + esc(pubFecha(PD().hasta)) + '</div></div></div><ul class="ana">';
+  lista.forEach(function (a) {
+    var nv = /^(bien|ojo|mal|info)$/.test(a.nivel) ? a.nivel : "info";
+    h += '<li class="ana-i ' + nv + '"><span class="ana-ic" aria-hidden="true">' + ANA_IC[nv] + "</span><div><b>" +
+      (a.anuncio && a.cuenta ? '<button class="ana-ad" data-act="pub-ad" data-c="' + esc(a.cuenta) + '" data-v="' + esc(a.anuncio) + '">' + esc(a.titulo) + "</button>" : esc(a.titulo)) +
+      "</b><p>" + esc(a.texto) + "</p></div>" +
+      (!id && a.cuenta ? '<button class="ana-c" data-act="pub-cta" data-v="' + esc(a.cuenta) + '">' + puntoCta(a.cuenta) + esc(PUB_CORTO[a.cuenta] || a.cuenta) + "</button>" : "") + "</li>";
   });
-  h += "</ul>";
-  if (lista.length > u.evN) h += '<div class="mas"><button class="btn" data-act="padel-ev-mas">Ver más <span style="color:var(--text2)">(' + fmtN(lista.length - u.evN) + " restantes)</span></button></div>";
+  return h + "</ul></section>";
+}
+function marcasAnuncio() {
+  var mk = {};
+  arr(PD().analisis).forEach(function (a) { if (a && a.anuncio) mk[a.anuncio] = a.nivel === "bien" ? "Destacado" : a.nivel === "mal" ? "Sin ventas" : ""; });
+  return mk;
+}
+
+/* ─────────── Galería de anuncios ─────────── */
+function anunciosPub(c) {
+  var lista = [];
+  (c ? [c] : ctasOk()).forEach(function (x) { arr(x.anuncios).forEach(function (a) { if (a && a.id) lista.push({ a: a, c: x }); }); });
+  var u = S.ui.pub;
+  lista = lista.filter(function (o) { return num(mAd(o.a).gasto) > 0 && (!u.activos || o.a.estado === "ACTIVE"); });
+  function val(o) {
+    var m = mAd(o.a), r = resultado(m, o.c.destino);
+    if (u.orden === "retorno") return o.c.destino === "web" ? div0(m.valor, m.gasto) : -1;
+    if (u.orden === "resultado") return r.mil ? 0 : r.n;
+    if (u.orden === "costo") return r.n && !r.mil ? -costoRes(m, r) / (o.c.moneda === "USD" ? 1 / trmPub() : 1) : -Infinity;
+    if (u.orden === "ctr") return div0(m.clics, m.imp);
+    return enCop(m.gasto, o.c.moneda);
+  }
+  return lista.sort(function (a, b) { return val(b) - val(a); });
+}
+function galeriaHTML(c) {
+  var u = S.ui.pub, lista = anunciosPub(c), n = Math.min(lista.length, u.n), mk = marcasAnuncio();
+  var h = '<section class="card"><div class="card-cab"><div><h2>Anuncios</h2><div class="sub">' + esc(fmtN(lista.length) + (lista.length === 1 ? " anuncio" : " anuncios") + " con gasto · " + textoPer() + " · toca uno para verlo") + '</div></div><div class="cab-ctl">' +
+    '<select class="sel" data-act="pub-orden" aria-label="Ordenar anuncios">' + PUB_ORDENES.map(function (o) { return '<option value="' + o[0] + '"' + (u.orden === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select>" +
+    '<div class="seg" role="group" aria-label="Estado"><button data-act="pub-act" data-v="1" aria-pressed="' + u.activos + '">Activos</button><button data-act="pub-act" data-v="0" aria-pressed="' + !u.activos + '">Todos</button></div></div></div>';
+  if (!lista.length) return h + '<div class="vacio">' + esc(u.activos ? "No hay anuncios activos con gasto en el período. Prueba con «Todos»." : "Sin anuncios con gasto en el período.") + "</div></section>";
+  h += '<div class="ads">';
+  for (var i = 0; i < n; i++) h += tarjetaAd(lista[i].a, lista[i].c, !c, mk[lista[i].a.id]);
+  h += "</div>";
+  if (lista.length > n) h += '<div class="mas"><button class="btn" data-act="pub-mas">Ver ' + fmtN(Math.min(12, lista.length - n)) + ' más <span style="color:var(--text2)">(' + fmtN(lista.length - n) + " restantes)</span></button></div>";
   return h + "</section>";
 }
-
-/* ─────────── Consultar una fecha (GET /padel/dia) ───────────
-   Detalle de un día exacto del historial (o de los próximos días: lo reservado hasta ahora). La respuesta trae todos los
-   clubes con el día completo (porHora sin recorte) y las reservas detectadas de esa fecha; dia: null = sin datos ese día.
-   La fecha queda en la URL (#padel/2026-10-12) y su panel reemplaza la vista normal hasta tocar "Cerrar"; el selector de
-   arriba sigue eligiendo "Todos" o un club. Las respuestas se guardan un rato en memoria (no en localStorage). */
-var PADEL_DIA_ADELANTE = 4; // el API acepta hasta hoy + 4 (easycancha publica unos días hacia adelante)
-function fechaLarga(f) { var p = f.split("-"); return DOW_L[dowDe(f)] + " " + (+p[2]) + " de " + (MES_L[+p[1] - 1] || "") + " de " + p[0]; }
-function fechaDeHash(h) { var m = /^padel\/(\d{4}-\d{2}-\d{2})$/.exec(String(h || "")); return m && esFecha(m[1]) ? m[1] : ""; }
-function hashTab(t) { return t === "padel" && S.padel.dia.fecha ? "padel/" + S.padel.dia.fecha : t; }
-function hashPadel() { if (S.tab === "padel") { try { history.replaceState(null, "", "#" + hashTab("padel")); } catch (e) {} } }
-/* Rango de la consulta: desde el primer día con historial (el menor `desde` de los clubes) hasta hoy + 4 */
-function limitesDiaPadel() {
-  var hoy = hoyPadel(), max = sumarDias(hoy, PADEL_DIA_ADELANTE), min = "";
-  clubesPadel().forEach(function (c) { var f = esFecha(c.desde) ? c.desde : (diasPadel(c)[0] || {}).f; if (esFecha(f) && (!min || f < min)) min = f; });
-  if (!min || min > max) min = hoy;
-  return { hoy: hoy, min: min, max: max };
-}
-function formDiaPadel() {
-  var D = S.padel.dia, lim = limitesDiaPadel(), v = esFecha(S.ui.padel.diaF) ? S.ui.padel.diaF : D.fecha || lim.hoy;
-  return '<form class="pd-f" id="pd-form" novalidate><label class="fld"><span>Consultar una fecha</span>' +
-    '<input type="date" class="fecha" id="pd-fecha" data-act="padel-dia-f" value="' + esc(v) + '" min="' + esc(lim.min) + '" max="' + esc(lim.max) + '"' +
-    (D.aviso ? ' aria-invalid="true" aria-describedby="pd-msg"' : "") + "></label>" +
-    '<button class="btn prim" type="submit" data-act="padel-dia-ver">Ver</button>' +
-    (D.aviso ? '<p class="pd-msg" id="pd-msg" role="alert">' + esc(D.aviso) + "</p>" : "") + "</form>";
-}
-/* Botón "Ver" (o Enter en el campo) */
-function verDiaPadel() {
-  var inp = $("pd-fecha"), f = inp ? String(inp.value || "") : "", lim = limitesDiaPadel();
-  S.ui.padel.diaF = f;
-  if (!esFecha(f) || f < lim.min || f > lim.max) {
-    S.padel.dia.aviso = "Elige una fecha entre el " + fechaC(lim.min) + " y el " + fechaC(lim.max) + ".";
-    render(); return;
-  }
-  abrirDiaPadel(f, false);
-}
-/* Abre una fecha. Si se consultó hace poco se usa la copia en memoria (días cerrados 5 min; hoy y los próximos 1 min). */
-function abrirDiaPadel(f, forzar) {
-  var D = S.padel.dia;
-  if (!esFecha(f)) return;
-  if (D.fecha !== f) S.ui.padel.devN = 20;
-  D.fecha = f; D.aviso = ""; S.ui.padel.diaF = f;
-  hashPadel();
-  var cc = propia(D.cache, f) ? D.cache[f] : null;
-  if (!forzar && cc && Date.now() - cc.t < (f < cc.hoy ? 300000 : 60000)) {
-    if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
-    D.n++; D.data = cc.j; D.dataF = f; D.cargando = false; D.error = null;
-    if (S.tab === "padel") render();
-    return;
-  }
-  cargarDiaPadel(f);
-}
-function cerrarDiaPadel() {
-  var D = S.padel.dia;
-  if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
-  D.n++; D.fecha = ""; D.data = null; D.dataF = ""; D.cargando = false; D.error = null; D.aviso = "";
-  hashPadel(); render();
-}
-function datosDiaValidos(j) { return !!(j && typeof j === "object" && Array.isArray(j.clubes)); }
-function errorDia(msg, reintentar) { var e = new Error(msg); e.dia = true; e.sinReintento = !reintentar; return e; }
-function errorHttpDia(st, m) {
-  if (S.dev) return errorDia("No se pudo leer " + S.devPadelDia + " (HTTP " + st + ").", true);
-  if (st === 400) return errorDia(m || "La fecha no es válida.", false);
-  if (st === 404) return errorDia("La consulta por fecha todavía no está disponible en el servidor.", true);
-  if (st === 503) return errorDia(m || "La consulta por fecha todavía no está configurada en el servidor.", true);
-  return errorDia("El servidor respondió con un error (" + st + ").", true);
-}
-function textoErrorDia(e) {
-  if (e && e.dia) return e.message;
-  if (e && e.datos) return "Los datos recibidos no se pudieron mostrar (" + e.message + ").";
-  if (e && e.name === "AbortError") return "El servidor tardó demasiado en responder.";
-  return S.dev ? "No se pudo leer " + S.devPadelDia + " (" + (e && e.message ? e.message : "error") + ")." : "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
-}
-/* Carga de /padel/dia: misma sesión (Bearer) y mismos errores que /padel (401 = sesión vencida). Una consulta nueva
-   (otra fecha, Reintentar, Cerrar o cerrar sesión) cancela la anterior y su respuesta se descarta.
-   En vista previa (?padeldia=) se lee un JSON fijo. */
-function cargarDiaPadel(f) {
-  var D = S.padel.dia;
-  if (D.ctl) { try { D.ctl.abort(); } catch (e) {} D.ctl = null; }
-  var n = ++D.n, gen = S.gen, tok = S.token, mismo = !!D.data && D.dataF === f;
-  function vigente() { return S.padel.dia === D && D.n === n && gen === S.gen && tok === S.token; }
-  if (!mismo) { D.data = null; D.dataF = ""; }
-  D.fecha = f; D.error = null; D.reintentar = true;
-  D.cargando = S.dev || !!S.token; // sin sesión no se consulta: al entrar se abre la fecha de la URL
-  if (S.tab === "padel") render();
-  if (!D.cargando) return;
-  var p;
-  if (S.dev) p = S.devPadelDia ? fetch(S.devPadelDia, { cache: "no-store" }) : Promise.reject(errorDia("Vista previa sin ?padeldia=<ruta .json>.", false));
-  else {
-    var opts = { headers: { Authorization: "Bearer " + tok }, cache: "no-store" };
-    p = conTiempo(API + "/padel/dia?fecha=" + encodeURIComponent(f), opts, 30000);
-    D.ctl = opts._ctl || null;
-  }
-  p.then(function (r) {
-    if (!vigente()) return;
-    if (r.status === 401 && !S.dev) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return; }
-    if (!r.ok) return leerError(r).then(function (m) { throw errorHttpDia(r.status, m); });
-    // Un 200 que no es JSON (página HTML de un proxy, cuerpo cortado) es un problema de datos, no de conexión
-    return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); }).then(function (j) {
-      if (!vigente()) return;
-      if (!datosDiaValidos(j)) throw errorDatos("respuesta sin clubes");
-      D.data = j; D.dataF = f; D.error = null;
-      D.cache[f] = { j: j, t: Date.now(), hoy: esFecha(j.hoy) ? j.hoy : hoyPadel() };
-      Object.keys(D.cache).sort(function (a, b) { return D.cache[b].t - D.cache[a].t; }).slice(8).forEach(function (k) { delete D.cache[k]; });
-    });
-  }).catch(function (e) {
-    if (!vigente()) return;
-    D.error = textoErrorDia(e); D.reintentar = !(e && e.sinReintento);
-  }).then(function () {
-    if (!vigente()) return; // otra consulta, Cerrar o cerrar sesión ya tomaron el control
-    D.cargando = false; D.ctl = null;
-    if (S.tab !== "padel") return;
-    // Al actualizar la misma fecha se conserva el deslizamiento lateral de las tablas
-    var desl = mismo ? Array.prototype.map.call(document.querySelectorAll("#view .tw"), function (x) { return x.scrollLeft; }) : [];
-    render();
-    Array.prototype.forEach.call(document.querySelectorAll("#view .tw"), function (x, i) { if (desl[i]) x.scrollLeft = desl[i]; });
-  });
-}
-/* Clubes de la respuesta unidos al JSON principal por id (color, nombre y botón del selector). Turnos y noche: los de la
-   respuesta; si no vienen, los del JSON principal; si tampoco, la lógica anterior (horas desde las 17:00 de porHora). */
-function filasDia(j, cs) {
-  var out = [];
-  arr(j.clubes).forEach(function (cd, i) {
-    if (!cd || typeof cd !== "object") return;
-    var id = idClub(cd, i), iM = -1;
-    for (var k = 0; k < cs.length; k++) if (idClub(cs[k], k) === id) { iM = k; break; }
-    var cM = iM >= 0 ? cs[iM] : null, dia = cd.dia && typeof cd.dia === "object" ? cd.dia : null;
-    var ref = turnosClub(cd) || nocheClub(cd) || !cM ? cd : cM;
-    var canchas = canchasDe({ canchas: num(cd.canchas) > 0 ? cd.canchas : cM && cM.canchas, dias: dia ? [dia] : [] }), N = canchas.length || 1;
-    var noche = nocheClub(ref), ph = dia && dia.porHora && typeof dia.porHora === "object" ? dia.porHora : {};
-    var hs = !dia ? [] : noche ? noche.turnos.slice() : horasNoche([dia]);
-    var ks = hs.filter(function (x) { return ph[x] && typeof ph[x] === "object"; }), sa = 0;
-    ks.forEach(function (x) { sa += arrendadasDe(ph[x], N); });
-    out.push({
-      cd: cd, cM: cM, ref: ref, id: cM ? idClub(cM, iM) : "", nombre: cM ? nombreClub(cM, iM) : nombreClub(cd, i), corto: cM ? nombreCorto(cM, iM) : nombreCorto(cd, i),
-      color: colorClubI(iM >= 0 ? iM : i), dia: dia, canchas: canchas, N: N, noche: noche, ph: ph, hs: hs, ks: ks, sa: sa, tot: ks.length > 0 && sinTraslape(ks)
-    });
-  });
-  return out;
-}
-/* Panel del día consultado: "Todos" = tabla por club; un club = sus KPIs, todas las horas, horas por cancha y reservas */
-function vPadelDia(c, cs) {
-  var D = S.padel.dia, j = D.data && D.dataF === D.fecha ? D.data : null;
-  var f = j && esFecha(j.fecha) ? j.fecha : D.fecha, hoyJ = j && esFecha(j.hoy) ? j.hoy : hoyPadel();
-  var fs = j ? filasDia(j, cs) : [], r = null;
-  if (c) fs.forEach(function (x) { if (x.cM === c) r = x; });
-  var fest = fs.some(function (x) { return x.dia && x.dia.festivo === true; });
-  var tags = (f === hoyJ ? '<span class="tag">hoy · en curso</span>' : f > hoyJ ? '<span class="tag">próximo · lo reservado hasta ahora</span>' : "") +
-    (fest ? '<span class="tag">festivo</span>' : "") + (r && r.dia && sinDatoPadel(r.dia) ? '<span class="tag">datos parciales</span>' : "");
-  var sub = c ? nombreClub(c, cs.indexOf(c)) + " · " + fmtN(r ? r.N : canchasDe(c).length) + " canchas"
-    : j ? (fs.length === 1 ? "1 club" : fmtN(fs.length) + " clubes") + " · toca un club para ver todas sus horas" : "";
-  if (D.cargando && j) sub += (sub ? " · " : "") + "actualizando…";
-  function cab(solo) {
-    return '<div class="card-cab pd-cab"' + (solo ? ' style="margin-bottom:0"' : "") + '><div><h2>' + esc("Día " + fechaLarga(f)) + '</h2><div class="sub pd-tags">' + tags + esc(sub) + "</div></div>" +
-      '<button class="btn" data-act="padel-dia-cerrar">Cerrar</button></div>';
-  }
-  if (!j) {
-    if (D.error && !D.cargando) return '<section class="card">' + cab() + '<div class="vacio"><div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px">No se pudo consultar esta fecha</div><div>' + esc(D.error) + "</div>" +
-      (D.reintentar ? '<div style="margin-top:14px"><button class="btn prim" data-act="padel-dia-reintentar">Reintentar</button></div>' : "") + "</div></section>";
-    return '<section class="card" aria-busy="true">' + cab() + '<p class="sub">Buscando los datos de ese día…</p>' +
-      [64, 92, 80, 88, 72].map(function (w) { return '<div class="skel" style="width:' + w + '%"></div>'; }).join("") + "</section>";
-  }
-  var h = "";
-  if (D.error) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>No se pudo actualizar este día</b><p>' + esc(D.error) + "</p></div>" +
-    (D.reintentar ? '<button class="btn" data-act="padel-dia-reintentar" style="margin-left:auto">Reintentar</button>' : "") + "</div>";
-  if (j.version !== 1) h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Versión de datos del día no reconocida</b><p>Recarga la página; si sigue igual, avisa a soporte.</p></div></div>';
-  if (!c) return h + '<section class="card">' + cab() + (fs.length ? zDiaTodos(fs, f, hoyJ) : '<div class="vacio">La respuesta no trae clubes para esa fecha.</div>') + "</section>";
-  if (!r) return h + '<section class="card">' + cab() + '<div class="vacio">' + esc(nombreClub(c, cs.indexOf(c)) + " no viene en la respuesta de esa fecha.") + "</div></section>";
-  return h + '<section class="card">' + cab(true) + "</section>" + zDiaClub(r, f, hoyJ);
-}
-/* Todos los clubes en la fecha: canchas, horas arrendadas de las abiertas, ocupación, ingreso y los turnos de la noche */
-function zDiaTodos(fs, f, hoyJ) {
-  var u = S.ui.padel, todas = !!u.todas, M = 1, t = { h: 0, ab: 0, ing: 0, n: 0, can: 0 };
-  // Columnas de turnos de cada club: todo el día (sus turnos fijos) o solo la noche, con su total "x de y"
-  var cols = fs.map(function (r) {
-    if (!todas) return { hs: r.hs, ks: r.ks, sa: r.sa, tot: r.tot };
-    var hs = r.dia ? horasDiaClub(r.ref, [r.dia]) : [], ks = hs.filter(function (x) { return r.ph[x] && typeof r.ph[x] === "object"; }), sa = 0;
-    ks.forEach(function (x) { sa += arrendadasDe(r.ph[x], r.N); });
-    return { hs: hs, ks: ks, sa: sa, tot: ks.length > 0 && sinTraslape(ks) };
-  });
-  fs.forEach(function (r, i) {
-    M = Math.max(M, cols[i].hs.length);
-    if (r.dia) { t.h += num(r.dia.horasArrendadas); t.ab += num(r.dia.horasAbiertas); t.ing += num(r.dia.ingresoEst); t.n++; t.can += contarDia(r.ref, r.N, r.dia).a; }
-  });
-  var fijos = fs.every(function (r) { return r.noche; });
-  var h = '<div class="ctrls">' + segHoras(u) + "</div>" + '<div class="resumen-f">' + esc(t.n ? "Total: " + fmtN(t.can) + (t.can === 1 ? " cancha arrendada · " : " canchas arrendadas · ") + horas(t.h) + " de " + horas(t.ab) + " abiertas" + (t.ab > 0 ? " (" + pct(t.h / t.ab) + ")" : "") + " · ingreso est. " + moneyA(t.ing) +
-    (t.n < fs.length ? " · " + t.n + " de " + fs.length + " clubes con datos" : "") : "Ningún club tiene datos ese día.") + "</div>";
-  h += '<div class="tw"><table class="turnos pd"><thead><tr><th scope="col">Club</th><th scope="col" class="d m-no">Canchas</th><th scope="col" class="d m-no">Horas arrendadas</th>' +
-    '<th scope="col" class="d m-no">Ocupación</th><th scope="col" class="d m-no">Ingreso est.</th><th scope="colgroup" colspan="' + M + '"' + (todas ? "" : ' class="noche"') + ">" + (todas ? "Turnos del día" : "Turnos de la noche") + "</th>" +
-    '<th scope="col" class="tot m-no">' + (todas ? "Total" : "Noche") + "</th></tr></thead><tbody>";
-  fs.forEach(function (r, i) {
-    var c = cols[i], d = r.dia, ab = d ? num(d.horasAbiertas) : 0, hh = d ? num(d.horasArrendadas) : 0, sd = !!d && sinDatoPadel(d);
-    var nom = '<span class="sw bg-' + r.color + '" aria-hidden="true"></span><span><span class="m-no">' + esc(r.nombre) + '</span><span class="solo-m">' + esc(r.corto) + "</span></span>";
-    var res = d ? (ab > 0 ? pct(hh / ab) + " · " : "") + horas(hh) + " de " + horas(ab) + (sd ? " · parcial" : "") : "sin datos ese día";
-    h += "<tr><td>" + (r.id ? '<button class="rk-n" data-act="padel-club" data-v="' + esc(r.id) + '">' + nom + "</button>" : '<span class="rk-n">' + nom + "</span>") +
-      // En el celular las columnas de horas, ocupación, ingreso y total de la noche se esconden: van debajo del nombre
-      (d ? '<div class="n2 solo-m">' + esc(res) + "<br>" + esc(fmtN(r.N) + " canchas · " + moneyA(d.ingresoEst) + (c.tot ? (todas ? " · arrendadas " : " · noche ") + fmtN(c.sa) + " de " + fmtN(c.ks.length * r.N) : "")) + "</div>" : "") + "</td>" +
-      '<td class="d m-no">' + esc(fmtN(r.N)) + "</td>" +
-      '<td class="d m-no">' + (d ? esc(horas(hh)) + "<small>" + esc("de " + horas(ab) + (sd ? " · parcial" : "")) + "</small>" : "—") + "</td>" +
-      '<td class="d m-no">' + (d && ab > 0 ? "<b>" + esc(pct(hh / ab)) + '</b><div class="minibar" aria-hidden="true"><span class="bg-' + r.color + '" style="width:' + (Math.max(0, Math.min(1, hh / ab)) * 100).toFixed(1) + '%"></span></div>' : "—") + "</td>" +
-      '<td class="d m-no">' + (d ? esc(moneyA(d.ingresoEst)) : "—") + "</td>";
-    if (!d || !c.hs.length) h += '<td colspan="' + M + '" class="pd-sin">' + (!d ? "sin datos ese día" : todas ? "sin turnos ese día" : "sin turnos desde las 17:00") + "</td>";
-    else {
-      c.hs.forEach(function (k) { h += '<td><span class="nt-c"><span class="nt-h">' + esc(k) + "</span>" + botonTurno(r.ph[k], r.canchas, r.N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(r.dia, k)) + "</span></td>"; });
-      for (var q = c.hs.length; q < M; q++) h += '<td class="pd-v"></td>'; // club con menos turnos (p. ej. los 5 de La Jaula frente a 11)
-    }
-    h += '<td class="tot m-no">' + (c.tot ? "<b>" + esc(fmtN(c.sa)) + '</b><span style="color:var(--text2)"> / ' + esc(fmtN(c.ks.length * r.N)) + "</span>" : '<span style="color:var(--text3)">—</span>') + "</td></tr>";
-  });
-  h += "</tbody></table></div>";
-  return h + '<p class="pie">' + (fijos
-    ? "Cada celda es arrendadas / canchas del club en un turno fijo de 90 min" + (todas ? "" : " de la noche") + " (la hora va encima); tócala para ver qué canchas estaban arrendadas y cuáles libres. «" + (todas ? "Total" : "Noche") + "» suma las arrendadas de las posibles en esos turnos. "
-    : "Cada celda es arrendadas / canchas del club en esa hora de inicio desde las 17:00; tócala para ver qué canchas estaban arrendadas y cuáles libres. «Noche» solo sale cuando los turnos no se traslapan. ") +
-    "Horas, ocupación e ingreso son del día completo" + (f > hoyJ ? " (lo reservado hasta ahora)" : f === hoyJ ? " (hoy va en curso)" : "") +
-    ". «cerrado» = el club no publicó ese turno ese día (p. ej. festivos); «—» = sin lectura; «parcial» = parte del día sin ninguna lectura.</p>";
-}
-/* Un club en la fecha: KPIs, todas las horas (sus turnos fijos), horas por cancha y reservas detectadas */
-function zDiaClub(r, f, hoyJ) {
-  var d = r.dia, ev = zDiaEventos(r);
-  if (!d) return '<section class="card"><div class="vacio">' + esc("Sin datos de " + r.nombre + " ese día.") + "</div></section>" + (ev.n ? ev.h : "");
-  var ab = num(d.horasAbiertas), hh = num(d.horasArrendadas), sd = sinDatoPadel(d), turnos = turnosClub(r.ref), noche = r.noche, desdeN = noche ? noche.desde : NOCHE_DESDE;
-  var h = '<div class="grid kpis">' +
-    kpi("Horas arrendadas", horas(hh), esc(ab > 0 ? "de " + horas(ab) + " abiertas" + (sd ? " · sin lectura en parte del día" : "") : sd ? "sin lecturas" : "club cerrado"), "azul") +
-    kpi("Ocupación", ab > 0 ? pct(hh / ab) : "—", esc("de las horas abiertas" + (d.festivo === true ? " · festivo" : "")), "naranja") +
-    kpi("Turnos de la noche", r.tot ? fmtN(r.sa) + " de " + fmtN(r.ks.length * r.N) : "—", esc(r.tot ? "canchas arrendadas de las posibles" : r.ks.length ? "inicios traslapados: sin total" : "sin turnos de noche ese día"), "") +
-    kpi("Ingreso estimado", moneyA(d.ingresoEst), esc("precio publicado" + (f > hoyJ ? " · lo reservado hasta ahora" : f === hoyJ ? " · en curso" : "")), "verde") + "</div>";
-  // Todas las horas: una fila por turno (con `turnos`, los fijos del club; un turno sin dato sale "—")
-  var hs = horasDiaClub(r.ref, [d]), ph = r.ph, enNoche = false;
-  var t = '<section class="card"><div class="card-cab"><div><h2>Todas las horas</h2><div class="sub">' +
-    esc("Canchas arrendadas de " + r.N + " en cada " + (turnos ? "turno fijo de 90 min del club" : "hora de inicio") + " · toca una cifra para ver el detalle") + "</div></div></div>";
-  if (!hs.length) t += '<div class="vacio">Sin horas de inicio ese día (club cerrado o sin lecturas).</div>';
-  else {
-    t += '<div class="tw"><table class="pd-h"><thead><tr><th scope="col">' + (turnos ? "Turno" : "Hora") + '</th><th scope="col">Arrendadas</th><th scope="col" class="m-no">Libres</th><th scope="col" class="d m-no">Precio</th></tr></thead><tbody>';
-    hs.forEach(function (k) {
-      var x = ph[k] && typeof ph[k] === "object" ? ph[k] : null, esN = k >= desdeN, cuales = "", libT = "—", prT = "—";
-      if (x) {
-        var a = arrendadasDe(x, r.N), lib = libresDe(x).map(function (l) { return l.c; });
-        var arrC = r.canchas.filter(function (k2) { return lib.indexOf(k2) < 0; });
-        // Se nombran las canchas ("cancha 2", "canchas 1, 3") para no confundir el número de cancha con la cantidad
-        cuales = !a ? "ninguna" : arrC.length === a ? (a === 1 ? "cancha " : "canchas ") + arrC.join(", ") : "";
-        libT = lib.length ? (lib.length === 1 ? "cancha " : "canchas ") + lib.join(", ") : "ninguna";
-        prT = textoPrecio(x) || "—";
-      }
-      t += "<tr" + (esN ? ' class="noche"' : "") + '><th scope="row">' + esc(k) + (esN ? (enNoche ? '<span class="sr"> (noche)</span>' : ' <span class="tag">noche</span>') : "") + "</th>" +
-        '<td><span class="pd-a">' + botonTurno(x, r.canchas, r.N, r.nombre + " · " + diaC(f) + " · " + k, turnoCerrado(d, k)) + (cuales ?"<span>" + esc(cuales) + "</span>" : "") + "</span></td>" +
-        '<td class="m-no">' + esc(libT) + '</td><td class="d m-no">' + esc(prT) + "</td></tr>";
-      if (esN) enNoche = true;
-    });
-    t += "</tbody></table></div>" + '<p class="pie">' + esc((turnos ? "Solo cuentan los turnos fijos de 90 min del club; las horas de inicio intermedias no cuentan. " : noche ? "En la noche solo cuentan los turnos fijos de 90 min del club. " : "") +
-      "Un turno que falta entre turnos publicados cuenta lleno; «cerrado» = el club no publicó ese turno ese día (p. ej. festivos); «—» = sin lectura." + (enNoche ?" Fondo azul = noche, desde las " + desdeN + "." : "")) + "</p>";
-  }
-  t += "</section>";
-  // Horas por cancha: la barra llega a las horas abiertas de una cancha (todas las canchas del club abren igual)
-  var pc = d.porCancha && typeof d.porCancha === "object" ? d.porCancha : {}, porC = ab > 0 ? ab / r.N : 0, maxV = 0;
-  r.canchas.forEach(function (k) { maxV = Math.max(maxV, num(pc[k])); });
-  var tope = porC > 0 ? porC : maxV || 1;
-  var p = '<section class="card"><div class="card-cab"><div><h2>Horas por cancha</h2><div class="sub">' +
-    esc("Horas arrendadas de cada cancha ese día" + (porC > 0 ? " · la barra llega a " + horas(porC) + " (horas abiertas por cancha)" : "")) + '</div></div></div><ul class="cmp pd-c">';
-  r.canchas.forEach(function (k, i) {
-    var v = Math.max(0, num(pc[k])), col = COLOR_CANCHA[i % COLOR_CANCHA.length], w = Math.min(1, v / tope) * 100;
-    p += '<li><span class="cmp-n"><span class="sw bg-' + col + '" aria-hidden="true"></span><span>' + esc("Cancha " + k) + '</span></span><span class="cmp-v">' + esc(horas(v)) +
-      (porC > 0 ? "<small>" + esc(pct(Math.min(1, v / porC))) + "</small>" : "") + '</span><div class="cmp-b" role="img" aria-label="' +
-      esc("Cancha " + k + ": " + horas(v) + " arrendadas" + (porC > 0 ? " de " + horas(porC) + " abiertas" : "")) + '"><span class="bg-' + col + '" style="width:' + w.toFixed(1) + '%"></span></div></li>';
-  });
-  p += "</ul></section>";
-  // Escritorio: horas y canchas a la izquierda, reservas (la lista más larga) a la derecha; cada tarjeta con su alto
-  return h + '<div class="grid g2" style="align-items:start"><div class="grid">' + t + p + "</div>" + ev.h + "</div>";
-}
-/* Reservas detectadas en los turnos de la fecha, por hora del turno → {n, h} */
-function zDiaEventos(r) {
-  var u = S.ui.padel;
-  var evs = arr(r.cd.eventos).filter(function (e) { return e && esFecha(e.f) && esHora(e.hora) && (e.tipo === "reserva" || e.tipo === "liberada"); });
-  evs.sort(function (a, b) {
-    return a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : (num(a.cancha) - num(b.cancha)) || ((Date.parse(a.detectado || "") || 0) - (Date.parse(b.detectado || "") || 0));
-  });
-  var nRes = evs.filter(function (e) { return e.tipo === "reserva"; }).length, nLib = evs.length - nRes;
-  var h = '<section class="card"><div class="card-cab"><div><h2>Reservas detectadas</h2><div class="sub">Cambios vistos entre lecturas en los turnos de ese día · por hora del turno</div></div></div>';
-  if (!evs.length) return { n: 0, h: h + '<div class="vacio">No se detectaron reservas para ese día.</div></section>' };
-  h += '<div class="resumen-f">' + esc(fmtN(nRes) + (nRes === 1 ? " reserva" : " reservas") + (nLib ? " · " + fmtN(nLib) + (nLib === 1 ? " liberada" : " liberadas") : "")) + '</div><ul class="evs">';
-  evs.slice(0, u.devN).forEach(function (e) {
-    var res = e.tipo === "reserva", t = Date.parse(e.detectado || "") || 0;
-    var ant = e.anticipacionH != null && String(e.anticipacionH).trim() !== "" && isFinite(Number(e.anticipacionH));
-    var cancha = /^\d{1,3}$/.test(String(e.cancha)) ? "Cancha " + e.cancha : "Cancha";
-    h += '<li><span class="pt ' + (res ? "bg-green" : "bg-orange") + '" aria-hidden="true"></span><span class="q">' + esc(e.hora + " · " + cancha) + "</span>" +
-      '<span class="cu">' + esc(t ? hace(t) : "—") + '</span><span class="d2">' + esc((res ? "Reservada" : "Liberada") + (ant ? " " + anticipacion(e.anticipacionH) : "") + (num(e.horas) > 0 ? " · " + horas(e.horas) : "")) + "</span></li>";
-  });
-  h += "</ul>";
-  if (evs.length > u.devN) h += '<div class="mas"><button class="btn" data-act="padel-dia-ev-mas">Ver más <span style="color:var(--text2)">(' + fmtN(evs.length - u.devN) + " restantes)</span></button></div>";
-  return { n: evs.length, h: h + "</section>" };
+function tarjetaAd(a, c, conCta, marca) {
+  var m = mAd(a), r = resultado(m, c.destino), mon = c.moneda, est = estadoTxt(a.estado), src = imgPub(a);
+  var k = c.destino === "web" && num(m.compras) > 0
+    ? [["Gasto", plataA(m.gasto, mon)], ["Retorno", veces(div0(m.valor, m.gasto))], ["Compras", fmtN(m.compras)], ["C/compra", plataA(div0(m.gasto, m.compras), mon)]]
+    : [["Gasto", plataA(m.gasto, mon)], [cap(r.t.split(" ")[0]), fmtN(r.n)], ["Costo", r.n ? plataA(costoRes(m, r), mon) : "—"], ["CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—"]];
+  var tienda = a.tienda && num(per30() ? a.tienda.p : a.tienda.p7);
+  return '<article class="ad"><button class="ad-m" data-act="pub-ad" data-c="' + esc(c.id) + '" data-v="' + esc(a.id) + '" aria-label="' + esc("Ver el anuncio " + a.nombre) + '">' +
+    (src ? '<img class="ad-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : "") +
+    '<span class="ad-ph bg-' + (PUB_COLOR[c.id] || "gray") + '" aria-hidden="true">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>" +
+    (a.tipo === "video" ? '<span class="ad-play">' + ICO_PLAY + "</span>" : "") +
+    '<span class="ad-est ' + est[0] + '">' + esc(est[1]) + "</span>" +
+    (marca ? '<span class="ad-tag ' + (marca === "Destacado" ? "bien" : "mal") + '">' + esc(marca) + "</span>" : "") +
+    "</button>" +
+    '<div class="ad-b"><div class="ad-n" title="' + esc(a.nombre) + '">' + esc(a.nombre) + "</div>" +
+    '<div class="ad-s">' + (conCta ? puntoCta(c.id) + esc(PUB_CORTO[c.id]) + " · " : "") + esc(a.campana) + "</div>" +
+    '<div class="ad-k">' + k.map(function (x) { return "<div><span>" + esc(x[0]) + "</span><b>" + esc(x[1]) + "</b></div>"; }).join("") + "</div>" +
+    (tienda ? '<div class="ad-t">' + esc(fmtN(tienda) + (tienda === 1 ? " pedido" : " pedidos") + " en la tienda con su UTM") + "</div>" : "") +
+    "</div></article>";
 }
 
-/* Copia local de /padel. Con 6 clubes y meses de historial el JSON puede pasar de 3 MB y localStorage
-   (~5 M caracteres por sitio, menos en Safari) lo comparte con la copia del dashboard (K_CACHE). Si es grande se
-   guarda recortada: sin porHora en los días de hace más de 4 semanas (la tabla de turnos arranca con 14 filas;
-   el resto de la pestaña usa los totales del día, que se conservan). Una copia recortada va SIN ETag, así la
-   siguiente revisión baja el JSON completo en vez de recibir un 304 y quedarse con la recortada.
-   Devuelve el texto a guardar o null si ni recortada cabe en el límite. */
-var PADEL_COPIA_MAX = 1500000;
-function copiaPadel(nuevo) {
-  var txt = JSON.stringify(nuevo);
-  if (txt.length <= PADEL_COPIA_MAX) return txt;
-  var d = nuevo.data, lim = sumarDias(esFecha(d.hoy) ? d.hoy : hoyPadel(), -28);
-  var rec = {};
-  Object.keys(d).forEach(function (k) { rec[k] = d[k]; });
-  rec.clubes = arr(d.clubes).map(function (c) {
-    if (!c || typeof c !== "object") return c;
-    var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; });
-    x.dias = arr(c.dias).map(function (dd) {
-      if (!dd || !esFecha(dd.f) || dd.f >= lim || !dd.porHora) return dd;
-      var y = {}; Object.keys(dd).forEach(function (k) { if (k !== "porHora") y[k] = dd[k]; }); return y;
-    });
-    return x;
+/* ─────────── Campañas ─────────── */
+function campanasHTML(c) {
+  var filas = [];
+  (c ? [c] : ctasOk()).forEach(function (x) { arr(x.campanas).forEach(function (k) { if (k && (k.estado === "ACTIVE" || num(((per30() ? k.m30 : k.m7) || {}).gasto) > 0)) filas.push({ k: k, c: x }); }); });
+  filas.sort(function (a, b) { return (b.k.estado === "ACTIVE") - (a.k.estado === "ACTIVE") || enCop(((per30() ? b.k.m30 : b.k.m7) || {}).gasto, b.c.moneda) - enCop(((per30() ? a.k.m30 : a.k.m7) || {}).gasto, a.c.moneda); });
+  var h = '<section class="card"><div class="card-cab"><div><h2>Campañas</h2><div class="sub">Activas y las que gastaron en el período · ' + esc(textoPer()) + "</div></div></div>";
+  if (!filas.length) return h + '<div class="vacio">Sin campañas en el período.</div></section>';
+  h += '<div class="tw"><table><thead><tr><th scope="col">Campaña</th><th scope="col">Estado</th><th class="d m-no" scope="col">Presupuesto/día</th><th class="d" scope="col">Gasto</th><th class="d" scope="col">Resultado</th><th class="d m-no" scope="col">Costo por resultado</th><th class="d" scope="col">Retorno</th></tr></thead><tbody>';
+  filas.forEach(function (o) {
+    var m = (per30() ? o.k.m30 : o.k.m7) || {}, r = resultado(m, o.c.destino), est = estadoTxt(o.k.estado), mon = o.c.moneda;
+    h += "<tr><td>" + celdaNombre(o.k.nombre, (c ? "" : PUB_CORTO[o.c.id] + " · ") + fmtN(o.k.anuncios) + (o.k.anuncios === 1 ? " anuncio" : " anuncios")) + "</td>" +
+      '<td><span class="ad-est inl ' + est[0] + '">' + esc(est[1]) + "</span></td>" +
+      '<td class="d m-no">' + esc(o.k.presupuesto ? plata(o.k.presupuesto, mon) : "—") + "</td>" +
+      '<td class="d">' + esc(plata(m.gasto, mon)) + "</td>" +
+      '<td class="d">' + esc(fmtN(r.n)) + '<div class="n2">' + esc(r.t) + "</div></td>" +
+      '<td class="d m-no">' + esc(r.n ? plata(costoRes(m, r), mon) : "—") + "</td>" +
+      '<td class="d">' + esc(o.c.destino === "web" && num(m.valor) ? veces(div0(m.valor, m.gasto)) : "—") + "</td></tr>";
   });
-  txt = JSON.stringify({ etag: null, data: rec, guardado: nuevo.guardado, recortada: true });
-  return txt.length <= PADEL_COPIA_MAX ? txt : null;
+  return h + "</tbody></table></div></section>";
 }
 
-/* Carga de /padel: misma sesión (Bearer), copia local propia y revalidación con If-None-Match.
-   Sin forzar, no repite la consulta si se revisó hace menos de 1 minuto (cambiar de pestaña no martilla el Worker). */
-function revalidarPadel(forzar) {
-  var P = S.padel;
+/* ─────────── Ventana de un anuncio (imagen o video, métricas de 7 y 30 días) ─────────── */
+function abrirAdPub(cid, aid, origen) {
+  var c = ctaPub(cid), a = c && arr(c.anuncios).filter(function (x) { return x.id === aid; })[0];
+  if (!a) return;
+  cerrarAdPub(true);
+  var mon = c.moneda, src = imgPub(a), web = c.destino === "web";
+  function fila(t, f) { return "<tr><th scope=\"row\">" + esc(t) + '</th><td class="d">' + esc(f(a.m7 || {})) + '</td><td class="d">' + esc(f(a.m30 || {})) + "</td></tr>"; }
+  var tabla = '<table class="pm-t"><thead><tr><th></th><th class="d" scope="col">7 días</th><th class="d" scope="col">30 días</th></tr></thead><tbody>' +
+    fila("Gasto", function (m) { return plata(m.gasto, mon); }) +
+    (web ? fila("Compras", function (m) { return fmtN(m.compras); }) + fila("Ventas reportadas", function (m) { return plata(m.valor, mon); }) + fila("Retorno", function (m) { return veces(div0(m.valor, m.gasto)); }) +
+      fila("Costo por compra", function (m) { return m.compras ? plata(div0(m.gasto, m.compras), mon) : "—"; }) : "") +
+    (num((a.m30 || {}).conv) ? fila("Conversaciones", function (m) { return fmtN(m.conv); }) : "") +
+    fila("Impresiones", function (m) { return fmtN(m.imp); }) + fila("Clics", function (m) { return fmtN(m.clics); }) +
+    fila("Costo por clic", function (m) { return m.clics ? plata(div0(m.gasto, m.clics), mon) : "—"; }) +
+    fila("CTR", function (m) { return m.imp ? pct(div0(m.clics, m.imp)) : "—"; }) + fila("Reproducciones", function (m) { return fmtN(m.vistas); }) +
+    "</tbody></table>";
+  var est = estadoTxt(a.estado);
+  var h = '<div class="pm-fondo" data-pm="cerrar"></div><div class="pm" role="dialog" aria-modal="true" aria-labelledby="pm-t">' +
+    '<div class="pm-media" id="pm-media">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="ad-ph bg-' + PUB_COLOR[c.id] + '">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>") +
+    (a.tipo === "video" && !S.dev ? '<div class="pm-carga">Cargando el video…</div>' : "") + "</div>" +
+    '<div class="pm-b"><button class="pm-x" data-pm="cerrar" aria-label="Cerrar">✕</button>' +
+    '<div class="pm-c">' + puntoCta(c.id) + esc(PUB_CORTO[c.id]) + ' · <span class="ad-est inl ' + est[0] + '">' + esc(est[1]) + "</span></div>" +
+    '<h2 id="pm-t">' + esc(a.nombre) + "</h2>" +
+    '<div class="pm-s">' + esc(a.campana) + (a.conjunto ? " · " + esc(a.conjunto) : "") + "</div>" +
+    (a.texto ? '<p class="pm-x2">' + esc(a.texto) + "</p>" : "") +
+    (a.tienda && num(a.tienda.p) ? '<div class="ad-t">' + esc(fmtN(a.tienda.p7) + " pedidos en 7 días y " + fmtN(a.tienda.p) + " en 30 llegaron a la tienda con su UTM") + "</div>" : "") +
+    tabla +
+    '<div class="pm-l">' + (a.enlace ? '<a class="btn prim" href="' + esc(a.enlace) + '" target="_blank" rel="noopener">Ver la publicación ↗</a>' : "") +
+    '<a class="btn" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">Abrir el administrador ↗</a></div></div></div>';
+  var box = document.createElement("div");
+  box.id = "pub-modal"; box.innerHTML = h; document.body.appendChild(box);
+  document.body.classList.add("sin-scroll");
+  S.pub.modal = { origen: origen || null, n: (S.pub.modalN = (S.pub.modalN || 0) + 1) };
+  var x = box.querySelector(".pm-x"); if (x) x.focus();
+  if (a.tipo === "video" && !S.dev && S.token) cargarVideoPub(c, a, S.pub.modal.n);
+}
+function cargarVideoPub(c, a, n) {
+  var gen = S.gen;
+  conTiempo(API + "/publicidad/video?c=" + encodeURIComponent(c.id) + "&ad=" + encodeURIComponent(a.id), { headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 25000)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      var el = $("pm-media"); if (!el || gen !== S.gen || !S.pub.modal || S.pub.modal.n !== n) return;
+      var carga = el.querySelector(".pm-carga");
+      if (j && typeof j.url === "string" && /^https:\/\//.test(j.url)) {
+        var v = document.createElement("video");
+        v.src = j.url; v.controls = true; v.playsInline = true; v.autoplay = true; v.muted = true; v.loop = true; v.setAttribute("playsinline", "");
+        var img = el.querySelector("img"); if (img) v.poster = img.src;
+        el.innerHTML = ""; el.appendChild(v);
+      } else if (carga) carga.textContent = "El video no se puede reproducir aquí: ábrelo con «Ver la publicación».";
+    })
+    .catch(function () { var el = $("pm-media"), carga = el && el.querySelector(".pm-carga"); if (carga) carga.textContent = "No se pudo cargar el video."; });
+}
+function cerrarAdPub(sinFoco) {
+  var b = $("pub-modal"); if (!b) return;
+  var v = b.querySelector("video"); if (v) { try { v.pause(); } catch (e) {} }
+  b.remove(); document.body.classList.remove("sin-scroll");
+  var o = S.pub.modal && S.pub.modal.origen; S.pub.modal = null;
+  if (!sinFoco && o && document.contains(o)) { try { o.focus({ preventScroll: true }); } catch (e) {} }
+}
+document.addEventListener("click", function (ev) { var t = ev.target.closest && ev.target.closest("[data-pm]"); if (t && t.getAttribute("data-pm") === "cerrar") cerrarAdPub(); });
+document.addEventListener("keydown", function (ev) {
+  var b = $("pub-modal"); if (!b) return;
+  if (ev.key === "Escape") { ev.stopPropagation(); cerrarAdPub(); return; }
+  if (ev.key === "Tab") { // el foco no se sale de la ventana
+    var f = b.querySelectorAll("button,a[href],video"); if (!f.length) return;
+    var p = f[0], u = f[f.length - 1];
+    if (ev.shiftKey && document.activeElement === p) { ev.preventDefault(); u.focus(); }
+    else if (!ev.shiftKey && document.activeElement === u) { ev.preventDefault(); p.focus(); }
+  }
+}, true);
+/* Miniatura que no carga (aún no guardada o vencida): queda el fondo de color con la plataforma */
+document.addEventListener("error", function (ev) { var t = ev.target; if (t && t.tagName === "IMG" && (t.classList.contains("ad-img") || t.closest("#pm-media"))) t.remove(); }, true);
+
+/* ─────────── Carga de /publicidad (sesión, copia local propia, If-None-Match) ─────────── */
+function revalidarPub(forzar) {
+  var Pu = S.pub;
   if (S.dev || !S.token) return Promise.resolve();
-  if (P.cargando && Date.now() - P.desde < 60000) return Promise.resolve();
-  if (!forzar && P.data && !P.error && Date.now() - P.revisado < 60000) return Promise.resolve();
+  if (Pu.cargando && Date.now() - Pu.desde < 60000) return Promise.resolve();
+  if (!forzar && Pu.data && !Pu.error && Date.now() - Pu.revisado < 60000) return Promise.resolve();
   var gen = S.gen, tok = S.token;
   function vigente() { return gen === S.gen && tok === S.token; }
-  P.cargando = true; P.desde = Date.now();
-  // Lo que cambia la vista (sin datos, la vista depende también de P.cargando): si al final es igual, no se redibuja
-  function firma() { return P.data ? "d\u0001" + (P.error || "") : "s\u0001" + (P.error || "") + "\u0001" + (P.vacio || ""); }
-  var firmaAntes = firma();
-  if (S.tab === "padel") { $("b-refrescar").classList.add("girando"); pintarEstado(); }
+  Pu.cargando = true; Pu.desde = Date.now();
+  if (S.tab === "publicidad") { $("b-refrescar").classList.add("girando"); pintarEstado(); if (!Pu.data) render(); }
   var hd = { Authorization: "Bearer " + tok };
-  if (P.etag && P.data) hd["If-None-Match"] = P.etag;
-  var opts = { headers: hd, cache: "no-store" }, nuevo = null;
-  var p = conTiempo(API + "/padel", opts, 30000);
-  P.ctl = opts._ctl || null;
+  if (Pu.etag && Pu.data) hd["If-None-Match"] = Pu.etag;
+  var opts = { headers: hd, cache: "no-store" }, nuevo = null, cambio = false;
+  var p = conTiempo(API + "/publicidad", opts, 30000);
+  Pu.ctl = opts._ctl || null;
   return p.then(function (r) {
     if (!vigente()) return;
-    if (r.status === 304) { P.error = null; P.vacio = null; P.revisado = Date.now(); return; }
+    if (r.status === 304) { Pu.error = null; Pu.vacio = null; Pu.revisado = Date.now(); return; }
     if (r.status === 401) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return; }
     if (r.status === 404 || r.status === 503) {
       return leerError(r).then(function (m) {
         if (!vigente()) return;
-        P.error = null; P.revisado = Date.now();
-        if (!P.data) P.vacio = m || "Todavía no hay lecturas de easycancha: la primera corrida automática no ha terminado. Vuelve a intentar en unos minutos.";
+        Pu.error = null; Pu.revisado = Date.now(); cambio = true;
+        if (!Pu.data) Pu.vacio = m || "La primera lectura de Meta y TikTok todavía no termina. Vuelve a intentar en unos minutos.";
       });
     }
     if (!r.ok) { var eh = new Error("El servidor respondió con un error (" + r.status + ")."); eh.http = true; throw eh; }
     var etag = r.headers.get("ETag");
-    // Un 200 que no es JSON (página HTML de un proxy, cuerpo cortado) es un problema de datos, no de conexión
     return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); }).then(function (j) {
       if (!vigente()) return;
-      if (!datosPadelValidos(j)) throw errorDatos("respuesta sin clubes");
-      P.data = j; P.etag = etag || null; P.error = null; P.vacio = null; P.revisado = Date.now();
-      // Si el club elegido ya no viene en los datos, clubPadel() muestra "Todos"
-      nuevo = { etag: etag || null, data: j, guardado: Date.now() };
+      if (!pubValida(j)) throw errorDatos("respuesta sin cuentas");
+      Pu.data = j; Pu.etag = etag || null; Pu.error = null; Pu.vacio = null; Pu.revisado = Date.now();
+      nuevo = { etag: etag || null, data: j, guardado: Date.now() }; cambio = true;
     });
   }).catch(function (e) {
     if (!vigente()) return;
-    P.vacio = null; // un error posterior a un "todavía no hay datos" se tiene que ver
-    P.error = e && e.datos ? "Los datos recibidos no se pudieron mostrar (" + e.message + ")." : e && e.http ? e.message :
+    Pu.vacio = null; cambio = true;
+    Pu.error = e && e.datos ? "Los datos recibidos no se pudieron mostrar (" + e.message + ")." : e && e.http ? e.message :
       e && e.name === "AbortError" ? "El servidor tardó demasiado en responder." : "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
   }).then(function () {
-    if (gen !== S.gen) return; // cerrarSesion ya dejó todo limpio
-    P.cargando = false; P.ctl = null;
+    if (gen !== S.gen) return;
+    Pu.cargando = false; Pu.ctl = null;
     if (!S.cargando) $("b-refrescar").classList.remove("girando");
     var fallo = false;
-    // Un 304 o una respuesta sin cambios visibles no redibuja (no se pierde el deslizamiento de las tablas ni el tooltip).
-    // Si hay datos nuevos se redibuja conservando el deslizamiento lateral de cada tabla.
-    if (S.tab === "padel" && (nuevo || !P.data || firma() !== firmaAntes)) {
-      var desl = Array.prototype.map.call(document.querySelectorAll("#view .tw"), function (x) { return x.scrollLeft; });
-      render(); fallo = S.fallaRender;
-      Array.prototype.forEach.call(document.querySelectorAll("#view .tw"), function (x, i) { if (desl[i]) x.scrollLeft = desl[i]; });
-    }
+    if (S.tab === "publicidad" && (cambio || !Pu.data)) { render(); fallo = S.fallaRender; }
     pintarEstado();
-    // Solo se guarda una copia que se pudo dibujar (y que no se coma el espacio de la copia del dashboard)
-    if (nuevo) { var cp = fallo ? null : copiaPadel(nuevo); if (!cp || !ls.set(K_PADEL, cp)) ls.del(K_PADEL); }
+    if (nuevo) { var cp = fallo ? null : JSON.stringify(nuevo); if (!cp || cp.length > 1500000 || !ls.set(K_PUB, cp)) ls.del(K_PUB); }
   });
+}
+/* «Leer ahora»: pide al Worker una lectura nueva de Meta, TikTok y la tienda (tarda ~30 s; como mucho cada 10 min) */
+function leerAhoraPub() {
+  if (S.dev || !S.token || S.pub.leyendo) return;
+  var gen = S.gen; S.pub.leyendo = true; S.pub.msg = "Leyendo Meta, TikTok y la tienda… tarda cerca de medio minuto."; render();
+  conTiempo(API + "/publicidad/sync", { method: "POST", headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 150000)
+    .then(function (r) {
+      if (gen !== S.gen) return null;
+      if (r.status === 401) { cerrarSesion("Tu sesión venció. Vuelve a entrar."); return null; }
+      return r.json().then(function (j) {
+        if (r.status === 429 || r.status === 409) return textoError(j) || "Ya hay una lectura en curso. Espera unos minutos.";
+        if (!r.ok || !j || j.ok === false) return "La lectura falló: " + ((j && (j.error || textoError(j))) || "error " + r.status) + ".";
+        return "Listo: datos leídos ahora mismo" + (j.fallidas && j.fallidas.length ? " (sin " + j.fallidas.map(function (x) { return PUB_CORTO[x] || x; }).join(", ") + ")" : "") + ".";
+      }, function () { return r.ok ? "Listo." : "El servidor respondió " + r.status + "."; });
+    })
+    .catch(function (e) { return e && e.name === "AbortError" ? "La lectura tardó demasiado; puede seguir en el servidor. Vuelve a cargar en un minuto." : "No se pudo contactar el servidor."; })
+    .then(function (m) {
+      if (gen !== S.gen) return;
+      S.pub.leyendo = false;
+      if (m == null) return;
+      S.pub.msg = m; render();
+      return revalidarPub(true).then(function () { setTimeout(function () { if (gen === S.gen && S.pub.msg === m) { S.pub.msg = null; if (S.tab === "publicidad") pintarAvisos(); } }, 9000); });
+    });
 }
 
 /* ═══════════ Render ═══════════ */
-var VISTAS = { resumen: vResumen, productos: vProductos, clientes: vClientes, vendedores: vVendedores, inventario: vInventario, cartera: vCartera, movimiento: vMovimiento, padel: vPadel };
+var VISTAS = { resumen: vResumen, productos: vProductos, clientes: vClientes, vendedores: vVendedores, inventario: vInventario, cartera: vCartera, movimiento: vMovimiento, publicidad: vPublicidad };
 var ZONAS = { prod: ["z-prod", zProductos], top: ["z-top", zTop], riesgo: ["z-riesgo", zRiesgo], inv: ["z-inv", zInv], car: ["z-car", zCartera], mov: ["z-mov", zMov], mensual: ["z-mensual", zMensual] };
 
 function pintarTabs() {
@@ -2584,8 +1953,8 @@ function restaurarFoco(f) {
   if (f.ini != null) { try { n.setSelectionRange(f.ini, f.fin); } catch (e) {} }
 }
 function render() {
-  // Casa Padel no depende del JSON del dashboard: se dibuja aunque /data no haya cargado o haya fallado
-  if (!S.data && S.tab !== "padel") {
+  // Publicidad no depende del JSON del dashboard: se dibuja aunque /data no haya cargado o haya fallado
+  if (!S.data && S.tab !== "publicidad") {
     ocultarTip(); S.charts = [];
     $("view").innerHTML = S.msgSinDatos ? sinDatosHTML(S.msgSinDatos) : cargandoHTML();
     pintarAvisos(); return;
@@ -2615,19 +1984,19 @@ function renderZona(t) {
 function irTab(t, enfocar) {
   if (!propia(VISTAS, t)) t = "resumen";
   S.tab = t; guardarPref();
-  try { history.replaceState(null, "", "#" + hashTab(t)); } catch (e) {}
+  try { history.replaceState(null, "", "#" + t); } catch (e) {}
   pintarTabs(); render(); pintarEstado(); window.scrollTo(0, 0);
-  if (t === "padel") revalidarPadel();
+  if (t === "publicidad") revalidarPub();
   var b = $("tab-" + t); if (b) { b.scrollIntoView({ block: "nearest", inline: "nearest" }); if (enfocar) b.focus(); }
   marcarDesborde();
 }
-function guardarPref() { ls.set(K_PREF, JSON.stringify({ periodo: S.periodo, tab: S.tab, padelClub: S.ui.padel.club })); }
+function guardarPref() { ls.set(K_PREF, JSON.stringify({ periodo: S.periodo, tab: S.tab, pubCta: S.ui.pub.cta, pubPer: S.ui.pub.per })); }
 
 /* ─────────── Estado de actualización y avisos ─────────── */
 function pintarEstado() {
   var el = $("estado"), d = S.data;
   if (S.dev) { el.innerHTML = '<span class="punto"></span><span>Vista previa local</span>'; return; }
-  if (S.tab === "padel") { pintarEstadoPadel(); return; }
+  if (S.tab === "publicidad") { pintarEstadoPub(); return; }
   if (!d) { el.innerHTML = '<span class="punto off"></span><span>' + (S.cargando ? "Cargando…" : "Sin datos") + "</span>"; return; }
   var t = Date.parse(d.sincronizado || d.generado || "") || 0;
   var viejo = t && Date.now() - t > 90 * 60000;
@@ -2636,26 +2005,23 @@ function pintarEstado() {
   el.innerHTML = '<span class="punto' + (S.errorRed ? " off" : viejo ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>";
   el.title = t ? "Última sincronización con Siigo: " + new Date(t).toLocaleString("es-CO") : "";
 }
-/* En Casa Padel el indicador muestra la última lectura de easycancha */
-function pintarEstadoPadel() {
-  var el = $("estado"), P = S.padel, c = clubPadel();
-  if (!P.data) { el.innerHTML = '<span class="punto off"></span><span>' + (P.cargando ? "Cargando…" : P.error ? "No se pudo cargar" : "Sin datos") + "</span>"; el.title = ""; return; }
-  // Vista "Todos": la lectura más reciente (el ranking muestra la de cada club)
-  var l = c || !clubesPadel().length ? lecturaPadel(c) : lecturaTodos(), t = l.t;
-  var txt = (t ? "Lectura " + hace(t) : "Sin lecturas") + (P.error ? " · copia guardada" : "");
-  el.innerHTML = '<span class="punto' + (P.error ? " off" : l.viejo ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>";
-  el.title = t ? "Última lectura de easycancha: " + new Date(t).toLocaleString("es-CO") : "";
-  // La cabecera de la pestaña repite la lectura: se actualiza con el mismo reloj para que no quede atrás
-  var pl = $("p-lect"); if (pl && (c || clubesPadel().length)) pl.innerHTML = textoLecturaPadel(c);
-  if (!c) clubesPadel().forEach(function (x, i) {
-    var lx = lecturaPadel(x), id = idClub(x, i);
-    document.querySelectorAll('#view [data-lect="' + CSS.escape(id) + '"]').forEach(function (n) { n.textContent = lx.t ? hace(lx.t) : "sin lecturas"; n.classList.toggle("naranja", lx.viejo); });
-  });
+/* En Publicidad el indicador muestra cuándo se armó la foto de Meta y TikTok */
+function pintarEstadoPub() {
+  var el = $("estado"), Pu = S.pub;
+  if (!Pu.data) { el.innerHTML = '<span class="punto off"></span><span>' + (Pu.cargando ? "Cargando…" : Pu.error ? "No se pudo cargar" : "Sin datos") + "</span>"; el.title = ""; return; }
+  var t = Date.parse(Pu.data.generado || "") || 0, viejo = t && Date.now() - t > 30 * 3600000;
+  var txt = (t ? "Leído " + hace(t) : "Sin fecha") + (Pu.error ? " · copia guardada" : "");
+  el.innerHTML = '<span class="punto' + (Pu.error ? " off" : viejo ? " viejo" : "") + '"></span><span>' + esc(txt) + "</span>";
+  el.title = t ? "Última lectura de Meta, TikTok y Shopify: " + new Date(t).toLocaleString("es-CO") : "";
 }
 function pintarAvisos() {
   var h = "", d = S.data;
-  // En Casa Padel los avisos del dashboard de ventas no aplican (esa pestaña trae los suyos)
-  if (S.tab === "padel") d = null;
+  // En Publicidad los avisos del dashboard de ventas no aplican (esa pestaña trae los suyos)
+  if (S.tab === "publicidad") {
+    if (S.pub.msg) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Leer ahora</b><p>' + esc(S.pub.msg) + "</p></div></div>";
+    if (S.pub.error && S.pub.data) h += '<div class="aviso info"><span class="ic" aria-hidden="true">i</span><div><b>Mostrando la última copia guardada</b><p>' + esc(S.pub.error) + "</p></div></div>";
+    $("avisos").innerHTML = h; return;
+  }
   if (d && d.backfillCompleto === false) {
     var det = describirEstado(S.estadoSync);
     h += '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Cargando el historial desde Siigo</b><p>La primera sincronización todavía está trayendo meses antiguos: los totales históricos pueden estar incompletos por ahora.' + (det ? " " + esc(det) : "") + "</p></div></div>";
@@ -2741,10 +2107,10 @@ function revalidar() {
       S.errorRed = null; S.revisado = Date.now();
       // Primero se pinta; solo si funcionó se guarda la copia local (así no queda guardada una copia que rompe)
       try { aplicarDatos(j, etag); } catch (e) { throw errorDatos(e && e.message ? e.message : "error al dibujar"); }
-      // (en Casa Padel el dibujo no usa este JSON: su resultado no decide si se guarda la copia)
-      // Si no cabe, primero se suelta la copia de Casa Padel (se vuelve a bajar sola) y se intenta otra vez
+      // (en Publicidad el dibujo no usa este JSON: su resultado no decide si se guarda la copia)
+      // Si no cabe, primero se suelta la copia de Publicidad (se vuelve a bajar sola) y se intenta otra vez
       var copia = JSON.stringify({ etag: etag, data: j, guardado: Date.now() });
-      if ((S.fallaRender && S.tab !== "padel") || !(ls.set(K_CACHE, copia) || (ls.del(K_PADEL), ls.set(K_CACHE, copia)))) ls.del(K_CACHE);
+      if ((S.fallaRender && S.tab !== "publicidad") || !(ls.set(K_CACHE, copia) || (ls.del(K_PUB), ls.set(K_CACHE, copia)))) ls.del(K_CACHE);
       if (j.backfillCompleto === false) cargarEstado();
     });
   }).catch(function (e) {
@@ -2754,7 +2120,7 @@ function revalidar() {
     if (!S.data) mostrarSinDatos(S.errorRed + (e && e.datos ? " Avisa a soporte si sigue igual." : " Revisa tu internet y vuelve a intentar."));
   }).then(function () {
     if (gen !== S.gen) return; // cerrarSesion ya dejó todo limpio
-    S.cargando = false; S.ctl = null; if (!S.padel.cargando) $("b-refrescar").classList.remove("girando"); pintarEstado(); pintarAvisos();
+    S.cargando = false; S.ctl = null; if (!S.pub.cargando) $("b-refrescar").classList.remove("girando"); pintarEstado(); pintarAvisos();
   });
 }
 function cargarEstado() {
@@ -2767,7 +2133,7 @@ function cargarEstado() {
 }
 function mostrarSinDatos(msg) {
   S.msgSinDatos = msg;
-  if (S.tab === "padel") return; // Casa Padel tiene su propia carga: no se le pisa la vista
+  if (S.tab === "publicidad") return; // Publicidad tiene su propia carga: no se le pisa la vista
   $("view").innerHTML = sinDatosHTML(msg);
 }
 function sinDatosHTML(msg) {
@@ -2816,10 +2182,9 @@ function cerrarSesion(msg) {
   // Invalida y cancela lo que esté en vuelo: ninguna respuesta vieja vuelve a guardar datos
   S.gen++;
   if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
-  if (S.padel.ctl) { try { S.padel.ctl.abort(); } catch (e) {} }
-  if (S.padel.dia.ctl) { try { S.padel.dia.ctl.abort(); } catch (e) {} }
-  S.padel = padelInicial(); S.msgSinDatos = null;
-  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PADEL); ls.del("letos_locatel_cache"); // copia de locatel.html (misma sesión)
+  if (S.pub.ctl) { try { S.pub.ctl.abort(); } catch (e) {} }
+  cerrarAdPub(true); S.pub = pubInicial(); S.msgSinDatos = null;
+  ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PUB); ls.del("letos_padel_cache"); ls.del("letos_locatel_cache"); // copia de locatel.html (misma sesión)
   S.token = null; S.data = null; S.etag = null; S.memo = {}; S.errorRed = null;
   S.cargando = false; S.usuario = null; S.rol = null; S.estadoSync = null; S.msgSync = null; S.syncEnCurso = false;
   S.ui = uiInicial();
@@ -2855,11 +2220,7 @@ $("f-login").addEventListener("submit", function (ev) {
       $("l-clave").value = "";
       mostrarApp();
       $("view").innerHTML = cargandoHTML();
-      if (S.tab === "padel") {
-        render(); revalidarPadel(true);
-        // Fecha consultada que estaba en la URL (#padel/2026-10-12) antes de entrar
-        var fUrl = S.padel.dia.fecha || fechaDeHash(location.hash.slice(1)); if (fUrl) abrirDiaPadel(fUrl, true);
-      }
+      if (S.tab === "publicidad") { render(); revalidarPub(true); }
       return revalidar();
     })
     .catch(function (e) {
@@ -2905,7 +2266,7 @@ document.addEventListener("keydown", function (ev) {
 });
 $("b-refrescar").addEventListener("click", function () {
   if (S.dev) { location.reload(); return; }
-  if (S.tab === "padel") { revalidarPadel(true); if (S.padel.dia.fecha) cargarDiaPadel(S.padel.dia.fecha); } else revalidar();
+  if (S.tab === "publicidad") revalidarPub(true); else revalidar();
 });
 
 /* ═══════════ Eventos de la vista (delegación) ═══════════ */
@@ -2959,62 +2320,20 @@ $("view").addEventListener("click", function (ev) {
   }
   if (act === "mov-abrir") { var c = b.getAttribute("data-c"); S.ui.mov.abierto = S.ui.mov.abierto === c ? "" : c; renderZona("mov"); var fila = document.querySelector('[data-act="mov-abrir"][data-c="' + CSS.escape(c) + '"]'); if (fila) fila.focus({ preventScroll: true }); return; }
   if (act === "reintentar") { S.msgSinDatos = null; $("view").innerHTML = cargandoHTML(); revalidar(); return; }
-  // Casa Padel
-  if (act === "padel-rango") { if (S.ui.padel.rango !== v) { S.ui.padel.rango = v; render(); } return; }
-  if (act === "padel-club") {
-    if (!/^[\w-]{1,20}$/.test(v || "")) return;
-    var cambio = S.ui.padel.club !== v;
-    S.ui.padel.club = v; S.ui.padel.n = 14; S.ui.padel.evN = 15; S.ui.padel.devN = 20; guardarPref(); render(); pintarEstado();
-    // Desde el ranking (más abajo) se sube hasta el selector; el botón elegido queda a la vista dentro del carrusel
-    var ps = $("p-sel"), on = ps && ps.querySelector('[aria-pressed="true"]');
-    if (ps && cambio && ps.getBoundingClientRect().top < 0) window.scrollTo(0, Math.max(0, window.scrollY + ps.getBoundingClientRect().top - 120));
-    // (render() ya dejó centrado en el carrusel el botón elegido: ver centrarSelectorPadel)
-    if (on && cambio && !$("view").contains(document.activeElement)) { try { on.focus({ preventScroll: true }); } catch (e) {} }
+  // Publicidad
+  if (act === "pub-per") { if (S.ui.pub.per !== v) { S.ui.pub.per = v === "30" ? "30" : "7"; S.ui.pub.n = 12; guardarPref(); render(); } return; }
+  if (act === "pub-cta") {
+    var nc = v === "todas" || ctaPub(v) ? v : "todas";
+    if (S.ui.pub.cta !== nc) { S.ui.pub.cta = nc; S.ui.pub.n = 12; guardarPref(); render(); window.scrollTo(0, 0); }
+    var bc = document.querySelector('#view .pub-sel [data-v="' + CSS.escape(nc) + '"]'); if (bc) bc.scrollIntoView({ block: "nearest", inline: "center" });
     return;
   }
-  if (act === "padel-orden") {
-    var ko = b.getAttribute("data-k"), o = S.ui.padel.orden;
-    if (!/^(nombre|N|ayer|h7|h30|oc7|oc30|ing30|lt)$/.test(ko || "")) return;
-    S.ui.padel.orden = o.k === ko ? { k: ko, dir: -o.dir } : { k: ko, dir: ko === "nombre" ? 1 : -1 };
-    render(); return;
-  }
-  if (act === "padel-noche") { var nf = v === "1" ? "1" : "0"; if (S.ui.padel.nocheF !== nf) { S.ui.padel.nocheF = nf; render(); } return; }
-  if (act === "padel-horas") { var nt = v === "1" ? true : v === "0" ? false : !S.ui.padel.todas; if (S.ui.padel.todas !== nt) { S.ui.padel.todas = nt; render(); } return; }
-  if (act === "padel-mas") { S.ui.padel.n += 14; render(); return; }
-  if (act === "padel-cd-mas") { S.ui.padel.cdN = (S.ui.padel.cdN || 14) + 14; render(); return; }
-  if (act === "padel-ev") { if (S.ui.padel.ev !== v) { S.ui.padel.ev = v; S.ui.padel.evN = 15; render(); } return; }
-  if (act === "padel-ev-mas") { S.ui.padel.evN += 30; render(); return; }
-  if (act === "padel-reintentar") { revalidarPadel(true); render(); return; }
-  if (act === "padel-tip") { tipCelda(b); return; }
-  // Consultar una fecha ("Ver" va por el submit del formulario, más abajo)
-  if (act === "padel-dia-cerrar") {
-    var enVista = $("view").contains(document.activeElement);
-    cerrarDiaPadel();
-    var bv = document.querySelector('#view [data-act="padel-dia-ver"]');
-    if (bv && enVista) { try { bv.focus({ preventScroll: true }); } catch (e) {} }
-    return;
-  }
-  if (act === "padel-dia-reintentar") { if (S.padel.dia.fecha) cargarDiaPadel(S.padel.dia.fecha); return; }
-  if (act === "padel-dia-ev-mas") { S.ui.padel.devN += 30; render(); return; }
+  if (act === "pub-act") { var na = v === "1"; if (S.ui.pub.activos !== na) { S.ui.pub.activos = na; S.ui.pub.n = 12; render(); } return; }
+  if (act === "pub-mas") { S.ui.pub.n += 12; render(); return; }
+  if (act === "pub-ad") { abrirAdPub(b.getAttribute("data-c"), v, b); return; }
+  if (act === "pub-sync") { leerAhoraPub(); return; }
+  if (act === "pub-reintentar") { revalidarPub(true); render(); return; }
 });
-/* Casa Padel: "Consultar una fecha" (botón Ver o Enter en el campo) */
-$("view").addEventListener("submit", function (ev) {
-  if (!ev.target || ev.target.id !== "pd-form") return;
-  ev.preventDefault(); verDiaPadel();
-});
-/* Casa Padel: detalle de las celdas de turnos y del mapa de calor en el mismo #tip de los gráficos.
-   Tocar o Enter lo abre; pasar el mouse también; Escape, tocar fuera o deslizar la tabla lo cierra. */
-function tipCelda(b) { var r = b.getBoundingClientRect(); verTip(b.getAttribute("data-tip") || "", r.left + r.width / 2, r.top); }
-$("view").addEventListener("pointerover", function (ev) {
-  if (ev.pointerType !== "mouse" || !ev.target.closest) return;
-  var b = ev.target.closest('[data-act="padel-tip"]'); if (b) tipCelda(b);
-});
-$("view").addEventListener("pointerout", function (ev) {
-  if (ev.pointerType !== "mouse" || !ev.target.closest) return;
-  var b = ev.target.closest('[data-act="padel-tip"]');
-  if (b && !(ev.relatedTarget && b.contains(ev.relatedTarget))) ocultarTip();
-});
-$("view").addEventListener("scroll", function (ev) { if (S.tab === "padel" && ev.target.classList && ev.target.classList.contains("tw")) ocultarTip(); }, { capture: true, passive: true });
 $("view").addEventListener("keydown", function (ev) {
   if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches("tr[data-act]")) { ev.preventDefault(); ev.target.click(); }
 });
@@ -3028,7 +2347,7 @@ $("view").addEventListener("change", function (ev) {
     S.ui.car[act === "car-desde" ? "desde" : "hasta"] = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : "";
     S.ui.car.rapido = "todas"; S.ui.car.n = 50; render();
   }
-  else if (act === "padel-dia-f") S.ui.padel.diaF = el.value; // se recuerda lo elegido aunque la vista se redibuje
+  else if (act === "pub-orden") { S.ui.pub.orden = PUB_ORDENES.some(function (o) { return o[0] === el.value; }) ? el.value : "gasto"; S.ui.pub.n = 12; render(); }
 });
 var tBusca = null;
 $("view").addEventListener("input", function (ev) {
@@ -3041,60 +2360,54 @@ $("view").addEventListener("input", function (ev) {
 var anchoPrevio = window.innerWidth, tRes = null;
 window.addEventListener("resize", function () {
   clearTimeout(tRes);
-  tRes = setTimeout(function () { marcarDesborde(); if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (S.data || S.tab === "padel") render(); } }, 180);
+  tRes = setTimeout(function () { marcarDesborde(); if (window.innerWidth !== anchoPrevio) { anchoPrevio = window.innerWidth; if (S.data || S.tab === "publicidad") render(); } }, 180);
 });
 window.addEventListener("hashchange", function () {
-  var t = location.hash.slice(1), fd = fechaDeHash(t);
-  // Casa Padel con una fecha consultada (#padel/2026-10-12); "#padel" a secas la cierra
-  if (fd) { if (S.tab !== "padel") irTab("padel"); if (fd !== S.padel.dia.fecha) abrirDiaPadel(fd, false); else hashPadel(); return; }
-  if (t === "padel" && S.tab === "padel" && S.padel.dia.fecha) { cerrarDiaPadel(); return; }
+  var t = location.hash.slice(1);
   if (propia(VISTAS, t) && t !== S.tab) irTab(t);
 });
 
 /* Reloj del indicador + revalidación periódica */
 setInterval(pintarEstado, 30000);
-setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) { revalidar(); if (S.tab === "padel") revalidarPadel(); } }, 5 * 60000);
+setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) { revalidar(); if (S.tab === "publicidad") revalidarPub(); } }, 5 * 60000);
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState !== "visible" || !S.token || S.dev) return;
   if (Date.now() - S.revisado > 60000) revalidar();
-  if (S.tab === "padel") revalidarPadel();
+  if (S.tab === "publicidad") revalidarPub();
 });
 
 /* ═══════════ Arranque ═══════════ */
 (function iniciar() {
   var pref = ls.json(K_PREF) || {};
   if (pref.periodo && /^(3|6|12|todo)$/.test(pref.periodo)) S.periodo = pref.periodo;
-  if (typeof pref.padelClub === "string" && /^[\w-]{1,20}$/.test(pref.padelClub)) S.ui.padel.club = pref.padelClub;
-  var h = location.hash.slice(1), fHash = fechaDeHash(h);
-  // #padel/2026-10-12 = Casa Padel con esa fecha consultada: se abre al final, con sesión o en vista previa
-  // (sin sesión la abre el login, que la lee de la URL)
-  if (fHash) { h = "padel"; S.ui.padel.diaF = fHash; }
+  if (typeof pref.pubCta === "string" && /^(todas|[a-z_]{3,30})$/.test(pref.pubCta)) S.ui.pub.cta = pref.pubCta;
+  if (pref.pubPer === "30") S.ui.pub.per = "30";
+  var h = location.hash.slice(1);
+  if (h === "padel" || /^padel[/]/.test(h)) h = "publicidad"; // enlaces viejos de Casa Padel
   S.tab = propia(VISTAS, h) ? h : propia(VISTAS, pref.tab) ? pref.tab : "resumen";
 
-  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json>, ?padel=<ruta relativa .json>
-  // y/o ?padeldia=<ruta relativa .json> (respuesta fija de /padel/dia para cualquier fecha)
+  // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json> y/o ?pub=<ruta relativa .json>
   var host = location.hostname;
-  var datos = null, padelJ = null, padelDiaJ = null;
-  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); padelJ = qs.get("padel"); padelDiaJ = qs.get("padeldia"); } catch (e) {}
-  if ((host === "localhost" || host === "127.0.0.1") && (datos || padelJ || padelDiaJ)) {
+  var datos = null, pubJ = null;
+  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); pubJ = qs.get("pub"); } catch (e) {}
+  if ((host === "localhost" || host === "127.0.0.1") && (datos || pubJ)) {
     var rutaOk = function (x) { return !x || (/^[\w.\-\/]+\.json$/.test(x) && x.indexOf("//") < 0); };
-    if (!rutaOk(datos) || !rutaOk(padelJ) || !rutaOk(padelDiaJ)) { document.body.textContent = "Parámetro ?datos, ?padel o ?padeldia inválido: debe ser una ruta relativa a un .json"; return; }
-    S.dev = true; S.devPadelDia = padelDiaJ || null;
-    if (!datos) S.msgSinDatos = "Vista previa sin ?datos=: solo se puede ver la pestaña Casa Padel.";
-    if (padelJ) S.padel.cargando = true; else S.padel.vacio = "Vista previa sin ?padel=<ruta .json>.";
+    if (!rutaOk(datos) || !rutaOk(pubJ)) { document.body.textContent = "Parámetro ?datos o ?pub inválido: debe ser una ruta relativa a un .json"; return; }
+    S.dev = true;
+    if (!datos) S.msgSinDatos = "Vista previa sin ?datos=: solo se puede ver la pestaña Publicidad.";
+    if (pubJ) S.pub.cargando = true; else S.pub.vacio = "Vista previa sin ?pub=<ruta .json>.";
     mostrarApp(); render();
     if (datos) {
       fetch(datos, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (j) { aplicarDatos(j, null); })
         .catch(function (e) { mostrarSinDatos("No se pudo leer " + datos + ": " + e.message); });
     }
-    if (padelJ) {
-      fetch(padelJ, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-        .then(function (j) { if (!datosPadelValidos(j)) throw new Error("el JSON no trae clubes"); S.padel.data = j; })
-        .catch(function (e) { S.padel.error = "No se pudo leer " + padelJ + ": " + e.message + "."; })
-        .then(function () { S.padel.cargando = false; if (S.tab === "padel") render(); });
+    if (pubJ) {
+      fetch(pubJ, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (j) { if (!pubValida(j)) throw new Error("el JSON no trae cuentas"); S.pub.data = j; })
+        .catch(function (e) { S.pub.error = "No se pudo leer " + pubJ + ": " + e.message + "."; })
+        .then(function () { S.pub.cargando = false; if (S.tab === "publicidad") render(); });
     }
-    if (fHash) abrirDiaPadel(fHash, false);
     return;
   }
 
@@ -3103,28 +2416,27 @@ document.addEventListener("visibilitychange", function () {
   S.usuario = u.usuario || null; S.rol = u.rol || null;
   if (!S.token || tokenVencido(u.expira)) { if (S.token) cerrarSesion("Tu sesión venció. Vuelve a entrar."); else mostrarLogin(""); return; }
   mostrarApp();
-  // Copia local de Casa Padel (independiente): si no se puede dibujar se descarta
-  var cp = ls.json(K_PADEL);
-  if (cp && datosPadelValidos(cp.data)) {
-    S.padel.data = cp.data; S.padel.etag = cp.etag || null;
-    if (S.tab === "padel") {
-      try { vPadel(); } catch (e) { console.error("Copia local de Casa Padel inválida", e); S.padel = padelInicial(); ls.del(K_PADEL); }
+  ls.del("letos_padel_cache"); // copia de la pestaña Casa Padel (ya no existe)
+  // Copia local de Publicidad (independiente): si no se puede dibujar se descarta
+  var cp = ls.json(K_PUB);
+  if (cp && pubValida(cp.data)) {
+    S.pub.data = cp.data; S.pub.etag = cp.etag || null;
+    if (S.tab === "publicidad") {
+      try { vPublicidad(); } catch (e) { console.error("Copia local de Publicidad inválida", e); S.pub = pubInicial(); ls.del(K_PUB); }
       S.charts = [];
     }
   }
-  if (fHash) S.padel.dia.fecha = fHash; // el primer dibujo ya muestra el panel de esa fecha (cargando)
   var c = ls.json(K_CACHE);
   var okCache = false;
   if (c && c.data && Array.isArray(c.data.meses)) {
     // Una copia guardada que rompa el dibujo se descarta; igual se pide la versión del servidor
-    // (en Casa Padel el dibujo no usa este JSON, así que ahí no sirve para juzgarla)
-    try { aplicarDatos(c.data, c.etag); okCache = !S.fallaRender || S.tab === "padel"; } catch (e) { console.error("Copia local inválida", e); }
+    // (en Publicidad el dibujo no usa este JSON, así que ahí no sirve para juzgarla)
+    try { aplicarDatos(c.data, c.etag); okCache = !S.fallaRender || S.tab === "publicidad"; } catch (e) { console.error("Copia local inválida", e); }
     if (!okCache) { ls.del(K_CACHE); S.data = null; S.etag = null; S.memo = {}; }
   }
-  if (!okCache) render(); // sin copia: "Cargando…" (o Casa Padel, que no depende de este JSON)
+  if (!okCache) render(); // sin copia: "Cargando…" (o Publicidad, que no depende de este JSON)
   revalidar();
-  if (S.tab === "padel") revalidarPadel(true);
-  if (fHash) abrirDiaPadel(fHash, false);
+  if (S.tab === "publicidad") revalidarPub(true);
 })();
 
 /* Cifras de los KPI: si una no cabe en su tarjeta (celular), se reduce la letra hasta que quepa
