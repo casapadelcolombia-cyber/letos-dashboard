@@ -277,7 +277,7 @@ button.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.10
 .cta-s{font-size:12px;color:var(--text2);margin-top:2px}
 .spark{width:100%;height:44px;display:block}
 .cta-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--sep)}
-.cta-k span,.ad-k span{display:block;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cta-k span,.cr-k span{display:block;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cta-k b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cta-p{font-size:12px;color:var(--text2);margin-top:10px}
 .ana{list-style:none;display:grid;gap:8px;margin:0;padding:0}
@@ -295,30 +295,30 @@ button.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.10
 .ana-ad{font:inherit;font-weight:600;color:inherit;background:none;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--text3);text-underline-offset:3px}
 .ana-c{flex:none;font:inherit;font-size:11px;color:var(--text2);background:var(--card);border:0;border-radius:999px;padding:4px 9px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
 @media (max-width:600px){.ana-i{flex-wrap:wrap}.ana-c{margin-left:36px}}
-.ads{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (min-width:700px){.ads{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (min-width:1100px){.ads{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.ad{border-radius:16px;background:var(--fill2);overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.ad-m{position:relative;display:block;width:100%;aspect-ratio:4/5;border:0;padding:0;cursor:pointer;overflow:hidden;background:var(--fill)}
-.ad-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:transform .35s}
-.ad-m:hover .ad-img{transform:scale(1.04)}
-.ad-ph{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px;opacity:.85}
-.ad-m::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.35));z-index:2;pointer-events:none}
-.ad-play{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;z-index:3;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.ad-play svg{width:22px;height:22px;margin-left:3px}
-.ad-est{position:absolute;left:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap}
-.ad-est::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px;background:#aeaeb2}
-.ad-est.on::before{background:#30d158}.ad-est.rev::before{background:#ffd60a}.ad-est.mal::before{background:#ff453a}
-.ad-est.inl{position:static;background:var(--fill);color:var(--text)}
-.ad-tag{position:absolute;right:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;color:#fff}
-.ad-tag.bien{background:var(--green)}.ad-tag.mal{background:var(--red)}
-.ad-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
-.ad-n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ad-s{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
-.ad-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;margin-top:8px}
-.ad-k b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-.ad-t{font-size:12px;color:var(--pos);margin-top:8px;font-weight:500}
-@media (max-width:600px){.ad-b{padding:9px 10px 10px}.ad-k{gap:5px 8px}.ad-k b{font-size:12.5px;letter-spacing:-.2px}.ad-k span{font-size:10.5px}.ad-n{font-size:13px}}
+.crs{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:700px){.crs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1100px){.crs{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.cr{border-radius:16px;background:var(--fill2);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.cr-m{position:relative;display:block;width:100%;aspect-ratio:4/5;border:0;padding:0;cursor:pointer;overflow:hidden;background:var(--fill)}
+.cr-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:transform .35s}
+.cr-m:hover .cr-img{transform:scale(1.04)}
+.cr-ph{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px;opacity:.85}
+.cr-m::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.35));z-index:2;pointer-events:none}
+.cr-play{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;z-index:3;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.cr-play svg{width:22px;height:22px;margin-left:3px}
+.cr-est{position:absolute;left:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap}
+.cr-est::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px;background:#aeaeb2}
+.cr-est.on::before{background:#30d158}.cr-est.rev::before{background:#ffd60a}.cr-est.mal::before{background:#ff453a}
+.cr-est.inl{position:static;background:var(--fill);color:var(--text)}
+.cr-tag{position:absolute;right:8px;top:8px;z-index:3;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;color:#fff}
+.cr-tag.bien{background:var(--green)}.cr-tag.mal{background:var(--red)}
+.cr-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
+.cr-n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-s{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+.cr-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;margin-top:8px}
+.cr-k b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.cr-t{font-size:12px;color:var(--pos);margin-top:8px;font-weight:500}
+@media (max-width:600px){.cr-b{padding:9px 10px 10px}.cr-k{gap:5px 8px}.cr-k b{font-size:12.5px;letter-spacing:-.2px}.cr-k span{font-size:10.5px}.cr-n{font-size:13px}}
 body.sin-scroll{overflow:hidden}
 .pm-fondo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .pm{position:fixed;z-index:91;left:50%;top:50%;transform:translate(-50%,-50%);width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 40px);display:grid;grid-template-columns:minmax(0,1fr);background:var(--card);border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
@@ -326,7 +326,7 @@ body.sin-scroll{overflow:hidden}
 .pm-media{position:relative;background:#000;display:grid;place-items:center;min-height:240px;max-height:calc(100vh - 40px)}
 .pm-media img,.pm-media video{width:100%;height:100%;max-height:calc(100vh - 40px);object-fit:contain;display:block}
 @media (max-width:759px){.pm-media{max-height:46vh}.pm-media img,.pm-media video{max-height:46vh}}
-.pm-media .ad-ph{position:static;width:100%;height:240px}
+.pm-media .cr-ph{position:static;width:100%;height:240px}
 .pm-carga{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:5px 12px;border-radius:999px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
 .pm-b{padding:20px 20px 18px;overflow-y:auto;position:relative}
 .pm-x{position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:50%;border:0;background:var(--fill);color:var(--text);font-size:14px;cursor:pointer}
@@ -1449,7 +1449,7 @@ function estadoTxt(e) {
   if (/ISSUES|DISAPPROVED|REJECT/.test(e)) return ["mal", "Con problemas"];
   return ["off", e ? e.toLowerCase().replace(/_/g, " ") : "—"];
 }
-function imgPub(a) { return a && a.img ? API + "/publicidad/img/" + encodeURIComponent(a.img) : ""; }
+function imgPub(a) { return a && a.img ? API + "/pauta/img/" + encodeURIComponent(a.img) : ""; }
 function puntoCta(id) { return '<i class="pdot bg-' + (PUB_COLOR[id] || "gray") + '"></i>'; }
 var ICO_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
 var ICO_SYNC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
@@ -1716,7 +1716,7 @@ function galeriaHTML(c) {
     '<select class="sel" data-act="pub-orden" aria-label="Ordenar anuncios">' + PUB_ORDENES.map(function (o) { return '<option value="' + o[0] + '"' + (u.orden === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select>" +
     '<div class="seg" role="group" aria-label="Estado"><button data-act="pub-act" data-v="1" aria-pressed="' + u.activos + '">Activos</button><button data-act="pub-act" data-v="0" aria-pressed="' + !u.activos + '">Todos</button></div></div></div>';
   if (!lista.length) return h + '<div class="vacio">' + esc(u.activos ? "No hay anuncios activos con gasto en el período. Prueba con «Todos»." : "Sin anuncios con gasto en el período.") + "</div></section>";
-  h += '<div class="ads">';
+  h += '<div class="crs">';
   for (var i = 0; i < n; i++) h += tarjetaAd(lista[i].a, lista[i].c, !c, mk[lista[i].a.id]);
   h += "</div>";
   if (lista.length > n) h += '<div class="mas"><button class="btn" data-act="pub-mas">Ver ' + fmtN(Math.min(12, lista.length - n)) + ' más <span style="color:var(--text2)">(' + fmtN(lista.length - n) + " restantes)</span></button></div>";
@@ -1728,17 +1728,17 @@ function tarjetaAd(a, c, conCta, marca) {
     ? [["Gasto", plataA(m.gasto, mon)], ["Retorno", veces(div0(m.valor, m.gasto))], ["Compras", fmtN(m.compras)], ["C/compra", plataA(div0(m.gasto, m.compras), mon)]]
     : [["Gasto", plataA(m.gasto, mon)], [cap(r.t.split(" ")[0]), fmtN(r.n)], ["Costo", r.n ? plataA(costoRes(m, r), mon) : "—"], ["CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—"]];
   var tienda = a.tienda && num(per30() ? a.tienda.p : a.tienda.p7);
-  return '<article class="ad"><button class="ad-m" data-act="pub-ad" data-c="' + esc(c.id) + '" data-v="' + esc(a.id) + '" aria-label="' + esc("Ver el anuncio " + a.nombre) + '">' +
-    (src ? '<img class="ad-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : "") +
-    '<span class="ad-ph bg-' + (PUB_COLOR[c.id] || "gray") + '" aria-hidden="true">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>" +
-    (a.tipo === "video" ? '<span class="ad-play">' + ICO_PLAY + "</span>" : "") +
-    '<span class="ad-est ' + est[0] + '">' + esc(est[1]) + "</span>" +
-    (marca ? '<span class="ad-tag ' + (marca === "Destacado" ? "bien" : "mal") + '">' + esc(marca) + "</span>" : "") +
+  return '<article class="cr"><button class="cr-m" data-act="pub-ad" data-c="' + esc(c.id) + '" data-v="' + esc(a.id) + '" aria-label="' + esc("Ver el anuncio " + a.nombre) + '">' +
+    (src ? '<img class="cr-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : "") +
+    '<span class="cr-ph bg-' + (PUB_COLOR[c.id] || "gray") + '" aria-hidden="true">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>" +
+    (a.tipo === "video" ? '<span class="cr-play">' + ICO_PLAY + "</span>" : "") +
+    '<span class="cr-est ' + est[0] + '">' + esc(est[1]) + "</span>" +
+    (marca ? '<span class="cr-tag ' + (marca === "Destacado" ? "bien" : "mal") + '">' + esc(marca) + "</span>" : "") +
     "</button>" +
-    '<div class="ad-b"><div class="ad-n" title="' + esc(a.nombre) + '">' + esc(a.nombre) + "</div>" +
-    '<div class="ad-s">' + (conCta ? puntoCta(c.id) + esc(PUB_CORTO[c.id]) + " · " : "") + esc(a.campana) + "</div>" +
-    '<div class="ad-k">' + k.map(function (x) { return "<div><span>" + esc(x[0]) + "</span><b>" + esc(x[1]) + "</b></div>"; }).join("") + "</div>" +
-    (tienda ? '<div class="ad-t">' + esc(fmtN(tienda) + (tienda === 1 ? " pedido" : " pedidos") + " en la tienda con su UTM") + "</div>" : "") +
+    '<div class="cr-b"><div class="cr-n" title="' + esc(a.nombre) + '">' + esc(a.nombre) + "</div>" +
+    '<div class="cr-s">' + (conCta ? puntoCta(c.id) + esc(PUB_CORTO[c.id]) + " · " : "") + esc(a.campana) + "</div>" +
+    '<div class="cr-k">' + k.map(function (x) { return "<div><span>" + esc(x[0]) + "</span><b>" + esc(x[1]) + "</b></div>"; }).join("") + "</div>" +
+    (tienda ? '<div class="cr-t">' + esc(fmtN(tienda) + (tienda === 1 ? " pedido" : " pedidos") + " en la tienda con su UTM") + "</div>" : "") +
     "</div></article>";
 }
 
@@ -1753,7 +1753,7 @@ function campanasHTML(c) {
   filas.forEach(function (o) {
     var m = (per30() ? o.k.m30 : o.k.m7) || {}, r = resultado(m, o.c.destino), est = estadoTxt(o.k.estado), mon = o.c.moneda;
     h += "<tr><td>" + celdaNombre(o.k.nombre, (c ? "" : PUB_CORTO[o.c.id] + " · ") + fmtN(o.k.anuncios) + (o.k.anuncios === 1 ? " anuncio" : " anuncios")) + "</td>" +
-      '<td><span class="ad-est inl ' + est[0] + '">' + esc(est[1]) + "</span></td>" +
+      '<td><span class="cr-est inl ' + est[0] + '">' + esc(est[1]) + "</span></td>" +
       '<td class="d m-no">' + esc(o.k.presupuesto ? plata(o.k.presupuesto, mon) : "—") + "</td>" +
       '<td class="d">' + esc(plata(m.gasto, mon)) + "</td>" +
       '<td class="d">' + esc(fmtN(r.n)) + '<div class="n2">' + esc(r.t) + "</div></td>" +
@@ -1781,14 +1781,14 @@ function abrirAdPub(cid, aid, origen) {
     "</tbody></table>";
   var est = estadoTxt(a.estado);
   var h = '<div class="pm-fondo" data-pm="cerrar"></div><div class="pm" role="dialog" aria-modal="true" aria-labelledby="pm-t">' +
-    '<div class="pm-media" id="pm-media">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="ad-ph bg-' + PUB_COLOR[c.id] + '">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>") +
+    '<div class="pm-media" id="pm-media">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="cr-ph bg-' + PUB_COLOR[c.id] + '">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>") +
     (a.tipo === "video" && !S.dev ? '<div class="pm-carga">Cargando el video…</div>' : "") + "</div>" +
     '<div class="pm-b"><button class="pm-x" data-pm="cerrar" aria-label="Cerrar">✕</button>' +
-    '<div class="pm-c">' + puntoCta(c.id) + esc(PUB_CORTO[c.id]) + ' · <span class="ad-est inl ' + est[0] + '">' + esc(est[1]) + "</span></div>" +
+    '<div class="pm-c">' + puntoCta(c.id) + esc(PUB_CORTO[c.id]) + ' · <span class="cr-est inl ' + est[0] + '">' + esc(est[1]) + "</span></div>" +
     '<h2 id="pm-t">' + esc(a.nombre) + "</h2>" +
     '<div class="pm-s">' + esc(a.campana) + (a.conjunto ? " · " + esc(a.conjunto) : "") + "</div>" +
     (a.texto ? '<p class="pm-x2">' + esc(a.texto) + "</p>" : "") +
-    (a.tienda && num(a.tienda.p) ? '<div class="ad-t">' + esc(fmtN(a.tienda.p7) + " pedidos en 7 días y " + fmtN(a.tienda.p) + " en 30 llegaron a la tienda con su UTM") + "</div>" : "") +
+    (a.tienda && num(a.tienda.p) ? '<div class="cr-t">' + esc(fmtN(a.tienda.p7) + " pedidos en 7 días y " + fmtN(a.tienda.p) + " en 30 llegaron a la tienda con su UTM") + "</div>" : "") +
     tabla +
     '<div class="pm-l">' + (a.enlace ? '<a class="btn prim" href="' + esc(a.enlace) + '" target="_blank" rel="noopener">Ver la publicación ↗</a>' : "") +
     '<a class="btn" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">Abrir el administrador ↗</a></div></div></div>';
@@ -1801,7 +1801,7 @@ function abrirAdPub(cid, aid, origen) {
 }
 function cargarVideoPub(c, a, n) {
   var gen = S.gen;
-  conTiempo(API + "/publicidad/video?c=" + encodeURIComponent(c.id) + "&ad=" + encodeURIComponent(a.id), { headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 25000)
+  conTiempo(API + "/pauta/video?c=" + encodeURIComponent(c.id) + "&a=" + encodeURIComponent(a.id), { headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 25000)
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
       var el = $("pm-media"); if (!el || gen !== S.gen || !S.pub.modal || S.pub.modal.n !== n) return;
@@ -1834,7 +1834,7 @@ document.addEventListener("keydown", function (ev) {
   }
 }, true);
 /* Miniatura que no carga (aún no guardada o vencida): queda el fondo de color con la plataforma */
-document.addEventListener("error", function (ev) { var t = ev.target; if (t && t.tagName === "IMG" && (t.classList.contains("ad-img") || t.closest("#pm-media"))) t.remove(); }, true);
+document.addEventListener("error", function (ev) { var t = ev.target; if (t && t.tagName === "IMG" && (t.classList.contains("cr-img") || t.closest("#pm-media"))) t.remove(); }, true);
 
 /* ─────────── Carga de /publicidad (sesión, copia local propia, If-None-Match) ─────────── */
 function revalidarPub(forzar) {
@@ -1849,7 +1849,7 @@ function revalidarPub(forzar) {
   var hd = { Authorization: "Bearer " + tok };
   if (Pu.etag && Pu.data) hd["If-None-Match"] = Pu.etag;
   var opts = { headers: hd, cache: "no-store" }, nuevo = null, cambio = false;
-  var p = conTiempo(API + "/publicidad", opts, 30000);
+  var p = conTiempo(API + "/pauta", opts, 30000);
   Pu.ctl = opts._ctl || null;
   return p.then(function (r) {
     if (!vigente()) return;
@@ -1889,7 +1889,7 @@ function revalidarPub(forzar) {
 function leerAhoraPub() {
   if (S.dev || !S.token || S.pub.leyendo) return;
   var gen = S.gen; S.pub.leyendo = true; S.pub.msg = "Leyendo Meta, TikTok y la tienda… tarda cerca de medio minuto."; render();
-  conTiempo(API + "/publicidad/sync", { method: "POST", headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 150000)
+  conTiempo(API + "/pauta/sync", { method: "POST", headers: { Authorization: "Bearer " + S.token }, cache: "no-store" }, 150000)
     .then(function (r) {
       if (gen !== S.gen) return null;
       if (r.status === 401) { cerrarSesion("Tu sesión venció. Vuelve a entrar."); return null; }
