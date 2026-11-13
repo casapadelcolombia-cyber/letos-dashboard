@@ -1844,11 +1844,16 @@ function objetivosHTML(c) {
   var h = '<section class="card"><div class="card-cab"><div><h2>Keywords y productos</h2><div class="sub">' +
     esc(fmtN(lista.length) + " con gasto · " + textoPer() + " · las pausadas van al final") + "</div></div></div>";
   if (!lista.length) return h + '<div class="vacio">Sin keywords con gasto en el período.</div></section>';
+  // Campañas con varios grupos (p. ej. la de video de marca, un grupo por video): la misma keyword sale una vez por
+  // grupo, así que en esas se muestra también el nombre del grupo
+  var grupos = {};
+  arr(c.objetivos).forEach(function (o) { if (o && o.grupo) (grupos[o.campana] = grupos[o.campana] || {})[o.grupo] = 1; });
   h += '<div class="tw"><table><thead><tr><th scope="col">Keyword o producto</th><th class="d m-no" scope="col">Puja</th><th class="d" scope="col">Gasto</th><th class="d m-no" scope="col">Ventas</th><th class="d" scope="col">Pedidos</th><th class="d" scope="col">Retorno</th><th class="d m-no" scope="col">ACOS</th></tr></thead><tbody>';
   lista.slice(0, lim).forEach(function (o) {
     var m = mAd(o), r = div0(m.valor, m.gasto);
     var n1 = o.asin ? '<a href="https://www.amazon.com/dp/' + encodeURIComponent(o.asin) + '" target="_blank" rel="noopener">' + esc(o.texto) + " ↗</a>" : esc(o.texto);
-    var n2 = [o.campana, o.conc ? "concordancia " + o.conc : o.clase, AMZ_TIPO[o.prod] ? o.prod : ""].filter(Boolean).join(" · ");
+    var varios = o.grupo && Object.keys(grupos[o.campana] || {}).length > 1;
+    var n2 = [o.campana + (varios ? " › " + o.grupo : ""), o.conc ? "concordancia " + o.conc : o.clase, AMZ_TIPO[o.prod] ? o.prod : ""].filter(Boolean).join(" · ");
     h += '<tr><td><div class="n1">' + n1 + (o.estado === "PAUSED" ? ' <span class="cr-est inl off">Pausada</span>' : "") + '</div><div class="n2">' + esc(n2) + "</div></td>" +
       '<td class="d m-no">' + esc(o.puja ? plata(o.puja, mon) : "—") + "</td>" +
       '<td class="d">' + esc(plata(m.gasto, mon)) + "</td>" +
