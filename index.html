@@ -1393,13 +1393,14 @@ function zMov() {
   });
 }
 
-/* ═══════════ Publicidad: pauta de Meta y TikTok (foto diaria a la 1 p. m.) ═══════════
-   Lee /api/dashboard/publicidad, que arma el Worker letos-mcp (src/publicidad) todos los días desde la 1 p. m.
-   Cuentas: Meta Girlz Only Colombia, Meta Blondz Only US, TikTok Girlz Only Colombia y TikTok Blondz Only US.
+/* ═══════════ Publicidad: pauta de Meta, TikTok y Amazon Ads (foto diaria a la 1 p. m.) ═══════════
+   Lee /api/dashboard/pauta, que arma el Worker letos-mcp (src/publicidad) todos los días desde la 1 p. m.
+   Cuentas: Meta Girlz Only Colombia, Meta Blondz Only US, TikTok Girlz Only Colombia, TikTok Blondz Only US y
+   Amazon Ads Blondz Only US (Sponsored Products y Brands: esta sí trae pedidos y ventas, y keywords en vez de anuncios).
    Tiene su propia carga, copia local y errores (como tenía Casa Padel): si falla no toca las otras pestañas. */
-var PUB_ORDEN = ["meta_girlz", "tt_girlz", "meta_blondz_us", "tt_blondz_us"];
-var PUB_COLOR = { meta_girlz: "blue", tt_girlz: "pink", meta_blondz_us: "indigo", tt_blondz_us: "teal" };
-var PUB_CORTO = { meta_girlz: "Meta · Girlz CO", tt_girlz: "TikTok · Girlz CO", meta_blondz_us: "Meta · Blondz US", tt_blondz_us: "TikTok · Blondz US" };
+var PUB_ORDEN = ["meta_girlz", "tt_girlz", "meta_blondz_us", "tt_blondz_us", "amz_blondz_us"];
+var PUB_COLOR = { meta_girlz: "blue", tt_girlz: "pink", meta_blondz_us: "indigo", tt_blondz_us: "teal", amz_blondz_us: "orange" };
+var PUB_CORTO = { meta_girlz: "Meta · Girlz CO", tt_girlz: "TikTok · Girlz CO", meta_blondz_us: "Meta · Blondz US", tt_blondz_us: "TikTok · Blondz US", amz_blondz_us: "Amazon · Blondz US" };
 var PUB_ORDENES = [["gasto", "Más gasto"], ["retorno", "Mejor retorno"], ["resultado", "Más resultados"], ["costo", "Menor costo"], ["ctr", "Mejor CTR"]];
 var NF2 = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 function pubValida(j) { return !!(j && typeof j === "object" && Array.isArray(j.cuentas)); }
@@ -1428,9 +1429,13 @@ function enCop(v, mon) { return mon === "USD" ? num(v) * trmPub() : num(v); }
 function div0(a, b) { return num(b) ? num(a) / num(b) : 0; }
 function pubFecha(f) { var p = String(f || "").split("-"); return p.length === 3 ? +p[2] + " " + (MES_C[+p[1] - 1] || "") : String(f || ""); }
 function diario30(c) { var dd = arr(c.diario), desde = PD().desde || ""; return dd.filter(function (x) { return x && x.d >= desde; }); }
-/* Resultado principal según el destino: la web (compras; si no, conversaciones) o Amazon (clics; si no, vistas) */
+/* Resultado principal según el destino: la web (compras; si no, conversaciones), tráfico a Amazon (clics; si no,
+   vistas) o Amazon Ads (pedidos dentro de Amazon) */
 function resultado(m, destino) {
-  if (destino === "web") {
+  if (destino === "amazon_ads") {
+    if (num(m.compras) > 0) return { n: num(m.compras), t: "pedidos", u: "pedido" };
+    if (num(m.clics) > 0) return { n: num(m.clics), t: "clics", u: "clic" };
+  } else if (destino === "web") {
     if (num(m.compras) > 0) return { n: num(m.compras), t: "compras", u: "compra" };
     if (num(m.conv) > 0) return { n: num(m.conv), t: "conversaciones", u: "conversación" };
     if (num(m.clics) > 0) return { n: num(m.clics), t: "clics", u: "clic" };
@@ -1469,7 +1474,7 @@ function estadoPubHTML(titulo, msg, reintentar) {
     (reintentar ? '<div style="margin-top:14px"><button class="btn prim" data-act="pub-reintentar">Reintentar</button></div>' : "") + "</div></section>";
 }
 function cabeceraPub() {
-  var d = PD(), sub = "Meta y TikTok · Girlz Only Colombia y Blondz Only US";
+  var d = PD(), sub = "Meta, TikTok y Amazon · Girlz Only Colombia y Blondz Only US";
   if (d.hasta) sub += " · días cerrados hasta el " + fechaC(d.hasta) + " · se actualiza todos los días a la 1 p. m.";
   var h = '<div class="cab"><div><h1>Publicidad</h1><p>' + esc(sub) + "</p></div><div class=\"cab-ctl\">";
   h += '<div class="seg" role="group" aria-label="Período"><button data-act="pub-per" data-v="7" aria-pressed="' + !per30() + '">7 días</button><button data-act="pub-per" data-v="30" aria-pressed="' + per30() + '">30 días</button></div>';
@@ -1499,7 +1504,7 @@ function vPublicidad() {
   });
   var sel = ctaSel();
   if (S.ui.pub.cta !== "todas" && !sel) h += estadoPubHTML("Sin datos de esta cuenta", "La lectura de hoy no la pudo traer.", false);
-  else h += sel ? vPubCuenta(sel) : vPubTodas();
+  else h += sel ? (sel.plataforma === "amazon" ? vPubAmazon(sel) : vPubCuenta(sel)) : vPubTodas();
   return h;
 }
 
@@ -1516,6 +1521,7 @@ function vPubTodas() {
   var comp = 0, val = 0, clUs = 0, gUsCl = 0;
   co.forEach(function (c) { var m = totC(c); comp += num(m.compras); val += num(m.valor); });
   us.forEach(function (c) { var m = totC(c); clUs += num(m.clics); if (num(m.clics)) gUsCl += num(m.gasto); });
+  var amz = cs.filter(function (c) { return c.plataforma === "amazon"; })[0], ma = amz ? totC(amz) : null;
 
   var h = '<section class="card"><div class="heroe"><div>' +
     '<div class="l">Gasto en publicidad · ' + esc(textoPer()) + "</div>" +
@@ -1532,7 +1538,8 @@ function vPubTodas() {
     kpi("Vendido en la tienda", tv ? moneyA(tv.ventas) : "—", tv ? esc(fmtN(tv.pedidos) + " pedidos en Shopify") + (per30() ? "" : " · " + chipMini(variacion(tv.ventas, tp.ventas))) : esc(d.tienda && d.tienda.error ? "No se pudo leer Shopify" : "Sin datos"), "verde") +
     kpi("Retorno real en Colombia", mer ? veces(mer) : "—", esc("Ventas de la tienda ÷ pauta de Colombia") + (merP && !per30() ? " · antes " + esc(veces(merP)) : ""), mer >= 4 ? "verde" : mer && mer < 2.5 ? "rojo" : "") +
     kpi("Compras que reporta la pauta", fmtN(comp), esc(moneyA(val) + " · retorno " + veces(div0(val, co.reduce(function (s, c) { return s + num(totC(c).gasto); }, 0))) + " (Meta + TikTok CO)"), "azul") +
-    kpi("Clics a Amazon (EE. UU.)", fmtN(clUs), esc(clUs ? usd(div0(gUsCl, clUs)) + " por clic · Meta + TikTok" : "Sin clics"), "") +
+    (ma ? kpi("Vendido con Amazon Ads", usd(ma.valor), esc(fmtN(ma.compras) + " pedidos · retorno " + veces(div0(ma.valor, ma.gasto)) + (clUs ? " · y " + fmtN(clUs) + " clics a Amazon desde Meta + TikTok" : "")), div0(ma.valor, ma.gasto) >= 3 ? "verde" : "")
+      : kpi("Clics a Amazon (EE. UU.)", fmtN(clUs), esc(clUs ? usd(div0(gUsCl, clUs)) + " por clic · Meta + TikTok" : "Sin clics"), "")) +
     "</div>";
 
   h += anaHTML(null);
@@ -1598,17 +1605,20 @@ function tarjetaCta(c) {
   var m = totC(c), p = c.totPrev7 || {}, r = resultado(m, c.destino), mon = c.moneda;
   var activas = arr(c.campanas).filter(function (x) { return x.estado === "ACTIVE"; });
   var pres = activas.reduce(function (s, x) { return s + num(x.presupuesto); }, 0);
-  var kp = c.destino === "web"
+  var kp = c.destino === "amazon_ads"
+    ? [["Retorno", veces(div0(m.valor, m.gasto))], ["Pedidos", fmtN(m.compras)], ["ACOS", acos(m)]]
+    : c.destino === "web"
     ? [["Retorno", veces(div0(m.valor, m.gasto))], ["Compras", fmtN(m.compras)], ["Costo/compra", m.compras ? plataA(div0(m.gasto, m.compras), mon) : "—"]]
     : [["Clics", fmtN(m.clics)], ["Costo/clic", m.clics ? plata(div0(m.gasto, m.clics), mon) : "—"], ["CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—"]];
   if (c.destino === "web" && !num(m.compras) && num(m.conv)) kp[1] = ["Conversaciones", fmtN(m.conv)];
   return '<button class="card cta" data-act="pub-cta" data-v="' + esc(c.id) + '" aria-label="Ver ' + esc(c.nombre) + '">' +
-    '<div class="cta-cab">' + puntoCta(c.id) + "<b>" + esc(PUB_CORTO[c.id] || c.nombre) + '</b><span class="cta-pais">' + esc(c.destino === "web" ? "venta web" : "tráfico a Amazon") + "</span></div>" +
+    '<div class="cta-cab">' + puntoCta(c.id) + "<b>" + esc(PUB_CORTO[c.id] || c.nombre) + '</b><span class="cta-pais">' + esc(c.destino === "web" ? "venta web" : c.destino === "amazon_ads" ? "ventas en Amazon" : "tráfico a Amazon") + "</span></div>" +
     '<div class="cta-g"><div><div class="cta-v">' + esc(plataA(m.gasto, mon)) + '</div><div class="cta-s">gastado · ' + esc(textoPer()) +
     (sinComp(c) ? "" : " " + chipMini(variacion(m.gasto, p.gasto))) + "</div></div>" + spark(diario30(c).map(function (x) { return num(x.gasto); }), PUB_COLOR[c.id]) + "</div>" +
     '<div class="cta-k">' + kp.map(function (k) { return "<div><span>" + esc(k[0]) + "</span><b>" + esc(k[1]) + "</b></div>"; }).join("") + "</div>" +
     '<div class="cta-p">' + esc(activas.length + (activas.length === 1 ? " campaña activa" : " campañas activas") + (pres ? " · " + plataA(pres, mon) + "/día" : "") +
-      " · ayer " + plataA((c.ayer || {}).gasto, mon) + (c.inicio && c.inicio > (PD().desde || "") ? " · desde el " + pubFecha(c.inicio) : "")) + "</div></button>";
+      " · ayer " + plataA((c.ayer || {}).gasto, mon) + (c.inicio && c.inicio > (PD().desde || "") ? " · desde el " + pubFecha(c.inicio) : "") +
+      (c.atrasado ? " · datos hasta el " + pubFecha(c.atrasado) : "")) + "</div></button>";
 }
 
 /* ─────────── Una cuenta ─────────── */
@@ -1752,15 +1762,104 @@ function campanasHTML(c) {
   h += '<div class="tw"><table><thead><tr><th scope="col">Campaña</th><th scope="col">Estado</th><th class="d m-no" scope="col">Presupuesto/día</th><th class="d" scope="col">Gasto</th><th class="d" scope="col">Resultado</th><th class="d m-no" scope="col">Costo por resultado</th><th class="d" scope="col">Retorno</th></tr></thead><tbody>';
   filas.forEach(function (o) {
     var m = (per30() ? o.k.m30 : o.k.m7) || {}, r = resultado(m, o.c.destino), est = estadoTxt(o.k.estado), mon = o.c.moneda;
-    h += "<tr><td>" + celdaNombre(o.k.nombre, (c ? "" : PUB_CORTO[o.c.id] + " · ") + fmtN(o.k.anuncios) + (o.k.anuncios === 1 ? " anuncio" : " anuncios")) + "</td>" +
+    var amz = o.c.destino === "amazon_ads";
+    h += "<tr><td>" + celdaNombre(o.k.nombre, (c ? "" : PUB_CORTO[o.c.id] + " · ") + (amz ? AMZ_TIPO[o.k.tipo] || "" : fmtN(o.k.anuncios) + (o.k.anuncios === 1 ? " anuncio" : " anuncios"))) + "</td>" +
       '<td><span class="cr-est inl ' + est[0] + '">' + esc(est[1]) + "</span></td>" +
       '<td class="d m-no">' + esc(o.k.presupuesto ? plata(o.k.presupuesto, mon) : "—") + "</td>" +
       '<td class="d">' + esc(plata(m.gasto, mon)) + "</td>" +
       '<td class="d">' + esc(fmtN(r.n)) + '<div class="n2">' + esc(r.t) + "</div></td>" +
       '<td class="d m-no">' + esc(r.n ? plata(costoRes(m, r), mon) : "—") + "</td>" +
-      '<td class="d">' + esc(o.c.destino === "web" && num(m.valor) ? veces(div0(m.valor, m.gasto)) : "—") + "</td></tr>";
+      '<td class="d">' + esc((o.c.destino === "web" || amz) && num(m.valor) ? veces(div0(m.valor, m.gasto)) : "—") + "</td></tr>";
   });
   return h + "</tbody></table></div></section>";
+}
+
+/* ─────────── Amazon Ads · Blondz US: ventas dentro de Amazon, campañas y keywords ─────────── */
+var AMZ_TIPO = { SP: "Sponsored Products", SB: "Sponsored Brands" };
+function acos(m) { return num(m.valor) ? pct(div0(m.gasto, m.valor)) : "—"; }
+function clsRoas(r) { return r >= 3 ? "verde" : r && r < 2 ? "rojo" : ""; }
+function vPubAmazon(c) {
+  var m = totC(c), p = c.totPrev7 || {}, mon = c.moneda, comp = !sinComp(c), ay = c.ayer || {};
+  var activas = arr(c.campanas).filter(function (x) { return x.estado === "ACTIVE"; });
+  var pres = activas.reduce(function (s, x) { return s + num(x.presupuesto); }, 0);
+  var roas = div0(m.valor, m.gasto), roasP = div0(p.valor, p.gasto);
+  var h = c.atrasado ? '<div class="aviso"><span class="ic" aria-hidden="true">!</span><div><b>Amazon Ads con datos hasta el ' + esc(pubFecha(c.atrasado)) + "</b>" +
+    "<p>Amazon todavía está armando los reportes de ayer (tardan). La página se completa sola en el próximo intento, cada 30 minutos.</p></div></div>" : "";
+  h += '<section class="card"><div class="heroe"><div>' +
+    '<div class="l">' + puntoCta(c.id) + esc(c.nombre) + " · " + esc(textoPer()) + "</div>" +
+    '<div class="big">' + esc(plata(m.gasto, mon)) + "</div>" +
+    '<div class="chips">' + (comp ? chipVar(variacion(m.gasto, p.gasto), "vs los 7 días anteriores") : "") +
+    '<a class="chip" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">Abrir Amazon Ads ↗</a></div>' +
+    '<div class="nota">Vendió <b>' + esc(plata(m.valor, mon)) + "</b> en " + esc(fmtN(m.compras)) + " pedidos · retorno " + esc(veces(roas)) +
+    "<br>Ayer: " + esc(plata(ay.gasto, mon)) + " de gasto y " + esc(plata(ay.valor, mon)) + " en ventas · " +
+    esc(activas.length + (activas.length === 1 ? " campaña activa" : " campañas activas")) + (pres ? " · presupuesto " + esc(plata(pres, mon)) + " al día" : "") +
+    "<br>≈ " + esc(moneyA(enCop(m.gasto, mon))) + " en pesos</div>" +
+    '</div><div><div class="graf" id="g-pub-cta" style="min-height:190px"></div><div class="leyenda"><span><i class="bg-' + PUB_COLOR[c.id] + '"></i>Gasto diario</span>' +
+    '<span><i class="bg-green"></i>Ventas en Amazon</span></div></div></div></section>';
+
+  h += '<div class="grid kpis">' +
+    kpi("Ventas", plata(m.valor, mon), esc(fmtN(m.compras) + " pedidos") + (comp ? " · " + chipMini(variacion(m.valor, p.valor)) : ""), "verde") +
+    kpi("Retorno (ROAS)", veces(roas), esc(comp && roasP ? "antes " + veces(roasP) : "ventas ÷ gasto"), clsRoas(roas)) +
+    kpi("ACOS", acos(m), esc(comp && num(p.valor) ? "antes " + acos(p) : "gasto ÷ ventas"), clsRoas(roas)) +
+    kpi("Costo por pedido", m.compras ? plata(div0(m.gasto, m.compras), mon) : "—", esc(comp && num(p.compras) ? "antes " + plata(div0(p.gasto, p.compras), mon) : "gasto ÷ pedidos"), "") +
+    "</div>";
+  h += '<div class="grid kpis">' +
+    kpi("Impresiones", fmtN(m.imp), esc("CPM " + plata(div0(m.gasto, m.imp) * 1000, mon)), "") +
+    kpi("Clics", fmtN(m.clics), esc("CTR " + (m.imp ? pct(div0(m.clics, m.imp)) : "—")), "") +
+    kpi("Costo por clic", m.clics ? plata(div0(m.gasto, m.clics), mon) : "—", esc(comp && num(p.clics) ? "antes " + plata(div0(p.gasto, p.clics), mon) : "gasto ÷ clics"), "") +
+    kpi("Conversión", m.clics ? pct(div0(m.compras, m.clics)) : "—", esc(num(m.compras) ? "pedidos ÷ clics · ticket " + plata(div0(m.valor, m.compras), mon) : "pedidos ÷ clics"), "") +
+    "</div>";
+  h += anaHTML(c.id);
+  h += campanasHTML(c);
+  h += objetivosHTML(c);
+  h += '<div class="aviso info" style="margin-top:12px"><span class="ic" aria-hidden="true">i</span><div><b>Ventas que Amazon le atribuye a la publicidad</b>' +
+    "<p>Pedidos hechos hasta 14 días después del clic; en Sponsored Brands cuentan también otros productos de la marca. Son ventas dentro de Amazon, aparte de las que llegan por Meta o TikTok.</p></div></div>";
+
+  S.charts.push(function () {
+    var el = $("g-pub-cta"); if (!el) return;
+    var dd = diario30(c), dias = dd.map(function (x) { return x.d; });
+    graficoBarras(el, {
+      labels: dias, modo: "agrupado", h: 190, tipo: "n", aria: "Gasto y ventas diarias en Amazon",
+      series: [
+        { nombre: "Gasto", color: PUB_COLOR[c.id], v: dd.map(function (x) { return num(x.gasto); }) },
+        { nombre: "Ventas", color: "green", v: dd.map(function (x) { return num(x.valor); }) }
+      ],
+      xLab: function (i, cada) { return i % cada === 0 ? pubFecha(dias[i]) : null; },
+      tip: function (i) {
+        var x = dd[i] || {};
+        return "<b>" + esc(pubFecha(dias[i])) + "</b>" + filaTip(PUB_COLOR[c.id], "Gasto", plata(x.gasto, mon)) +
+          filaTip("green", "Ventas", plata(x.valor, mon) + " · " + fmtN(x.compras) + " ped.") +
+          filaTip(null, "Retorno", veces(div0(x.valor, x.gasto))) + filaTip(null, "ACOS", acos(x)) +
+          filaTip(null, "Clics", fmtN(x.clics) + (x.clics ? " a " + plata(div0(x.gasto, x.clics), mon) : ""));
+      }
+    });
+  });
+  return h;
+}
+/* Keywords, productos (ASIN) y categorías: las 80 con más gasto en 30 días, ordenadas por gasto del período */
+function objetivosHTML(c) {
+  var lim = num(S.ui.pub.nObj) || 20, mon = c.moneda;
+  var lista = arr(c.objetivos).filter(function (o) { return o && num(mAd(o).gasto) > 0; })
+    .sort(function (a, b) { return (a.estado === "PAUSED") - (b.estado === "PAUSED") || num(mAd(b).gasto) - num(mAd(a).gasto); });
+  var h = '<section class="card"><div class="card-cab"><div><h2>Keywords y productos</h2><div class="sub">' +
+    esc(fmtN(lista.length) + " con gasto · " + textoPer() + " · las pausadas van al final") + "</div></div></div>";
+  if (!lista.length) return h + '<div class="vacio">Sin keywords con gasto en el período.</div></section>';
+  h += '<div class="tw"><table><thead><tr><th scope="col">Keyword o producto</th><th class="d m-no" scope="col">Puja</th><th class="d" scope="col">Gasto</th><th class="d m-no" scope="col">Ventas</th><th class="d" scope="col">Pedidos</th><th class="d" scope="col">Retorno</th><th class="d m-no" scope="col">ACOS</th></tr></thead><tbody>';
+  lista.slice(0, lim).forEach(function (o) {
+    var m = mAd(o), r = div0(m.valor, m.gasto);
+    var n1 = o.asin ? '<a href="https://www.amazon.com/dp/' + encodeURIComponent(o.asin) + '" target="_blank" rel="noopener">' + esc(o.texto) + " ↗</a>" : esc(o.texto);
+    var n2 = [o.campana, o.conc ? "concordancia " + o.conc : o.clase, AMZ_TIPO[o.prod] ? o.prod : ""].filter(Boolean).join(" · ");
+    h += '<tr><td><div class="n1">' + n1 + (o.estado === "PAUSED" ? ' <span class="cr-est inl off">Pausada</span>' : "") + '</div><div class="n2">' + esc(n2) + "</div></td>" +
+      '<td class="d m-no">' + esc(o.puja ? plata(o.puja, mon) : "—") + "</td>" +
+      '<td class="d">' + esc(plata(m.gasto, mon)) + "</td>" +
+      '<td class="d m-no">' + esc(plata(m.valor, mon)) + "</td>" +
+      '<td class="d">' + esc(fmtN(m.compras)) + "</td>" +
+      '<td class="d ' + clsRoas(r) + '">' + esc(veces(r)) + "</td>" +
+      '<td class="d m-no">' + esc(acos(m)) + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  if (lista.length > lim) h += '<div class="mas"><button class="btn" data-act="pub-obj">Ver ' + fmtN(Math.min(20, lista.length - lim)) + ' más <span style="color:var(--text2)">(' + fmtN(lista.length - lim) + " restantes)</span></button></div>";
+  return h + "</section>";
 }
 
 /* ─────────── Ventana de un anuncio (imagen o video, métricas de 7 y 30 días) ─────────── */
@@ -2330,6 +2429,7 @@ $("view").addEventListener("click", function (ev) {
   }
   if (act === "pub-act") { var na = v === "1"; if (S.ui.pub.activos !== na) { S.ui.pub.activos = na; S.ui.pub.n = 12; render(); } return; }
   if (act === "pub-mas") { S.ui.pub.n += 12; render(); return; }
+  if (act === "pub-obj") { S.ui.pub.nObj = (num(S.ui.pub.nObj) || 20) + 20; render(); return; }
   if (act === "pub-ad") { abrirAdPub(b.getAttribute("data-c"), v, b); return; }
   if (act === "pub-sync") { leerAhoraPub(); return; }
   if (act === "pub-reintentar") { revalidarPub(true); render(); return; }
