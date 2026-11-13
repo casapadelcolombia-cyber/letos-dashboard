@@ -302,6 +302,7 @@ button.cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.10
 .cr-m{position:relative;display:block;width:100%;aspect-ratio:4/5;border:0;padding:0;cursor:pointer;overflow:hidden;background:var(--fill)}
 .cr-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:transform .35s}
 .cr-m:hover .cr-img{transform:scale(1.04)}
+.cr-img.ancho{object-fit:contain;background:#000}
 .cr-ph{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px;opacity:.85}
 .cr-m::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(0,0,0,.35));z-index:2;pointer-events:none}
 .cr-play{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;z-index:3;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
@@ -1712,7 +1713,7 @@ function anunciosPub(c) {
   lista = lista.filter(function (o) { return num(mAd(o.a).gasto) > 0 && (!u.activos || o.a.estado === "ACTIVE"); });
   function val(o) {
     var m = mAd(o.a), r = resultado(m, o.c.destino);
-    if (u.orden === "retorno") return o.c.destino === "web" ? div0(m.valor, m.gasto) : -1;
+    if (u.orden === "retorno") return o.c.destino === "web" || o.c.destino === "amazon_ads" ? div0(m.valor, m.gasto) : -1;
     if (u.orden === "resultado") return r.mil ? 0 : r.n;
     if (u.orden === "costo") return r.n && !r.mil ? -costoRes(m, r) / (o.c.moneda === "USD" ? 1 / trmPub() : 1) : -Infinity;
     if (u.orden === "ctr") return div0(m.clics, m.imp);
@@ -1732,15 +1733,18 @@ function galeriaHTML(c) {
   if (lista.length > n) h += '<div class="mas"><button class="btn" data-act="pub-mas">Ver ' + fmtN(Math.min(12, lista.length - n)) + ' más <span style="color:var(--text2)">(' + fmtN(lista.length - n) + " restantes)</span></button></div>";
   return h + "</section>";
 }
+function nomPlat(c) { return c.plataforma === "meta" ? "Meta" : c.plataforma === "amazon" ? "Amazon" : "TikTok"; }
 function tarjetaAd(a, c, conCta, marca) {
   var m = mAd(a), r = resultado(m, c.destino), mon = c.moneda, est = estadoTxt(a.estado), src = imgPub(a);
-  var k = c.destino === "web" && num(m.compras) > 0
+  var k = c.destino === "amazon_ads"
+    ? [["Gasto", plataA(m.gasto, mon)], ["Retorno", num(m.valor) ? veces(div0(m.valor, m.gasto)) : "—"], ["Pedidos", fmtN(m.compras)], ["ACOS", acos(m)]]
+    : c.destino === "web" && num(m.compras) > 0
     ? [["Gasto", plataA(m.gasto, mon)], ["Retorno", veces(div0(m.valor, m.gasto))], ["Compras", fmtN(m.compras)], ["C/compra", plataA(div0(m.gasto, m.compras), mon)]]
     : [["Gasto", plataA(m.gasto, mon)], [cap(r.t.split(" ")[0]), fmtN(r.n)], ["Costo", r.n ? plataA(costoRes(m, r), mon) : "—"], ["CTR", m.imp ? pct(div0(m.clics, m.imp)) : "—"]];
   var tienda = a.tienda && num(per30() ? a.tienda.p : a.tienda.p7);
   return '<article class="cr"><button class="cr-m" data-act="pub-ad" data-c="' + esc(c.id) + '" data-v="' + esc(a.id) + '" aria-label="' + esc("Ver el anuncio " + a.nombre) + '">' +
-    (src ? '<img class="cr-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : "") +
-    '<span class="cr-ph bg-' + (PUB_COLOR[c.id] || "gray") + '" aria-hidden="true">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>" +
+    (src ? '<img class="cr-img' + (c.plataforma === "amazon" ? " ancho" : "") + '" src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : "") +
+    '<span class="cr-ph bg-' + (PUB_COLOR[c.id] || "gray") + '" aria-hidden="true">' + nomPlat(c) + "</span>" +
     (a.tipo === "video" ? '<span class="cr-play">' + ICO_PLAY + "</span>" : "") +
     '<span class="cr-est ' + est[0] + '">' + esc(est[1]) + "</span>" +
     (marca ? '<span class="cr-tag ' + (marca === "Destacado" ? "bien" : "mal") + '">' + esc(marca) + "</span>" : "") +
@@ -1810,6 +1814,7 @@ function vPubAmazon(c) {
     kpi("Conversión", m.clics ? pct(div0(m.compras, m.clics)) : "—", esc(num(m.compras) ? "pedidos ÷ clics · ticket " + plata(div0(m.valor, m.compras), mon) : "pedidos ÷ clics"), "") +
     "</div>";
   h += anaHTML(c.id);
+  h += galeriaHTML(c);
   h += campanasHTML(c);
   h += objetivosHTML(c);
   h += '<div class="aviso info" style="margin-top:12px"><span class="ic" aria-hidden="true">i</span><div><b>Ventas que Amazon le atribuye a la publicidad</b>' +
@@ -1872,21 +1877,26 @@ function abrirAdPub(cid, aid, origen) {
   var c = ctaPub(cid), a = c && arr(c.anuncios).filter(function (x) { return x.id === aid; })[0];
   if (!a) return;
   cerrarAdPub(true);
-  var mon = c.moneda, src = imgPub(a), web = c.destino === "web";
+  var mon = c.moneda, src = imgPub(a), web = c.destino === "web", amz = c.destino === "amazon_ads";
+  // Amazon: el mp4 es un enlace público y estable de m.media-amazon.com que ya viene en la foto
+  var vidAmz = amz && /^https:\/\/[\w.-]+\.media-amazon\.com\//.test(a.video || "") ? a.video : "";
   function fila(t, f) { return "<tr><th scope=\"row\">" + esc(t) + '</th><td class="d">' + esc(f(a.m7 || {})) + '</td><td class="d">' + esc(f(a.m30 || {})) + "</td></tr>"; }
   var tabla = '<table class="pm-t"><thead><tr><th></th><th class="d" scope="col">7 días</th><th class="d" scope="col">30 días</th></tr></thead><tbody>' +
     fila("Gasto", function (m) { return plata(m.gasto, mon); }) +
     (web ? fila("Compras", function (m) { return fmtN(m.compras); }) + fila("Ventas reportadas", function (m) { return plata(m.valor, mon); }) + fila("Retorno", function (m) { return veces(div0(m.valor, m.gasto)); }) +
       fila("Costo por compra", function (m) { return m.compras ? plata(div0(m.gasto, m.compras), mon) : "—"; }) : "") +
+    (amz ? fila("Pedidos", function (m) { return fmtN(m.compras); }) + fila("Ventas en Amazon", function (m) { return plata(m.valor, mon); }) +
+      fila("Retorno", function (m) { return num(m.valor) ? veces(div0(m.valor, m.gasto)) : "—"; }) + fila("ACOS", acos) +
+      fila("Costo por pedido", function (m) { return m.compras ? plata(div0(m.gasto, m.compras), mon) : "—"; }) : "") +
     (num((a.m30 || {}).conv) ? fila("Conversaciones", function (m) { return fmtN(m.conv); }) : "") +
     fila("Impresiones", function (m) { return fmtN(m.imp); }) + fila("Clics", function (m) { return fmtN(m.clics); }) +
     fila("Costo por clic", function (m) { return m.clics ? plata(div0(m.gasto, m.clics), mon) : "—"; }) +
-    fila("CTR", function (m) { return m.imp ? pct(div0(m.clics, m.imp)) : "—"; }) + fila("Reproducciones", function (m) { return fmtN(m.vistas); }) +
+    fila("CTR", function (m) { return m.imp ? pct(div0(m.clics, m.imp)) : "—"; }) + fila(amz ? "Vistas de 5 s" : "Reproducciones", function (m) { return fmtN(m.vistas); }) +
     "</tbody></table>";
   var est = estadoTxt(a.estado);
   var h = '<div class="pm-fondo" data-pm="cerrar"></div><div class="pm" role="dialog" aria-modal="true" aria-labelledby="pm-t">' +
-    '<div class="pm-media" id="pm-media">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="cr-ph bg-' + PUB_COLOR[c.id] + '">' + (c.plataforma === "meta" ? "Meta" : "TikTok") + "</span>") +
-    (a.tipo === "video" && !S.dev ? '<div class="pm-carga">Cargando el video…</div>' : "") + "</div>" +
+    '<div class="pm-media" id="pm-media">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="cr-ph bg-' + PUB_COLOR[c.id] + '">' + nomPlat(c) + "</span>") +
+    (a.tipo === "video" && !S.dev && !vidAmz ? '<div class="pm-carga">Cargando el video…</div>' : "") + "</div>" +
     '<div class="pm-b"><button class="pm-x" data-pm="cerrar" aria-label="Cerrar">✕</button>' +
     '<div class="pm-c">' + puntoCta(c.id) + esc(PUB_CORTO[c.id]) + ' · <span class="cr-est inl ' + est[0] + '">' + esc(est[1]) + "</span></div>" +
     '<h2 id="pm-t">' + esc(a.nombre) + "</h2>" +
@@ -1894,14 +1904,22 @@ function abrirAdPub(cid, aid, origen) {
     (a.texto ? '<p class="pm-x2">' + esc(a.texto) + "</p>" : "") +
     (a.tienda && num(a.tienda.p) ? '<div class="cr-t">' + esc(fmtN(a.tienda.p7) + " pedidos en 7 días y " + fmtN(a.tienda.p) + " en 30 llegaron a la tienda con su UTM") + "</div>" : "") +
     tabla +
-    '<div class="pm-l">' + (a.enlace ? '<a class="btn prim" href="' + esc(a.enlace) + '" target="_blank" rel="noopener">Ver la publicación ↗</a>' : "") +
-    '<a class="btn" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">Abrir el administrador ↗</a></div></div></div>';
+    '<div class="pm-l">' + (a.enlace ? '<a class="btn prim" href="' + esc(a.enlace) + '" target="_blank" rel="noopener">' + (amz ? "Ver el producto en Amazon ↗" : "Ver la publicación ↗") + "</a>" : "") +
+    '<a class="btn" href="' + esc(c.gestor || "#") + '" target="_blank" rel="noopener">' + (amz ? "Abrir Amazon Ads ↗" : "Abrir el administrador ↗") + "</a></div></div></div>";
   var box = document.createElement("div");
   box.id = "pub-modal"; box.innerHTML = h; document.body.appendChild(box);
   document.body.classList.add("sin-scroll");
   S.pub.modal = { origen: origen || null, n: (S.pub.modalN = (S.pub.modalN || 0) + 1) };
   var x = box.querySelector(".pm-x"); if (x) x.focus();
-  if (a.tipo === "video" && !S.dev && S.token) cargarVideoPub(c, a, S.pub.modal.n);
+  if (vidAmz) ponerVideoPub($("pm-media"), vidAmz);
+  else if (a.tipo === "video" && !S.dev && S.token) cargarVideoPub(c, a, S.pub.modal.n);
+}
+function ponerVideoPub(el, url) {
+  if (!el) return;
+  var v = document.createElement("video");
+  v.src = url; v.controls = true; v.playsInline = true; v.autoplay = true; v.muted = true; v.loop = true; v.setAttribute("playsinline", "");
+  var img = el.querySelector("img"); if (img) v.poster = img.src;
+  el.innerHTML = ""; el.appendChild(v);
 }
 function cargarVideoPub(c, a, n) {
   var gen = S.gen;
@@ -1910,12 +1928,8 @@ function cargarVideoPub(c, a, n) {
     .then(function (j) {
       var el = $("pm-media"); if (!el || gen !== S.gen || !S.pub.modal || S.pub.modal.n !== n) return;
       var carga = el.querySelector(".pm-carga");
-      if (j && typeof j.url === "string" && /^https:\/\//.test(j.url)) {
-        var v = document.createElement("video");
-        v.src = j.url; v.controls = true; v.playsInline = true; v.autoplay = true; v.muted = true; v.loop = true; v.setAttribute("playsinline", "");
-        var img = el.querySelector("img"); if (img) v.poster = img.src;
-        el.innerHTML = ""; el.appendChild(v);
-      } else if (carga) carga.textContent = "El video no se puede reproducir aquí: ábrelo con «Ver la publicación».";
+      if (j && typeof j.url === "string" && /^https:\/\//.test(j.url)) ponerVideoPub(el, j.url);
+      else if (carga) carga.textContent = "El video no se puede reproducir aquí: ábrelo con «Ver la publicación».";
     })
     .catch(function () { var el = $("pm-media"), carga = el && el.querySelector(".pm-carga"); if (carga) carga.textContent = "No se pudo cargar el video."; });
 }
