@@ -88,6 +88,10 @@ main{max-width:1240px;margin:0 auto;padding:16px 16px 56px;padding-left:max(16px
 .cab p{font-size:13px;color:var(--text2);margin-top:4px}
 .seg{display:inline-flex;background:var(--fill2);border-radius:9px;padding:2px;gap:0;position:relative}
 .seg button{min-width:52px;height:30px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap}
+.seg button svg{width:14px;height:14px;margin-right:4px;vertical-align:-2px}
+.dia-ctrls{align-items:flex-end}
+.dia-ctrls .btn-ic{background:var(--fill)}
+.dia-ctrls .btn-ic[disabled]{opacity:.35;cursor:default;background:transparent}
 .seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04);font-weight:600}
 @media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:#636366}}
 .aviso{border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;background:var(--card);box-shadow:var(--shadow)}
@@ -479,6 +483,12 @@ function uiInicial() {
     car: { lado: "cxc", vista: "terceros", rapido: "todas", desde: "", hasta: "", q: "", nit: "", nitN: "", sort: { k: "s", dir: -1 }, n: 50 },
     mov: { mes: "", q: "", sort: { k: "t", dir: -1 }, n: 50, abierto: "" },
     mensual: { n: 12 },
+    // Resumen · Día: fechas elegidas (AAAA-MM-DD), modo rango y qué documentos se ven; tablas de la vista
+    dia: { activo: false, desde: "", hasta: "", rango: false, doc: "fact" },
+    dprod: { q: "", sort: { k: "v", dir: -1 }, n: 25 },
+    dfact: { q: "", sort: { k: "orden", dir: 1 }, n: 50 },
+    dnc: { q: "", sort: { k: "orden", dir: 1 }, n: 50 },
+    dcli: { q: "", sort: { k: "v", dir: -1 }, n: 50 },
     // Publicidad: cuenta elegida ("todas" o id), período (7 o 30 días), orden y filtro de la galería y anuncios a la vista
     pub: { cta: "todas", per: "7", orden: "gasto", activos: true, n: 12 }
   };
@@ -491,6 +501,7 @@ var S = {
   gen: 0, ctl: null, syncEnCurso: false, // gen cambia en cada login/logout: invalida respuestas viejas
   memo: {}, charts: [], msgSinDatos: null,
   pub: pubInicial(),
+  dia: diaInicial(),
   ui: uiInicial()
 };
 var $ = function (id) { return document.getElementById(id); };
@@ -877,11 +888,13 @@ function xMeses(ms) {
 }
 
 /* ═══════════ Vistas ═══════════ */
-function cabecera(titulo, sub, conPeriodo) {
+function cabecera(titulo, sub, conPeriodo, conDia) {
   var h = '<div class="cab"><div><h1>' + esc(titulo) + "</h1>" + (sub ? "<p>" + esc(sub) + "</p>" : "") + "</div>";
   if (conPeriodo) {
+    var enDia = !!conDia && S.ui.dia.activo;
     h += '<div class="seg" role="group" aria-label="Período">';
-    PERIODOS.forEach(function (p) { h += '<button data-act="periodo" data-v="' + p[0] + '" aria-pressed="' + (S.periodo === p[0]) + '">' + p[1] + "</button>"; });
+    PERIODOS.forEach(function (p) { h += '<button data-act="periodo" data-v="' + p[0] + '" aria-pressed="' + (!enDia && S.periodo === p[0]) + '">' + p[1] + "</button>"; });
+    if (conDia) h += '<button data-act="res-dia" aria-pressed="' + enDia + '" title="Ver las ventas de un día o de un rango de fechas">' + ICO_CAL + "Día</button>";
     h += "</div>";
   }
   return h + "</div>";
@@ -900,6 +913,7 @@ function cardGraf(id, titulo, sub, extra, alto) {
 
 /* ─────────── Resumen ─────────── */
 function vResumen() {
+  if (S.ui.dia.activo) return vDia();
   var d = D(), mm = mensualMap(), mA = d.mesActual || arr(d.meses).slice(-1)[0];
   if (!mA || !/^\d{4}-\d{2}$/.test(String(mA))) return cabecera("Resumen", "", false) + '<div class="vacio">Todavía no hay meses con datos para mostrar.</div>';
   var mP = mesPrevio(mA);
@@ -925,7 +939,7 @@ function vResumen() {
   var ticket = num(cur.facturas) ? num(cur.bruto) / num(cur.facturas) : 0;
   var ticketPrev = num(prev.facturas) ? num(prev.bruto) / num(prev.facturas) : 0;
 
-  var h = cabecera("Resumen", "Ventas netas (facturas − notas crédito) · datos al " + fechaC(d.hoy), true);
+  var h = cabecera("Resumen", "Ventas netas (facturas − notas crédito) · datos al " + fechaC(d.hoy), true, true);
   h += '<section class="card"><div class="heroe"><div>' +
     '<div class="l">Ventas netas · ' + esc(mesL(mA)) + ' <span style="color:var(--text3)">(mes en curso)</span></div>' +
     '<div class="big">' + esc(money(netoCur)) + "</div>" +
@@ -1022,6 +1036,263 @@ function vResumen() {
   });
   return h;
 }
+/* ─────────── Resumen · Día: ventas de un día o de un rango (GET /dia, consulta en vivo a D1) ─────────── */
+function diaInicial() { return { data: null, clave: "", cargando: false, error: null, ctl: null, req: 0, cache: {} }; }
+var DIAS_SEM = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+var DIAS_SEM_C = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+var MOTIVO_NC = { 1: "Devolución", 2: "Anulación", 3: "Descuento", 4: "Ajuste de precio", 5: "Otros" };
+var ICO_CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+var ICO_IZQ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>';
+var ICO_DER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';
+var FECHA_RE = /^\d{4}-\d{2}-\d{2}$/;
+function hoyBog() { return new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10); }
+function sumarDias(d, n) { return new Date(Date.parse(d + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
+function dSem(d) { return new Date(d + "T12:00:00Z").getUTCDay(); }
+function fechaDiaL(d) { var p = d.split("-"); return DIAS_SEM[dSem(d)] + " " + (+p[2]) + " de " + MES_L[+p[1] - 1] + " de " + p[0]; }
+function fechaCorta(d) { var p = d.split("-"); return DIAS_SEM_C[dSem(d)] + " " + (+p[2]) + " " + MES_C[+p[1] - 1]; }
+function textoRango(desde, hasta) {
+  if (desde === hasta) return fechaDiaL(desde);
+  var a = desde.split("-"), b = hasta.split("-"), n = diasEntre(desde, hasta) + 1;
+  var ini = a[0] !== b[0] ? fechaC(desde) : a[1] !== b[1] ? +a[2] + " " + MES_C[+a[1] - 1] : String(+a[2]);
+  return ini + " – " + fechaC(hasta) + " · " + n + " días";
+}
+function diaValida(j) { return !!(j && j.version === 1 && j.totales && Array.isArray(j.serie) && FECHA_RE.test(j.desde) && FECHA_RE.test(j.hasta)); }
+
+/* Cambia las fechas de la vista Día (y la activa) */
+function irDia(desde, hasta, rango) {
+  var hoy = hoyBog(), u = S.ui.dia;
+  if (!FECHA_RE.test(desde) || !FECHA_RE.test(hasta)) return;
+  if (desde > hasta) { var x = desde; desde = hasta; hasta = x; }
+  if (hasta > hoy) hasta = hoy;
+  if (desde > hoy) desde = hoy;
+  u.activo = true; u.desde = desde; u.hasta = hasta;
+  if (rango != null) u.rango = !!rango;
+  S.ui.dprod.n = 25; S.ui.dprod.q = "";
+  ["dfact", "dnc", "dcli"].forEach(function (k) { S.ui[k].n = 50; S.ui[k].q = ""; });
+  cargarDia(false);
+  render();
+}
+
+/* Pide /dia para las fechas elegidas. Días cerrados: copia en memoria 10 min (el navegador además guarda 5 min);
+   si el rango incluye hoy, 2 min. Una respuesta vieja (otra fecha, otra sesión) nunca pisa la actual. */
+function cargarDia(forzar) {
+  var u = S.ui.dia, Dd = S.dia, clave = u.desde + "|" + u.hasta;
+  if (!FECHA_RE.test(u.desde) || !FECHA_RE.test(u.hasta)) return;
+  var c = Dd.cache[clave];
+  if (!forzar && c && Date.now() - c.t < (u.hasta >= hoyBog() ? 120000 : 600000)) {
+    Dd.data = c.data; Dd.clave = clave; Dd.error = null; Dd.cargando = false; return;
+  }
+  if (!forzar && Dd.cargando && Dd.claveCarga === clave) return;
+  if (Dd.ctl) { try { Dd.ctl.abort(); } catch (e) {} Dd.ctl = null; }
+  var id = ++Dd.req, gen = S.gen;
+  Dd.cargando = true; Dd.claveCarga = clave; Dd.error = null;
+  function vigente() { return id === Dd.req && gen === S.gen; }
+  var p;
+  if (S.dev) {
+    if (!S.devDia) { Dd.cargando = false; Dd.error = "Vista previa sin ?dia=<ruta .json>."; return; }
+    p = fetch(S.devDia, { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json().then(function (j) { if (diaValida(j)) { u.desde = j.desde; u.hasta = j.hasta; u.rango = j.desde !== j.hasta; clave = j.desde + "|" + j.hasta; } return j; });
+    });
+  } else {
+    if (!S.token) { Dd.cargando = false; return; }
+    var opts = { headers: { Authorization: "Bearer " + S.token }, cache: forzar ? "no-store" : "default" };
+    p = conTiempo(API + "/dia?desde=" + encodeURIComponent(u.desde) + "&hasta=" + encodeURIComponent(u.hasta), opts, 30000);
+    Dd.ctl = opts._ctl || null;
+    p = p.then(function (r) {
+      if (!vigente()) return null;
+      if (r.status === 401) { cerrarSesion("Tu sesión venció o las claves cambiaron. Vuelve a entrar."); return null; }
+      if (!r.ok) {
+        return leerError(r).then(function (m) { var e = new Error(m || "El servidor respondió con un error (" + r.status + ")."); e.http = true; throw e; });
+      }
+      return r.json().then(null, function () { throw errorDatos("la respuesta no es JSON"); });
+    });
+  }
+  p.then(function (j) {
+    if (!vigente() || j == null) return;
+    if (!diaValida(j)) throw errorDatos("respuesta incompleta");
+    Dd.cache[clave] = { data: j, t: Date.now() };
+    Dd.data = j; Dd.clave = clave; Dd.error = null;
+  }).catch(function (e) {
+    if (!vigente()) return;
+    Dd.error = e && e.datos ? "Los datos recibidos no se pudieron mostrar (" + e.message + ")." : e && e.http ? e.message :
+      e && e.name === "AbortError" ? "El servidor tardó demasiado en responder." : "No hay conexión con el servidor (" + (e && e.message ? e.message : "error de red") + ").";
+  }).then(function () {
+    if (!vigente()) return;
+    Dd.cargando = false; Dd.ctl = null;
+    if (S.tab === "resumen" && S.ui.dia.activo) render();
+  });
+}
+
+function ctrlsDia(u, hoy) {
+  var uno = u.desde === u.hasta, ayer = sumarDias(hoy, -1), mesIni = hoy.slice(0, 8) + "01";
+  var h = '<div class="ctrls dia-ctrls">' +
+    '<button class="btn-ic" data-act="dia-mover" data-v="-1" aria-label="' + (uno ? "Día anterior" : "Período anterior") + '" title="' + (uno ? "Día anterior" : "Período anterior") + '">' + ICO_IZQ + "</button>";
+  if (!u.rango) h += '<label class="fld">Día<input class="fecha" type="date" data-act="dia-fecha" min="2024-01-01" max="' + hoy + '" value="' + esc(u.desde) + '"></label>';
+  else h += '<label class="fld">Desde<input class="fecha" type="date" data-act="dia-desde" min="2024-01-01" max="' + hoy + '" value="' + esc(u.desde) + '"></label>' +
+    '<label class="fld">Hasta<input class="fecha" type="date" data-act="dia-hasta" min="2024-01-01" max="' + hoy + '" value="' + esc(u.hasta) + '"></label>';
+  var fin = u.hasta >= hoy;
+  h += '<button class="btn-ic" data-act="dia-mover" data-v="1" aria-label="' + (uno ? "Día siguiente" : "Período siguiente") + '" title="' + (uno ? "Día siguiente" : "Período siguiente") + '"' + (fin ? ' disabled aria-disabled="true"' : "") + ">" + ICO_DER + "</button></div>";
+  h += '<div class="ctrls"><div class="pills" role="group" aria-label="Atajos de fecha">';
+  [["hoy", "Hoy", !u.rango && uno && u.desde === hoy], ["ayer", "Ayer", !u.rango && uno && u.desde === ayer],
+   ["7", "Últimos 7 días", u.rango && u.desde === sumarDias(hoy, -6) && u.hasta === hoy],
+   ["mes", "Este mes", u.rango && u.desde === mesIni && u.hasta === hoy]].forEach(function (p) {
+    h += '<button class="pill" data-act="dia-atajo" data-v="' + p[0] + '" aria-pressed="' + !!p[2] + '">' + p[1] + "</button>";
+  });
+  h += '<button class="pill" data-act="dia-rango" aria-pressed="' + !!u.rango + '">Rango de fechas</button></div></div>';
+  return h;
+}
+
+function vDia() {
+  var u = S.ui.dia, Dd = S.dia, hoy = hoyBog();
+  if (!FECHA_RE.test(u.desde) || !FECHA_RE.test(u.hasta)) { u.desde = u.hasta = hoy; u.rango = false; }
+  var clave = u.desde + "|" + u.hasta, j = Dd.clave === clave ? Dd.data : null, uno = u.desde === u.hasta;
+  var h = cabecera("Resumen", (uno ? "Ventas del " : "Ventas · ") + textoRango(u.desde, u.hasta) + " · facturas − notas crédito", true, true);
+  h += ctrlsDia(u, hoy);
+  if (!j) {
+    if (Dd.error && !Dd.cargando) {
+      h += '<div class="aviso error"><span class="ic" aria-hidden="true">!</span><div><b>No se pudieron traer las ventas de esas fechas</b><p>' + esc(Dd.error) +
+        '</p><p style="margin-top:8px"><button class="btn" data-act="dia-reintentar">Reintentar</button></p></div></div>';
+    } else {
+      h += '<section class="card"><div class="vacio">Cargando las ventas…</div></section>';
+      if (!Dd.cargando) setTimeout(function () { cargarDia(false); if (S.dia.data && S.dia.clave === S.ui.dia.desde + "|" + S.ui.dia.hasta) render(); }, 0);
+    }
+    return h;
+  }
+  var t = j.totales || {}, n = num(j.dias) || 1, comp = arr(j.comparar);
+  var ant = comp.filter(function (c) { return c && c.k === "anterior"; })[0], sem = comp.filter(function (c) { return c && c.k === "semana"; })[0];
+  var ticket = num(t.facturas) ? num(t.bruto) / num(t.facturas) : 0, enCurso = j.hasta >= hoy;
+  var notaComp = [];
+  if (ant) notaComp.push((uno ? fechaCorta(ant.desde) : "Los " + n + " días anteriores") + ": " + esc(money(ant.neto)));
+  if (sem) notaComp.push(fechaCorta(sem.desde) + ": " + esc(money(sem.neto)));
+  h += '<section class="card"><div class="heroe"><div>' +
+    '<div class="l">Ventas netas · ' + esc(uno ? fechaCorta(j.desde) + " " + j.desde.slice(0, 4) : textoRango(j.desde, j.hasta)) +
+    (enCurso ? ' <span style="color:var(--text3)">(' + (uno ? "hoy, en curso" : "incluye hoy") + ")</span>" : "") + "</div>" +
+    '<div class="big">' + esc(money(t.neto)) + "</div>" +
+    '<div class="chips">' + (ant ? chipVar(variacion(num(t.neto), num(ant.neto)), uno ? "vs " + fechaCorta(ant.desde) : "vs " + n + " días anteriores") : "") +
+    (sem ? chipVar(variacion(num(t.neto), num(sem.neto)), "vs " + fechaCorta(sem.desde)) : "") + "</div>" +
+    '<div class="nota">Facturado ' + esc(money(t.bruto)) + " · notas crédito " + esc(money(t.nc)) + (notaComp.length ? "<br>" + notaComp.join(" · ") : "") +
+    (enCurso ? "<br>Hoy se completa con cada sincronización con Siigo (cada 30 min)." : "") + "</div>" +
+    '</div><div><div class="graf" id="g-dia" style="min-height:170px"></div>' +
+    '<div class="leyenda"><span><i class="bg-blue"></i>' + (uno ? "Día elegido" : "Período elegido") + "</span>" +
+    (arr(j.contexto).length > arr(j.serie).length ? '<span><i class="bg-blue" style="opacity:.35"></i>Días anteriores</span>' : "") +
+    "<span>ventas netas por día · línea = promedio</span></div></div></div></section>";
+
+  h += '<div class="grid kpis">' +
+    kpi("Facturas", fmtN(t.facturas), esc(fmtN(t.clientes) + (num(t.clientes) === 1 ? " cliente" : " clientes")), "") +
+    kpi("Ticket promedio", money(ticket), "Facturado por factura", "") +
+    kpi("Unidades", fmtN(t.unidades), esc(fmtN(j.productosTotal) + (num(j.productosTotal) === 1 ? " producto" : " productos") + " · netas de devoluciones"), "azul") +
+    kpi("Notas crédito", moneyA(t.nc), esc(fmtN(t.notas) + (num(t.notas) === 1 ? " nota" : " notas") + (num(t.bruto) ? " · " + pct(num(t.nc) / num(t.bruto)) + " de lo facturado" : "")), num(t.nc) ? "rojo" : "") +
+    "</div>";
+
+  var vend = arr(j.vendedores);
+  h += '<div class="grid g2">' +
+    '<section class="card"><div class="card-cab"><div><h2>Por marca</h2><div class="sub">Ventas netas de los productos</div></div></div><div class="dona"><div class="graf" id="g-dmarcas"></div><ul class="lista-m" id="l-dmarcas"></ul></div></section>' +
+    '<section class="card"><div class="card-cab"><div><h2>Vendedores</h2><div class="sub">Facturas y ventas netas</div></div></div>' +
+    tabla("dvend", [
+      { k: "n", t: "Vendedor", f: function (r) { return celdaNombre(r.n, ""); } },
+      { k: "f", t: "Facturas", d: 1, f: function (r) { return esc(fmtN(r.f)); } },
+      { k: "v", t: "Ventas netas", d: 1, f: function (r) { return "<b>" + esc(money(r.v)) + "</b>" + (num(r.nc) ? '<div class="n2 rojo">NC ' + esc(money(r.nc)) + "</div>" : ""); } }
+    ], vend, { n: 100 }, { vacio: "Sin ventas en estas fechas" }) + "</section></div>";
+
+  h += '<section class="card"><div class="card-cab"><div><h2>Productos</h2><div class="sub">' + esc(fmtN(j.productosTotal) + (num(j.productosTotal) === 1 ? " producto" : " productos")) +
+    " · unidades y ventas netas de devoluciones (incluye combos)</div></div>" + btnCSV("dprod") + "</div>" +
+    '<div class="ctrls"><input class="buscar" type="search" data-q="dprod" placeholder="Buscar por nombre, marca o código…" aria-label="Buscar producto" value="' + esc(S.ui.dprod.q) + '"></div>' +
+    '<div id="z-dprod">' + zDiaProd() + "</div>" +
+    (num(j.productosTotal) > arr(j.productos).length ? '<p class="pie">Se muestran los ' + fmtN(arr(j.productos).length) + " productos que más vendieron de " + fmtN(j.productosTotal) + ".</p>" : "") + "</section>";
+
+  var dv = u.doc === "nc" || u.doc === "cli" ? u.doc : "fact", tid = "d" + dv;
+  var segD = function (v, txt, c) { return '<button data-act="dia-doc" data-v="' + v + '" aria-pressed="' + (dv === v) + '">' + txt + ' <span style="color:var(--text3);font-weight:500">' + esc(fmtN(c)) + "</span></button>"; };
+  var corto = dv === "fact" ? arr(j.facturas).length < num(t.facturas) : dv === "nc" ? arr(j.notas).length < num(t.notas) : arr(j.clientes).length < num(j.clientesTotal);
+  h += '<section class="card"><div class="card-cab"><div><h2>Documentos</h2><div class="sub">' + (dv === "cli" ? "Clientes con facturas o notas crédito en estas fechas, por ventas netas" : dv === "nc" ? "Notas crédito con su motivo" : "Facturas emitidas, la más reciente primero") + "</div></div>" +
+    '<div class="seg" role="group" aria-label="Ver">' + segD("fact", "Facturas", t.facturas) + segD("nc", "Notas crédito", t.notas) + segD("cli", "Clientes", j.clientesTotal) + "</div></div>" +
+    '<div class="ctrls"><input class="buscar" type="search" data-q="' + tid + '" placeholder="' + (dv === "cli" ? "Buscar cliente o NIT…" : "Buscar cliente, NIT, documento o vendedor…") + '" aria-label="Buscar" value="' + esc(S.ui[tid].q) + '">' + btnCSV(tid) + "</div>" +
+    '<div id="z-' + tid + '">' + (dv === "nc" ? zDiaNc() : dv === "cli" ? zDiaCli() : zDiaFact()) + "</div>" +
+    (corto ? '<p class="pie">Se muestran ' + (dv === "cli" ? "los " + fmtN(arr(j.clientes).length) + " clientes que más compraron" : "los " + fmtN(dv === "nc" ? arr(j.notas).length : arr(j.facturas).length) + " documentos más recientes") + ". Para ver todos, elige menos días.</p>" : "") +
+    "</section>";
+
+  S.charts.push(function () {
+    var cx = arr(j.contexto).length ? arr(j.contexto) : arr(j.serie), dl = cx.map(function (r) { return r.d; });
+    var dentro = function (i) { return dl[i] >= j.desde && dl[i] <= j.hasta; };
+    var vals = cx.map(function (r) { return num(r.neto); });
+    var prom = vals.length ? vals.reduce(function (a, v) { return a + v; }, 0) / vals.length : 0;
+    graficoBarras($("g-dia"), {
+      labels: dl, h: 170, recortar: true, aria: "Ventas netas por día", series: [{ nombre: "Neto", color: "blue", v: vals }],
+      promedio: vals.length > 2 && prom > 0 ? prom : 0,
+      parcial: function (i) { return !dentro(i); },
+      xLab: function (i, cada) {
+        var dd = +dl[i].slice(8);
+        if (dl.length <= 16) {
+          // Un solo día: su número siempre se ve (y se calla el vecino que se le montaría encima)
+          if (j.desde === j.hasta) { var sel = dl.indexOf(j.desde); if (i === sel) return String(dd); if (Math.abs(i - sel) < cada) return null; }
+          return i % cada === 0 || dentro(i) && dl.length <= 8 ? String(dd) : null;
+        }
+        return dd === 1 ? MES_C[+dl[i].slice(5, 7) - 1] : (dd === 15 && cada < 12 ? "15" : null);
+      },
+      tip: function (i) {
+        var r = cx[i] || {};
+        return "<b>" + esc(fechaCorta(r.d) + " " + r.d.slice(0, 4)) + "</b>" + filaTip("blue", "Neto", money(r.neto)) + filaTip(null, "Facturado", money(r.bruto)) +
+          filaTip(null, "Notas crédito", money(r.nc)) + filaTip(null, "Facturas", fmtN(r.facturas));
+      }
+    });
+    var mk = arr(j.marcas), tot = mk.reduce(function (a, x) { return a + Math.max(0, num(x.v)); }, 0);
+    var items = mk.map(function (x, i) { return { nombre: x.b, v: num(x.v), color: colorMarca(x.b, i) }; });
+    var ul = $("l-dmarcas");
+    ul.innerHTML = items.map(function (it, i) {
+      // Una marca en negativo (p. ej. una nota crédito de descuento) no tiene participación: se muestra en rojo y sin %
+      return '<li data-i="' + i + '"><span class="sw bg-' + it.color + '"></span><span class="n">' + esc(it.nombre) + '</span><span class="num' + (it.v < 0 ? " rojo" : "") + '">' + esc(moneyA(it.v)) + '</span><span class="p num">' + (it.v < 0 ? "—" : esc(pct(tot ? it.v / tot : 0))) + "</span></li>";
+    }).join("") || '<li class="vacio">Sin ventas</li>';
+    if (items.length) graficoDona($("g-dmarcas"), items, ["Total", moneyA(tot)], function (i) {
+      ul.querySelectorAll("li").forEach(function (li) { li.classList.toggle("on", +li.getAttribute("data-i") === i); });
+    });
+  });
+  return h;
+}
+
+function filasDiaProd() { return arr((S.dia.data || {}).productos).map(function (p) { return { c: p.c || "", n: p.n, b: p.b, combo: !!p.combo, u: num(p.u), v: num(p.v) }; }); }
+function zDiaProd() {
+  // % = participación en lo vendido (solo filas en positivo); una fila negativa (descuento, devolución) va en rojo y sin %
+  var u = S.ui.dprod, all = filasDiaProd(), tot = all.reduce(function (a, r) { return a + Math.max(0, r.v); }, 0);
+  var rows = ordenar(filtrar(all, u.q, ["c", "n", "b"]), u.sort), max = rows.reduce(function (a, r) { return Math.max(a, r.v); }, 0);
+  return (u.q ? '<div class="resumen-f">' + esc(fmtN(rows.length) + " de " + fmtN(all.length) + " productos") + "</div>" : "") + tabla("dprod", [
+    { k: "n", t: "Producto", sort: 1, f: function (r) { return '<div class="n1">' + esc(r.n) + (r.combo ? '<span class="tag combo">Combo</span>' : "") + '</div><div class="n2">' + esc(r.b) + (r.c ? " · " + esc(r.c) : "") + "</div>"; } },
+    { k: "u", t: "Unidades", sort: 1, d: 1, f: function (r) { return esc(fmtN(r.u)); } },
+    { k: "v", t: "Ventas", sort: 1, d: 1, f: function (r) { return (r.v < 0 ? '<span class="rojo">' + esc(money(r.v)) + "</span>" : esc(money(r.v))) + '<div class="minibar"><span class="bg-blue" style="width:' + (max > 0 ? Math.max(0, r.v / max * 100) : 0).toFixed(1) + '%"></span></div>'; } },
+    { k: "p", t: "%", d: 1, m: 1, f: function (r) { return '<span style="color:var(--text2)">' + (r.v < 0 ? "—" : esc(pct(tot ? r.v / tot : 0))) + "</span>"; } }
+  ], rows, u, { vacio: u.q ? "Ningún producto coincide con la búsqueda" : "No hubo productos vendidos en estas fechas" });
+}
+function filasDiaFact() { return arr((S.dia.data || {}).facturas).map(function (r, i) { return { orden: i, doc: r.doc, d: r.d, nit: r.nit, n: r.n || r.nit || "Sin cliente", sel: r.sel, v: num(r.v), saldo: num(r.saldo) }; }); }
+function zDiaFact() {
+  var j = S.dia.data || {}, u = S.ui.dfact, uno = j.desde === j.hasta, all = filasDiaFact();
+  var rows = ordenar(filtrar(all, u.q, ["doc", "n", "nit", "sel"]), u.sort);
+  return (u.q ? '<div class="resumen-f">' + esc(fmtN(rows.length) + " de " + fmtN(all.length) + " facturas") + "</div>" : "") + tabla("dfact", [
+    { k: "doc", t: "Factura", sort: 1, f: function (r) { return "<b>" + esc(r.doc) + "</b>" + (uno ? "" : '<div class="n2">' + esc(fechaCorta(r.d)) + "</div>"); } },
+    { k: "n", t: "Cliente", sort: 1, f: function (r) { return '<div class="n1">' + esc(r.n) + '</div><div class="n2">' + esc(r.nit) + '<span class="solo-m">' + (r.sel ? " · " + esc(r.sel) : "") + "</span></div>"; } },
+    { k: "sel", t: "Vendedor", sort: 1, m: 1, f: function (r) { return esc(r.sel); } },
+    { k: "v", t: "Valor", sort: 1, d: 1, f: function (r) { return "<b>" + esc(money(r.v)) + "</b>" + (r.saldo > 0.5 ? '<div class="n2 naranja">Pendiente ' + esc(money(r.saldo)) + "</div>" : ""); } }
+  ], rows, u, { vacio: u.q ? "Ninguna factura coincide con la búsqueda" : "No hubo facturas en estas fechas" });
+}
+function filasDiaNc() { return arr((S.dia.data || {}).notas).map(function (r, i) { return { orden: i, doc: r.doc, d: r.d, nit: r.nit, n: r.n || r.nit || "Sin cliente", sel: r.sel, v: num(r.v), motivo: MOTIVO_NC[r.motivo] || "Otros", fac: r.fac || "" }; }); }
+function zDiaNc() {
+  var j = S.dia.data || {}, u = S.ui.dnc, uno = j.desde === j.hasta, all = filasDiaNc();
+  var rows = ordenar(filtrar(all, u.q, ["doc", "n", "nit", "sel", "fac", "motivo"]), u.sort);
+  return (u.q ? '<div class="resumen-f">' + esc(fmtN(rows.length) + " de " + fmtN(all.length) + " notas") + "</div>" : "") + tabla("dnc", [
+    { k: "doc", t: "Nota crédito", sort: 1, f: function (r) { return "<b>" + esc(r.doc) + "</b>" + '<div class="n2">' + (uno ? "" : esc(fechaCorta(r.d)) + " · ") + (r.fac ? "Factura " + esc(r.fac) : "Sin factura") + "</div>"; } },
+    { k: "n", t: "Cliente", sort: 1, f: function (r) { return '<div class="n1">' + esc(r.n) + '</div><div class="n2">' + esc(r.nit) + '<span class="solo-m"> · ' + esc(r.motivo) + "</span></div>"; } },
+    { k: "motivo", t: "Motivo", sort: 1, m: 1, f: function (r) { return esc(r.motivo) + (r.sel ? '<div class="n2">' + esc(r.sel) + "</div>" : ""); } },
+    { k: "v", t: "Valor", sort: 1, d: 1, f: function (r) { return '<b class="rojo">' + esc(money(r.v)) + "</b>"; } }
+  ], rows, u, { vacio: u.q ? "Ninguna nota coincide con la búsqueda" : "No hubo notas crédito en estas fechas" });
+}
+function filasDiaCli() { return arr((S.dia.data || {}).clientes).map(function (r) { return { nit: r.nit, n: r.n || r.nit, f: num(r.f), v: num(r.v) }; }); }
+function zDiaCli() {
+  var u = S.ui.dcli, all = filasDiaCli(), rows = ordenar(filtrar(all, u.q, ["n", "nit"]), u.sort), max = rows.reduce(function (a, r) { return Math.max(a, r.v); }, 0);
+  return (u.q ? '<div class="resumen-f">' + esc(fmtN(rows.length) + " de " + fmtN(all.length) + " clientes") + "</div>" : "") + tabla("dcli", [
+    { k: "n", t: "Cliente", sort: 1, f: function (r) { return celdaNombre(r.n, r.nit); } },
+    { k: "f", t: "Facturas", sort: 1, d: 1, f: function (r) { return esc(fmtN(r.f)); } },
+    { k: "v", t: "Ventas netas", sort: 1, d: 1, f: function (r) { return esc(money(r.v)) + '<div class="minibar"><span class="bg-blue" style="width:' + (max > 0 ? Math.max(0, r.v / max * 100) : 0).toFixed(1) + '%"></span></div>'; } }
+  ], rows, u, { vacio: u.q ? "Ningún cliente coincide con la búsqueda" : "No hubo clientes en estas fechas" });
+}
+
 function filasMensual() {
   var mm = mensualMap(), mA = D().mesActual;
   return mesesPeriodo().slice().reverse().map(function (k) {
@@ -2029,7 +2300,7 @@ function leerAhoraPub() {
 
 /* ═══════════ Render ═══════════ */
 var VISTAS = { resumen: vResumen, productos: vProductos, clientes: vClientes, vendedores: vVendedores, inventario: vInventario, cartera: vCartera, movimiento: vMovimiento, publicidad: vPublicidad };
-var ZONAS = { prod: ["z-prod", zProductos], top: ["z-top", zTop], riesgo: ["z-riesgo", zRiesgo], inv: ["z-inv", zInv], car: ["z-car", zCartera], mov: ["z-mov", zMov], mensual: ["z-mensual", zMensual] };
+var ZONAS = { prod: ["z-prod", zProductos], top: ["z-top", zTop], riesgo: ["z-riesgo", zRiesgo], inv: ["z-inv", zInv], car: ["z-car", zCartera], mov: ["z-mov", zMov], mensual: ["z-mensual", zMensual], dprod: ["z-dprod", zDiaProd], dfact: ["z-dfact", zDiaFact], dnc: ["z-dnc", zDiaNc], dcli: ["z-dcli", zDiaCli] };
 
 function pintarTabs() {
   // Solo las 8 secciones van dentro del tablist; los enlaces externos quedan fuera (no son pestañas)
@@ -2302,6 +2573,8 @@ function cerrarSesion(msg) {
   if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
   if (S.pub.ctl) { try { S.pub.ctl.abort(); } catch (e) {} }
   cerrarAdPub(true); S.pub = pubInicial(); S.msgSinDatos = null;
+  if (S.dia.ctl) { try { S.dia.ctl.abort(); } catch (e) {} }
+  S.dia = diaInicial();
   ls.del(K_TOKEN); ls.del(K_CACHE); ls.del(K_USER); ls.del(K_PUB); ls.del("letos_padel_cache"); ls.del("letos_locatel_cache"); // copia de locatel.html (misma sesión)
   S.token = null; S.data = null; S.etag = null; S.memo = {}; S.errorRed = null;
   S.cargando = false; S.usuario = null; S.rol = null; S.estadoSync = null; S.msgSync = null; S.syncEnCurso = false;
@@ -2385,6 +2658,7 @@ document.addEventListener("keydown", function (ev) {
 $("b-refrescar").addEventListener("click", function () {
   if (S.dev) { location.reload(); return; }
   if (S.tab === "publicidad") revalidarPub(true); else revalidar();
+  if (S.tab === "resumen" && S.ui.dia.activo) { cargarDia(true); render(); }
 });
 
 /* ═══════════ Eventos de la vista (delegación) ═══════════ */
@@ -2407,15 +2681,37 @@ var CSV = {
     return [["Documento", "Fecha", "Vence", "Días vencida", "NIT", esCxc ? "Cliente" : "Proveedor", "Saldo"].concat(esCxc ? ["Vendedor"] : [])]
       .concat(ordenar(filtrar(docsFiltrados(), u.q, ["n", "nit", "doc", "sel"]), { k: "s", dir: -1 }).map(function (r) { return [r.doc, r.f, r.v, r.dias, r.nit, r.n, r.s].concat(esCxc ? [r.sel] : []); }));
   },
-  mov: function () { var u = S.ui.mov; return [["Código", "Producto", "Marca", "Directas", "Por combos", "Total"]].concat(ordenar(filtrar(aggMovimiento(mesesSel(u.mes)), u.q, ["c", "n", "b"]), u.sort).map(function (r) { return [r.c, r.n, r.b, r.d, r.cb, r.t]; })); }
+  mov: function () { var u = S.ui.mov; return [["Código", "Producto", "Marca", "Directas", "Por combos", "Total"]].concat(ordenar(filtrar(aggMovimiento(mesesSel(u.mes)), u.q, ["c", "n", "b"]), u.sort).map(function (r) { return [r.c, r.n, r.b, r.d, r.cb, r.t]; })); },
+  dprod: function () { var u = S.ui.dprod; return [["Código", "Producto", "Marca", "Combo", "Unidades", "Ventas netas"]].concat(ordenar(filtrar(filasDiaProd(), u.q, ["c", "n", "b"]), u.sort).map(function (r) { return [r.c, r.n, r.b, r.combo ? "Sí" : "No", r.u, r.v]; })); },
+  dfact: function () { var u = S.ui.dfact; return [["Factura", "Fecha", "NIT", "Cliente", "Vendedor", "Valor", "Saldo pendiente"]].concat(ordenar(filtrar(filasDiaFact(), u.q, ["doc", "n", "nit", "sel"]), u.sort).map(function (r) { return [r.doc, r.d, r.nit, r.n, r.sel, r.v, r.saldo]; })); },
+  dnc: function () { var u = S.ui.dnc; return [["Nota crédito", "Fecha", "NIT", "Cliente", "Motivo", "Factura", "Vendedor", "Valor"]].concat(ordenar(filtrar(filasDiaNc(), u.q, ["doc", "n", "nit", "sel", "fac", "motivo"]), u.sort).map(function (r) { return [r.doc, r.d, r.nit, r.n, r.motivo, r.fac, r.sel, r.v]; })); },
+  dcli: function () { var u = S.ui.dcli; return [["NIT", "Cliente", "Facturas", "Ventas netas"]].concat(ordenar(filtrar(filasDiaCli(), u.q, ["n", "nit"]), u.sort).map(function (r) { return [r.nit, r.n, r.f, r.v]; })); }
 };
-var NOMBRE_CSV = { mensual: "ventas-mensuales", prod: "productos", top: "top-clientes", riesgo: "clientes-en-riesgo", vend: "vendedores", inv: "inventario", mov: "movimiento" };
-function uiDe(t) { return { prod: S.ui.prod, top: S.ui.top, riesgo: S.ui.riesgo, inv: S.ui.inv, car: S.ui.car, mov: S.ui.mov, mensual: S.ui.mensual }[t]; }
+var NOMBRE_CSV = { mensual: "ventas-mensuales", prod: "productos", top: "top-clientes", riesgo: "clientes-en-riesgo", vend: "vendedores", inv: "inventario", mov: "movimiento", dprod: "productos-dia", dfact: "facturas-dia", dnc: "notas-credito-dia", dcli: "clientes-dia" };
+function uiDe(t) { return { prod: S.ui.prod, top: S.ui.top, riesgo: S.ui.riesgo, inv: S.ui.inv, car: S.ui.car, mov: S.ui.mov, mensual: S.ui.mensual, dprod: S.ui.dprod, dfact: S.ui.dfact, dnc: S.ui.dnc, dcli: S.ui.dcli }[t]; }
 
 $("view").addEventListener("click", function (ev) {
   var b = ev.target.closest("[data-act]"); if (!b || b.tagName === "SELECT" || b.tagName === "INPUT") return;
   var act = b.getAttribute("data-act"), t = b.getAttribute("data-t"), v = b.getAttribute("data-v");
-  if (act === "periodo") { if (S.periodo !== v) { S.periodo = v; guardarPref(); ["prod", "vend", "mov"].forEach(function (k) { S.ui[k].mes = ""; }); ["prod", "top", "riesgo", "mov", "mensual"].forEach(function (k) { S.ui[k].n = k === "mensual" ? 12 : k === "top" || k === "riesgo" ? 25 : 50; }); render(); } return; }
+  if (act === "periodo") { var salirDia = S.ui.dia.activo; S.ui.dia.activo = false; if (S.periodo !== v) { S.periodo = v; guardarPref(); ["prod", "vend", "mov"].forEach(function (k) { S.ui[k].mes = ""; }); ["prod", "top", "riesgo", "mov", "mensual"].forEach(function (k) { S.ui[k].n = k === "mensual" ? 12 : k === "top" || k === "riesgo" ? 25 : 50; }); render(); } else if (salirDia) render(); return; }
+  // Resumen · Día
+  if (act === "res-dia") { if (!S.ui.dia.activo) { var hd = hoyBog(), ud = S.ui.dia; if (FECHA_RE.test(ud.desde) && FECHA_RE.test(ud.hasta)) irDia(ud.desde, ud.hasta); else irDia(hd, hd, false); } return; }
+  if (act === "dia-atajo") {
+    var hy = hoyBog();
+    if (v === "hoy") irDia(hy, hy, false); else if (v === "ayer") irDia(sumarDias(hy, -1), sumarDias(hy, -1), false);
+    else if (v === "7") irDia(sumarDias(hy, -6), hy, true); else if (v === "mes") irDia(hy.slice(0, 8) + "01", hy, true);
+    return;
+  }
+  if (act === "dia-mover") {
+    var um2 = S.ui.dia, nd = diasEntre(um2.desde, um2.hasta) + 1, sg = v === "1" ? 1 : -1, hm = hoyBog();
+    var nDesde = sumarDias(um2.desde, sg * nd), nHasta = sumarDias(um2.hasta, sg * nd);
+    if (nHasta > hm) { nHasta = hm; nDesde = sumarDias(hm, -(nd - 1)); }
+    if (nHasta !== um2.hasta || nDesde !== um2.desde) irDia(nDesde, nHasta);
+    return;
+  }
+  if (act === "dia-rango") { var ur = S.ui.dia; ur.rango = !ur.rango; if (!ur.rango && ur.desde !== ur.hasta) irDia(ur.hasta, ur.hasta, false); else render(); return; }
+  if (act === "dia-doc") { if (S.ui.dia.doc !== v) { S.ui.dia.doc = v === "nc" || v === "cli" ? v : "fact"; render(); } return; }
+  if (act === "dia-reintentar") { cargarDia(true); render(); return; }
   if (act === "sort") {
     var u = uiDe(t), k = b.getAttribute("data-k");
     u.sort = u.sort.k === k ? { k: k, dir: -u.sort.dir } : { k: k, dir: (k === "n" || k === "c" || k === "doc" || k === "v" && t === "car" || k === "u" && t === "riesgo" || k === "dias" || k === "orden") ? 1 : -1 };
@@ -2423,7 +2719,10 @@ $("view").addEventListener("click", function (ev) {
     return;
   }
   if (act === "mas") { var um = uiDe(t); um.n += um.n >= 200 ? 500 : 50; renderZona(t); return; }
-  if (act === "csv") { descargarCSV("letos-" + (t === "car" ? (S.ui.car.lado === "cxc" ? "cuentas-por-cobrar" : "cuentas-por-pagar") : NOMBRE_CSV[t]) + "-" + (D().hoy || "") + ".csv", CSV[t]()); return; }
+  if (act === "csv") {
+    var jd = S.dia.data, sufijo = /^d(prod|fact|nc|cli)$/.test(t) && jd ? jd.desde + (jd.hasta !== jd.desde ? "_" + jd.hasta : "") : (D().hoy || "");
+    descargarCSV("letos-" + (t === "car" ? (S.ui.car.lado === "cxc" ? "cuentas-por-cobrar" : "cuentas-por-pagar") : NOMBRE_CSV[t]) + "-" + sufijo + ".csv", CSV[t]()); return;
+  }
   if (act === "inv-f") { S.ui.inv.f = v; S.ui.inv.n = 50; render(); return; }
   if (act === "car-lado") { S.ui.car.lado = v; S.ui.car.q = ""; S.ui.car.nit = ""; S.ui.car.nitN = ""; S.ui.car.n = 50; render(); return; }
   if (act === "car-vista") { S.ui.car.vista = v; if (v === "terceros") { S.ui.car.nit = ""; S.ui.car.nitN = ""; } S.ui.car.n = 50; S.ui.car.sort = { k: "s", dir: -1 }; render(); return; }
@@ -2466,13 +2765,17 @@ $("view").addEventListener("change", function (ev) {
     S.ui.car[act === "car-desde" ? "desde" : "hasta"] = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : "";
     S.ui.car.rapido = "todas"; S.ui.car.n = 50; render();
   }
+  else if (act === "dia-fecha") { if (FECHA_RE.test(el.value)) irDia(el.value, el.value, false); }
+  else if (act === "dia-desde" || act === "dia-hasta") {
+    if (FECHA_RE.test(el.value)) { var ux = S.ui.dia; irDia(act === "dia-desde" ? el.value : ux.desde, act === "dia-hasta" ? el.value : ux.hasta, true); }
+  }
   else if (act === "pub-orden") { S.ui.pub.orden = PUB_ORDENES.some(function (o) { return o[0] === el.value; }) ? el.value : "gasto"; S.ui.pub.n = 12; render(); }
 });
 var tBusca = null;
 $("view").addEventListener("input", function (ev) {
   var el = ev.target, t = el.getAttribute("data-q"); if (!t) return;
   clearTimeout(tBusca);
-  tBusca = setTimeout(function () { var u = uiDe(t); u.q = el.value; u.n = t === "top" || t === "riesgo" ? 25 : 50; renderZona(t); }, 160);
+  tBusca = setTimeout(function () { var u = uiDe(t); u.q = el.value; u.n = t === "top" || t === "riesgo" || t === "dprod" ? 25 : 50; renderZona(t); }, 160);
 });
 
 /* Redibujar gráficos al cambiar el ancho */
@@ -2488,7 +2791,12 @@ window.addEventListener("hashchange", function () {
 
 /* Reloj del indicador + revalidación periódica */
 setInterval(pintarEstado, 30000);
-setInterval(function () { if (document.visibilityState === "visible" && S.token && !S.dev) { revalidar(); if (S.tab === "publicidad") revalidarPub(); } }, 5 * 60000);
+setInterval(function () {
+  if (document.visibilityState === "visible" && S.token && !S.dev) {
+    revalidar(); if (S.tab === "publicidad") revalidarPub();
+    if (S.tab === "resumen" && S.ui.dia.activo && S.ui.dia.hasta >= hoyBog()) cargarDia(true); // hoy cambia con cada sync de Siigo
+  }
+}, 5 * 60000);
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState !== "visible" || !S.token || S.dev) return;
   if (Date.now() - S.revisado > 60000) revalidar();
@@ -2507,12 +2815,12 @@ document.addEventListener("visibilitychange", function () {
 
   // Modo desarrollo: SOLO en localhost / 127.0.0.1 y con ?datos=<ruta relativa .json> y/o ?pub=<ruta relativa .json>
   var host = location.hostname;
-  var datos = null, pubJ = null;
-  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); pubJ = qs.get("pub"); } catch (e) {}
+  var datos = null, pubJ = null, diaJ = null;
+  try { var qs = new URLSearchParams(location.search); datos = qs.get("datos"); pubJ = qs.get("pub"); diaJ = qs.get("dia"); } catch (e) {}
   if ((host === "localhost" || host === "127.0.0.1") && (datos || pubJ)) {
     var rutaOk = function (x) { return !x || (/^[\w.\-\/]+\.json$/.test(x) && x.indexOf("//") < 0); };
-    if (!rutaOk(datos) || !rutaOk(pubJ)) { document.body.textContent = "Parámetro ?datos o ?pub inválido: debe ser una ruta relativa a un .json"; return; }
-    S.dev = true;
+    if (!rutaOk(datos) || !rutaOk(pubJ) || !rutaOk(diaJ)) { document.body.textContent = "Parámetro ?datos, ?pub o ?dia inválido: debe ser una ruta relativa a un .json"; return; }
+    S.dev = true; S.devDia = diaJ || null;
     if (!datos) S.msgSinDatos = "Vista previa sin ?datos=: solo se puede ver la pestaña Publicidad.";
     if (pubJ) S.pub.cargando = true; else S.pub.vacio = "Vista previa sin ?pub=<ruta .json>.";
     mostrarApp(); render();
