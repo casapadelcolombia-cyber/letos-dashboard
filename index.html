@@ -1097,7 +1097,8 @@ function cargarDia(forzar) {
   } else {
     if (!S.token) { Dd.cargando = false; return; }
     var opts = { headers: { Authorization: "Bearer " + S.token }, cache: forzar ? "no-store" : "default" };
-    p = conTiempo(API + "/dia?desde=" + encodeURIComponent(u.desde) + "&hasta=" + encodeURIComponent(u.hasta), opts, 30000);
+    // v=2: respuestas con vendedoresDia (no reusar las que el navegador guardó antes de ese cambio)
+    p = conTiempo(API + "/dia?desde=" + encodeURIComponent(u.desde) + "&hasta=" + encodeURIComponent(u.hasta) + "&v=2", opts, 30000);
     Dd.ctl = opts._ctl || null;
     p = p.then(function (r) {
       if (!vigente()) return null;
@@ -1120,8 +1121,34 @@ function cargarDia(forzar) {
   }).then(function () {
     if (!vigente()) return;
     Dd.cargando = false; Dd.ctl = null;
-    if (S.tab === "resumen" && S.ui.dia.activo) render();
+    if (enVistaDia()) render();
   });
+}
+
+/* La vista Día se ve en el Resumen y en Vendedores (las mismas fechas para las dos) */
+function enVistaDia() { return S.ui.dia.activo && (S.tab === "resumen" || S.tab === "vendedores"); }
+
+/* Mientras no hay datos de las fechas elegidas: aviso de error con «Reintentar», o «Cargando…» (y arranca la consulta) */
+function esperaDia() {
+  var Dd = S.dia;
+  if (Dd.error && !Dd.cargando) {
+    return '<div class="aviso error"><span class="ic" aria-hidden="true">!</span><div><b>No se pudieron traer las ventas de esas fechas</b><p>' + esc(Dd.error) +
+      '</p><p style="margin-top:8px"><button class="btn" data-act="dia-reintentar">Reintentar</button></p></div></div>';
+  }
+  if (!Dd.cargando) setTimeout(function () { cargarDia(false); if (S.dia.data && S.dia.clave === S.ui.dia.desde + "|" + S.ui.dia.hasta) render(); }, 0);
+  return '<section class="card"><div class="vacio">Cargando las ventas…</div></section>';
+}
+
+/* Eje X de los gráficos por día: el número del día; un día suelto siempre se ve (y se calla el vecino que se le montaría encima) */
+function xLabDia(dl, j) {
+  return function (i, cada) {
+    var dd = +dl[i].slice(8), dentro = dl[i] >= j.desde && dl[i] <= j.hasta;
+    if (dl.length <= 16) {
+      if (j.desde === j.hasta) { var sel = dl.indexOf(j.desde); if (i === sel) return String(dd); if (Math.abs(i - sel) < cada) return null; }
+      return i % cada === 0 || dentro && dl.length <= 8 ? String(dd) : null;
+    }
+    return dd === 1 ? MES_C[+dl[i].slice(5, 7) - 1] : (dd === 15 && cada < 12 ? "15" : null);
+  };
 }
 
 function ctrlsDia(u, hoy) {
@@ -1149,16 +1176,7 @@ function vDia() {
   var clave = u.desde + "|" + u.hasta, j = Dd.clave === clave ? Dd.data : null, uno = u.desde === u.hasta;
   var h = cabecera("Resumen", (uno ? "Ventas del " : "Ventas · ") + textoRango(u.desde, u.hasta) + " · facturas − notas crédito", true, true);
   h += ctrlsDia(u, hoy);
-  if (!j) {
-    if (Dd.error && !Dd.cargando) {
-      h += '<div class="aviso error"><span class="ic" aria-hidden="true">!</span><div><b>No se pudieron traer las ventas de esas fechas</b><p>' + esc(Dd.error) +
-        '</p><p style="margin-top:8px"><button class="btn" data-act="dia-reintentar">Reintentar</button></p></div></div>';
-    } else {
-      h += '<section class="card"><div class="vacio">Cargando las ventas…</div></section>';
-      if (!Dd.cargando) setTimeout(function () { cargarDia(false); if (S.dia.data && S.dia.clave === S.ui.dia.desde + "|" + S.ui.dia.hasta) render(); }, 0);
-    }
-    return h;
-  }
+  if (!j) return h + esperaDia();
   var t = j.totales || {}, n = num(j.dias) || 1, comp = arr(j.comparar);
   var ant = comp.filter(function (c) { return c && c.k === "anterior"; })[0], sem = comp.filter(function (c) { return c && c.k === "semana"; })[0];
   var ticket = num(t.facturas) ? num(t.bruto) / num(t.facturas) : 0, enCurso = j.hasta >= hoy;
@@ -1220,15 +1238,7 @@ function vDia() {
       labels: dl, h: 170, recortar: true, aria: "Ventas netas por día", series: [{ nombre: "Neto", color: "blue", v: vals }],
       promedio: vals.length > 2 && prom > 0 ? prom : 0,
       parcial: function (i) { return !dentro(i); },
-      xLab: function (i, cada) {
-        var dd = +dl[i].slice(8);
-        if (dl.length <= 16) {
-          // Un solo día: su número siempre se ve (y se calla el vecino que se le montaría encima)
-          if (j.desde === j.hasta) { var sel = dl.indexOf(j.desde); if (i === sel) return String(dd); if (Math.abs(i - sel) < cada) return null; }
-          return i % cada === 0 || dentro(i) && dl.length <= 8 ? String(dd) : null;
-        }
-        return dd === 1 ? MES_C[+dl[i].slice(5, 7) - 1] : (dd === 15 && cada < 12 ? "15" : null);
-      },
+      xLab: xLabDia(dl, j),
       tip: function (i) {
         var r = cx[i] || {};
         return "<b>" + esc(fechaCorta(r.d) + " " + r.d.slice(0, 4)) + "</b>" + filaTip("blue", "Neto", money(r.neto)) + filaTip(null, "Facturado", money(r.bruto)) +
@@ -1403,9 +1413,10 @@ function zRiesgo() {
 
 /* ─────────── Vendedores ─────────── */
 function vVendedores() {
+  if (S.ui.dia.activo) return vVendDia();
   var u = S.ui.vend, ms = mesesSel(u.mes), rows = aggVendedores(ms);
   var tv = 0, tf = 0; rows.forEach(function (r) { tv += r.v; tf += r.f; });
-  var h = cabecera("Vendedores", "Facturas y ventas netas por vendedor asignado en Siigo · " + (u.mes ? mesL(u.mes) : textoPeriodo()), true);
+  var h = cabecera("Vendedores", "Facturas y ventas netas por vendedor asignado en Siigo · " + (u.mes ? mesL(u.mes) : textoPeriodo()), true, true);
   h += '<div class="ctrls">' + selectMes(u, "vend-mes") + "</div>";
   h += '<div class="grid kpis k3">' + kpi("Vendedores activos", fmtN(rows.length), "", "azul") + kpi("Ventas del período", moneyA(tv), esc(money(tv)), "verde") +
     kpi("Comprobantes", fmtN(tf), "facturas emitidas", "") + "</div>";
@@ -1438,6 +1449,84 @@ function vVendedores() {
       tip: function (i) { return "<b>" + esc(mesL(msP[i])) + "</b>" + series.map(function (s) { return s.v[i] ? filaTip(s.color, s.nombre, moneyA(s.v[i])) : ""; }).join(""); }
     });
     el.insertAdjacentHTML("afterend", '<div class="leyenda">' + series.map(function (s) { return '<span><i class="bg-' + s.color + '"></i>' + esc(s.nombre) + "</span>"; }).join("") + "</div>");
+  });
+  return h;
+}
+
+/* Vendedores · Día: colores por vendedor. Los 5 primeros del período conservan su color (igual que en la vista normal);
+   quien aparezca en las fechas elegidas sin color toma los que siguen libres y el resto va en gris («Otros»).
+   ids = orden para apilar: primero el del período, luego por movimiento en las fechas del gráfico. */
+function coloresVendDia(j) {
+  var color = {}, rangoP = {}, peso = {}, libres = COLORES.slice(5, 9);
+  aggVendedores(mesesPeriodo()).forEach(function (s, i) { rangoP[s.id] = i; if (i < 5) color[s.id] = COLORES[i]; });
+  arr(j.vendedoresDia).forEach(function (x) { var id = num(x.id); peso[id] = (peso[id] || 0) + arr(x.v).reduce(function (a, v) { return a + Math.abs(num(v)); }, 0); });
+  arr(j.vendedores).forEach(function (r) { var id = num(r.id); if (peso[id] == null) peso[id] = Math.abs(num(r.v)) + num(r.nc); });
+  var ids = Object.keys(peso).map(Number).sort(function (a, b) {
+    var ra = rangoP[a] != null ? rangoP[a] : 1e6, rb = rangoP[b] != null ? rangoP[b] : 1e6;
+    return ra - rb || peso[b] - peso[a];
+  });
+  ids.forEach(function (id) { if (!color[id]) color[id] = libres.length ? libres.shift() : "gray"; });
+  return { color: color, ids: ids };
+}
+
+/* Vendedores · Día: ranking y día a día por vendedor de las fechas elegidas (los mismos datos de GET /dia que el Resumen) */
+function vVendDia() {
+  var u = S.ui.dia, hoy = hoyBog();
+  if (!FECHA_RE.test(u.desde) || !FECHA_RE.test(u.hasta)) { u.desde = u.hasta = hoy; u.rango = false; }
+  var clave = u.desde + "|" + u.hasta, j = S.dia.clave === clave ? S.dia.data : null, uno = u.desde === u.hasta;
+  var h = cabecera("Vendedores", "Facturas y ventas netas por vendedor asignado en Siigo · " + textoRango(u.desde, u.hasta), true, true);
+  h += ctrlsDia(u, hoy);
+  if (!j) return h + esperaDia();
+  var t = j.totales || {}, cv = coloresVendDia(j);
+  var rows = arr(j.vendedores).map(function (r) { return { id: num(r.id), n: r.n || "Sin vendedor", f: num(r.f), v: num(r.v), nc: num(r.nc) }; });
+  var activos = rows.filter(function (r) { return r.f > 0; }).length, soloNc = rows.length - activos;
+  var totPos = rows.reduce(function (a, r) { return a + Math.max(0, r.v); }, 0), max = rows.reduce(function (a, r) { return Math.max(a, r.v); }, 0);
+  h += '<div class="grid kpis k3">' +
+    kpi("Vendedores activos", fmtN(activos), soloNc ? esc(fmtN(soloNc) + " más solo con notas crédito") :"con facturas en " + (uno ? "el día" : "las fechas"), "azul") +
+    kpi(uno ? "Ventas del día" : "Ventas del período", moneyA(t.neto), esc(money(t.neto)), num(t.neto) < 0 ? "rojo" : "verde") +
+    kpi("Comprobantes", fmtN(t.facturas), esc("facturas emitidas" + (num(t.notas) ? " · " + fmtN(t.notas) + (num(t.notas) === 1 ? " nota crédito" : " notas crédito") : "")), "") + "</div>";
+  h += '<div class="grid g2 g21"><section class="card"><div class="card-cab"><div><h2>Ranking</h2><div class="sub">Participación en ventas netas · ' + esc(uno ? fechaCorta(j.desde) : textoRango(j.desde, j.hasta)) + "</div></div>" + btnCSV("dvend") + "</div>";
+  if (!rows.length) h += '<div class="vacio">Sin ventas en estas fechas</div>';
+  else {
+    h += '<ol class="rank">';
+    rows.forEach(function (r, i) {
+      // Ticket = lo facturado por factura (sin restar notas crédito); una fila en negativo no tiene participación
+      var neg = r.v < 0, meta = fmtN(r.f) + (r.f === 1 ? " factura" : " facturas") + (r.f ? " · ticket " + moneyA((r.v + r.nc) / r.f) : "") + (r.nc ? " · NC " + moneyA(r.nc) : "");
+      h += '<li><span class="pos">' + (i + 1) + '</span><span class="nm">' + esc(r.n) + '</span><span class="vv' + (neg ? " rojo" : "") + '">' + esc(money(r.v)) + "</span>" +
+        '<span class="barra"><span class="bg-' + (cv.color[r.id] || "gray") + '" style="width:' + (max > 0 && r.v > 0 ? Math.max(0.5, r.v / max * 100) : 0).toFixed(1) + '%"></span></span>' +
+        '<span class="meta"><span>' + esc(meta) + "</span><span>" + (neg ? "—" : esc(pct(totPos ? r.v / totPos : 0))) + "</span></span></li>";
+    });
+    h += "</ol>";
+  }
+  h += '<p class="pie">Las facturas que entran automáticamente desde Shopify quedan con el vendedor por defecto de la integración, por eso un solo vendedor concentra la mayoría.</p></section>';
+  var ctx = arr(j.contexto), previos = ctx.length > arr(j.serie).length;
+  h += cardGraf("g-vdia", "Día a día", "Ventas netas por vendedor · " + (previos ? (uno ? "el día elegido y los " + (ctx.length - 1) + " anteriores" : "las fechas elegidas y los días anteriores") : textoRango(j.desde, j.hasta)), "", 260) + "</div>";
+  S.charts.push(function () {
+    var el = $("g-vdia"), vd = arr(j.vendedoresDia);
+    if (!el) return;
+    if (!vd.length || !ctx.length) { el.innerHTML = '<div class="vacio">Sin datos día a día para estas fechas</div>'; return; }
+    var dl = ctx.map(function (r) { return r.d; }), porId = {};
+    vd.forEach(function (x) { porId[num(x.id)] = x; });
+    var series = [], otros = dl.map(function () { return 0; }), hayOtros = false;
+    cv.ids.forEach(function (id) {
+      var x = porId[id]; if (!x) return;
+      var v = dl.map(function (_, i) { return num(arr(x.v)[i]); });
+      if (!v.some(function (n) { return n; })) return;
+      if (cv.color[id] === "gray") { hayOtros = true; v.forEach(function (n, i) { otros[i] += n; }); }
+      else series.push({ nombre: x.n || "Sin vendedor", color: cv.color[id], v: v });
+    });
+    if (hayOtros) series.push({ nombre: "Otros", color: "gray", v: otros });
+    graficoBarras(el, {
+      labels: dl, h: 260, modo: "apilado", recortar: true, series: series, aria: "Ventas netas por vendedor y día",
+      parcial: function (i) { return dl[i] < j.desde || dl[i] > j.hasta; },
+      xLab: xLabDia(dl, j),
+      tip: function (i) {
+        return "<b>" + esc(fechaCorta(dl[i]) + " " + dl[i].slice(0, 4)) + "</b>" + series.map(function (s) { return s.v[i] ? filaTip(s.color, s.nombre, moneyA(s.v[i])) : ""; }).join("") +
+          filaTip(null, "Total del día", moneyA(num((ctx[i] || {}).neto)));
+      }
+    });
+    el.insertAdjacentHTML("afterend", '<div class="leyenda">' + series.map(function (s) { return '<span><i class="bg-' + s.color + '"></i>' + esc(s.nombre) + "</span>"; }).join("") +
+      (previos ? '<span style="color:var(--text3)">' + (uno ? "los días anteriores van más claros" : "los días antes del rango van más claros") + "</span>" : "") + "</div>");
   });
   return h;
 }
@@ -2658,7 +2747,7 @@ document.addEventListener("keydown", function (ev) {
 $("b-refrescar").addEventListener("click", function () {
   if (S.dev) { location.reload(); return; }
   if (S.tab === "publicidad") revalidarPub(true); else revalidar();
-  if (S.tab === "resumen" && S.ui.dia.activo) { cargarDia(true); render(); }
+  if (enVistaDia()) { cargarDia(true); render(); }
 });
 
 /* ═══════════ Eventos de la vista (delegación) ═══════════ */
@@ -2685,9 +2774,10 @@ var CSV = {
   dprod: function () { var u = S.ui.dprod; return [["Código", "Producto", "Marca", "Combo", "Unidades", "Ventas netas"]].concat(ordenar(filtrar(filasDiaProd(), u.q, ["c", "n", "b"]), u.sort).map(function (r) { return [r.c, r.n, r.b, r.combo ? "Sí" : "No", r.u, r.v]; })); },
   dfact: function () { var u = S.ui.dfact; return [["Factura", "Fecha", "NIT", "Cliente", "Vendedor", "Valor", "Saldo pendiente"]].concat(ordenar(filtrar(filasDiaFact(), u.q, ["doc", "n", "nit", "sel"]), u.sort).map(function (r) { return [r.doc, r.d, r.nit, r.n, r.sel, r.v, r.saldo]; })); },
   dnc: function () { var u = S.ui.dnc; return [["Nota crédito", "Fecha", "NIT", "Cliente", "Motivo", "Factura", "Vendedor", "Valor"]].concat(ordenar(filtrar(filasDiaNc(), u.q, ["doc", "n", "nit", "sel", "fac", "motivo"]), u.sort).map(function (r) { return [r.doc, r.d, r.nit, r.n, r.motivo, r.fac, r.sel, r.v]; })); },
-  dcli: function () { var u = S.ui.dcli; return [["NIT", "Cliente", "Facturas", "Ventas netas"]].concat(ordenar(filtrar(filasDiaCli(), u.q, ["n", "nit"]), u.sort).map(function (r) { return [r.nit, r.n, r.f, r.v]; })); }
+  dcli: function () { var u = S.ui.dcli; return [["NIT", "Cliente", "Facturas", "Ventas netas"]].concat(ordenar(filtrar(filasDiaCli(), u.q, ["n", "nit"]), u.sort).map(function (r) { return [r.nit, r.n, r.f, r.v]; })); },
+  dvend: function () { return [["Vendedor", "Facturas", "Ventas netas", "Notas crédito"]].concat(arr((S.dia.data || {}).vendedores).map(function (r) { return [r.n || "Sin vendedor", num(r.f), num(r.v), num(r.nc)]; })); }
 };
-var NOMBRE_CSV = { mensual: "ventas-mensuales", prod: "productos", top: "top-clientes", riesgo: "clientes-en-riesgo", vend: "vendedores", inv: "inventario", mov: "movimiento", dprod: "productos-dia", dfact: "facturas-dia", dnc: "notas-credito-dia", dcli: "clientes-dia" };
+var NOMBRE_CSV = { mensual: "ventas-mensuales", prod: "productos", top: "top-clientes", riesgo: "clientes-en-riesgo", vend: "vendedores", inv: "inventario", mov: "movimiento", dprod: "productos-dia", dfact: "facturas-dia", dnc: "notas-credito-dia", dcli: "clientes-dia", dvend: "vendedores-dia" };
 function uiDe(t) { return { prod: S.ui.prod, top: S.ui.top, riesgo: S.ui.riesgo, inv: S.ui.inv, car: S.ui.car, mov: S.ui.mov, mensual: S.ui.mensual, dprod: S.ui.dprod, dfact: S.ui.dfact, dnc: S.ui.dnc, dcli: S.ui.dcli }[t]; }
 
 $("view").addEventListener("click", function (ev) {
@@ -2720,7 +2810,7 @@ $("view").addEventListener("click", function (ev) {
   }
   if (act === "mas") { var um = uiDe(t); um.n += um.n >= 200 ? 500 : 50; renderZona(t); return; }
   if (act === "csv") {
-    var jd = S.dia.data, sufijo = /^d(prod|fact|nc|cli)$/.test(t) && jd ? jd.desde + (jd.hasta !== jd.desde ? "_" + jd.hasta : "") : (D().hoy || "");
+    var jd = S.dia.data, sufijo = /^d(prod|fact|nc|cli|vend)$/.test(t) && jd ? jd.desde + (jd.hasta !== jd.desde ? "_" + jd.hasta : "") : (D().hoy || "");
     descargarCSV("letos-" + (t === "car" ? (S.ui.car.lado === "cxc" ? "cuentas-por-cobrar" : "cuentas-por-pagar") : NOMBRE_CSV[t]) + "-" + sufijo + ".csv", CSV[t]()); return;
   }
   if (act === "inv-f") { S.ui.inv.f = v; S.ui.inv.n = 50; render(); return; }
@@ -2794,7 +2884,7 @@ setInterval(pintarEstado, 30000);
 setInterval(function () {
   if (document.visibilityState === "visible" && S.token && !S.dev) {
     revalidar(); if (S.tab === "publicidad") revalidarPub();
-    if (S.tab === "resumen" && S.ui.dia.activo && S.ui.dia.hasta >= hoyBog()) cargarDia(true); // hoy cambia con cada sync de Siigo
+    if (enVistaDia() && S.ui.dia.hasta >= hoyBog()) cargarDia(true); // hoy cambia con cada sync de Siigo
   }
 }, 5 * 60000);
 document.addEventListener("visibilitychange", function () {
